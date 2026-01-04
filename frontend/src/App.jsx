@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import React from 'react'
 import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
@@ -31,4 +29,3 @@ const App = () => {
 }
 
 export default App;
->>>>>>> 8cba5bfc3fbc23d2234e8aeebd4c548da324f83b

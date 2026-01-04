@@ -1,6 +1,6 @@
 import React from "react";
 
-const Profile = () => {
+const Landing = () => {
   return (
     <div>
       Landing Page
@@ -8,4 +8,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Landing;

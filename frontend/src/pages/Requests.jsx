@@ -1,6 +1,6 @@
 import React from "react";
 
-const Profile = () => {
+const Requests = () => {
   return (
     <div>
       Requests Page
@@ -8,4 +8,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Requests;

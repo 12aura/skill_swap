@@ -8,11 +8,12 @@ import Profile from "./pages/Profile";
 import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
+import Badges from "./pages/Badges";
+
 
 const App = () => {
   return (
     <div className="h-screen" data-theme="coffee">
-      <button className="btn">Button</button>
 
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -23,6 +24,8 @@ const App = () => {
         <Route path="/search" element={<Search />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/sessions" element={<Sessions />} />
+        <Route path="/badges" element={<Badges />} />
+
       </Routes>
     </div>
   )

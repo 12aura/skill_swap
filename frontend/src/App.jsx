@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -11,7 +11,9 @@ import Sessions from "./pages/Sessions";
 
 const App = () => {
   return (
-    <div className="h-screen" data-theme="coffee"><button className="btn" >Button</button>
+    <div className="h-screen" data-theme="coffee">
+      <button className="btn">Button</button>
+
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -21,11 +23,9 @@ const App = () => {
         <Route path="/search" element={<Search />} />
         <Route path="/requests" element={<Requests />} />
         <Route path="/sessions" element={<Sessions />} />
-
       </Routes>
     </div>
   )
 }
 
-export default App
-
+export default App;

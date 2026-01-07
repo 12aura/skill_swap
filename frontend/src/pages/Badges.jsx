@@ -101,5 +101,4 @@ const Badges = () => {
     </div>
   );
 };
-
 export default Badges;

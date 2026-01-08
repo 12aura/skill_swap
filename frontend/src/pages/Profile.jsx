@@ -1,7 +1,38 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import axios from "axios";
+
+const handleImageUpload = async (file) => {
+  if (!file) return;
+
+  try {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      "http://localhost:5000/api/user/upload-avatar",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    // 🔥 update user avatar instantly in UI
+    user.avatar = res.data.avatar;
+
+  } catch (err) {
+    console.error("Avatar upload failed", err);
+  }
+};
 
 const Profile = () => {
+  const { user } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("profile");
 
   const badges = [
@@ -10,37 +41,63 @@ const Profile = () => {
     { id: 3, title: "Community Helper", icon: "🤝" },
   ];
 
+  if (!user) {
+    return <p className="p-6">Loading profile...</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-7xl bg-white rounded-3xl shadow-xl overflow-hidden flex">
 
         {/* LEFT PROFILE PANEL */}
-        <div className="w-full md:w-1/3 bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 p-10 flex flex-col items-center text-center">
+<div className="w-full md:w-1/3 bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 p-10 flex flex-col items-center text-center">
 
-          <div className="avatar mb-6">
-            <div className="w-36 rounded-full ring ring-white ring-offset-4">
-              <img src="https://th.bing.com/th/id/OIP.h9sXoKf-AloF5_uRncS2XgHaEz?w=247&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" alt="profile" />
-            </div>
-          </div>
+  {/* Profile Image */}
+  <div className="relative mb-4">
+  <div className="avatar">
+    <div className="w-36 rounded-full ring ring-white ring-offset-4 overflow-hidden">
+      <img
+        src={
+          user.avatar
+            ? user.avatar
+            : `https://ui-avatars.com/api/?name=${user.name}`
+        }
+        alt="profile"
+      />
+    </div>
+  </div>
 
-          <h2 className="text-3xl font-bold text-gray-800">
-            Sofia Chen
-          </h2>
+  {/* Upload button */}
+  <label className="absolute bottom-1 right-1 bg-white rounded-full p-2 cursor-pointer shadow hover:bg-gray-100">
+    📷
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={(e) => handleImageUpload(e.target.files[0])}
+    />
+  </label>
+</div>
 
-          <p className="text-sm text-gray-700 mt-1">
-            SkillSwap Member
-          </p>
 
-          <p className="text-sm text-gray-700 mt-6 leading-relaxed max-w-xs">
-            Full-stack developer passionate about helping others
-            learn and grow through skill exchange.
-          </p>
-        </div>
+  {/* User Name BELOW image */}
+  <h2 className="text-3xl font-bold text-gray-800 mt-2">
+    {user.name || "New User"}
+  </h2>
+
+  <p className="text-sm text-gray-700 mt-1">
+    {user.email}
+  </p>
+
+  <p className="text-sm text-gray-700 mt-6 leading-relaxed max-w-xs">
+    Welcome to SkillSwap! Complete your profile to start swapping skills.
+  </p>
+</div>
+
 
         {/* RIGHT DASHBOARD */}
         <div className="w-full md:w-2/3 p-10">
 
-          {/* HEADER */}
           <h1 className="text-3xl font-bold text-gray-800 mb-6">
             My Dashboard
           </h1>
@@ -74,20 +131,33 @@ const Profile = () => {
                   Skills & Offerings
                 </h3>
 
-                <div className="flex flex-wrap gap-3">
-                  <span className="px-4 py-1 rounded-full bg-teal-100 text-teal-700 text-sm">
-                    JavaScript · Mentor
-                  </span>
-                  <span className="px-4 py-1 rounded-full bg-sky-100 text-sky-700 text-sm">
-                    React · Learner
-                  </span>
-                  <span className="px-4 py-1 rounded-full bg-purple-100 text-purple-700 text-sm">
-                    UI/UX Design
-                  </span>
-                </div>
+                {user.skillsTeach?.length || user.skillsLearn?.length ? (
+                  <div className="flex flex-wrap gap-3">
+                    {user.skillsTeach?.map((skill, i) => (
+                      <span
+                        key={i}
+                        className="px-4 py-1 rounded-full bg-teal-100 text-teal-700 text-sm"
+                      >
+                        {skill} · Mentor
+                      </span>
+                    ))}
+                    {user.skillsLearn?.map((skill, i) => (
+                      <span
+                        key={i}
+                        className="px-4 py-1 rounded-full bg-sky-100 text-sky-700 text-sm"
+                      >
+                        {skill} · Learner
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">
+                    No skills added yet.
+                  </p>
+                )}
               </div>
 
-              {/* 🏅 BADGES SECTION */}
+              {/* BADGES */}
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className="text-xl font-semibold text-gray-800">
@@ -114,34 +184,6 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* AVAILABILITY */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                  Availability
-                </h3>
-
-                <div className="grid grid-cols-7 gap-3 text-center text-sm">
-                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day => (
-                    <div
-                      key={day}
-                      className="py-3 rounded-lg bg-gray-100 text-gray-700"
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* REVIEWS */}
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  Reviews
-                </h3>
-                <p className="text-sm text-gray-600 italic">
-                  “Clear explanations, very supportive mentor.”
-                </p>
               </div>
 
             </div>

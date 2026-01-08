@@ -1,5 +1,3 @@
-
-
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -17,36 +15,26 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthContext } from "./context/AuthContext";
 
 const App = () => {
-  const { user, loading } = useContext(AuthContext);
+  const { loading } = useContext(AuthContext);
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
-
-  const isAuthenticated = Boolean(user);
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen" data-theme="coffee">
       <Routes>
-        {/* Public Landing */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? <Navigate to="/dashboard" /> : <Landing />
-          }
-        />
 
-        {/* Auth Routes */}
-        <Route
-          path="/login"
-          element={
-            !isAuthenticated ? <Login /> : <Navigate to="/dashboard" />
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            !isAuthenticated ? <Register /> : <Navigate to="/dashboard" />
-          }
-        />
+        {/* ✅ Landing – ALWAYS accessible */}
+        <Route path="/" element={<Landing />} />
+
+        {/* Auth Routes (no forced redirect) */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Protected Routes */}
         <Route
@@ -57,6 +45,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/profile"
           element={
@@ -65,6 +54,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/search"
           element={
@@ -73,6 +63,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/requests"
           element={
@@ -81,6 +72,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/sessions"
           element={
@@ -89,6 +81,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/badges"
           element={
@@ -98,8 +91,9 @@ const App = () => {
           }
         />
 
-        {/* Fallback */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </div>
   );

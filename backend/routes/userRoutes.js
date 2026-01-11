@@ -3,9 +3,6 @@ const router = express.Router();
 
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
-console.log("auth =", auth);
-console.log("upload =", upload);
-console.log("upload.single =", upload?.single);
 
 const {
   updateProfile,
@@ -15,25 +12,19 @@ const {
   uploadAvatar,
 } = require("../controllers/userController");
 
-// 🔹 Upload profile picture
-router.post(
-  "/upload-avatar",
-  auth,
-  upload.single("avatar"),
-  (req, res) => {
-    res.json({ msg: "TEST OK" });
-  }
-);
+// ✅ UPDATE PROFILE
+router.put("/update", auth, updateProfile);
 
+// ✅ UPLOAD AVATAR
+router.post("/upload-avatar", auth, upload.single("avatar"), uploadAvatar);
 
-
-// 🔹 Search users by skill
+// ✅ SEARCH USERS
 router.get("/search", auth, searchUsers);
 
-// 🔹 Get logged-in user's profile
+// ✅ GET MY PROFILE
 router.get("/me", auth, getMyProfile);
 
-// 🔹 Dashboard stats
+// ✅ STATS
 router.get("/stats", auth, getStats);
 
 module.exports = router;

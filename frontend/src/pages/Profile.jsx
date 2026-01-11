@@ -72,6 +72,13 @@ const Profile = () => {
           <p className="text-sm text-gray-700 mt-1">
             {user.email}
           </p>
+          <Link
+  to="/edit-profile"
+  className="mt-3 text-sm text-teal-700 hover:underline font-medium"
+>
+  Edit Profile
+</Link>
+
 
           <p className="text-sm text-gray-700 mt-6 leading-relaxed max-w-xs">
             Welcome to SkillSwap! Complete your profile to start swapping skills.
@@ -86,79 +93,33 @@ const Profile = () => {
           </h1>
 
           {/* TABS (VERTICAL — ONLY CHANGE) */}
-          <div className="flex flex-col gap-4 mb-8 w-60 text-sm font-medium">
+          {/* NAVIGATION BUTTONS (VERTICAL) */}
+<div className="flex flex-col gap-4 mb-8 w-60 text-sm font-medium">
 
-            <Link
-              to="/dashboard"
-              className="w-full py-3 rounded-xl border bg-white text-gray-700 text-center hover:bg-teal-50 hover:text-teal-600 transition"
-            >
-              Dashboard
-            </Link>
+  <Link
+    to="/dashboard"
+    className="w-full py-3 rounded-xl border bg-white text-gray-700 text-center hover:bg-teal-50 hover:text-teal-600 transition"
+  >
+    Dashboard
+  </Link>
 
-            <button
-              onClick={() => setActiveTab("skills")}
-              className={`w-full py-3 rounded-xl border transition ${
-                activeTab === "skills"
-                  ? "bg-teal-50 text-teal-600 border-teal-300"
-                  : "bg-white text-gray-700 hover:bg-teal-50 hover:text-teal-600"
-              }`}
-            >
-              Skills
-            </button>
+  <Link
+    to="/skills"
+    className="w-full py-3 rounded-xl border bg-white text-gray-700 text-center hover:bg-teal-50 hover:text-teal-600 transition"
+  >
+    Skills
+  </Link>
 
-            <button
-              onClick={() => setActiveTab("messages")}
-              className={`w-full py-3 rounded-xl border transition ${
-                activeTab === "messages"
-                  ? "bg-teal-50 text-teal-600 border-teal-300"
-                  : "bg-white text-gray-700 hover:bg-teal-50 hover:text-teal-600"
-              }`}
-            >
-              Messages
-            </button>
+  <Link
+    to="/messages"
+    className="w-full py-3 rounded-xl border bg-white text-gray-700 text-center hover:bg-teal-50 hover:text-teal-600 transition"
+  >
+    Messages
+  </Link>
 
-          </div>
+</div>
 
-          {/* SKILLS TAB */}
-          {activeTab === "skills" && (
-            <div className="space-y-10">
-              <div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                  Skills & Offerings
-                </h3>
 
-                {user.skillsTeach?.length || user.skillsLearn?.length ? (
-                  <div className="flex flex-wrap gap-3">
-                    {user.skillsTeach?.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-4 py-1 rounded-full bg-teal-100 text-teal-700 text-sm"
-                      >
-                        {skill} · Mentor
-                      </span>
-                    ))}
-                    {user.skillsLearn?.map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-4 py-1 rounded-full bg-sky-100 text-sky-700 text-sm"
-                      >
-                        {skill} · Learner
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">
-                    No skills added yet.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* MESSAGES TAB */}
-          {activeTab === "messages" && (
-            <p className="text-gray-600">Messages coming soon</p>
-          )}
 
         </div>
       </div>

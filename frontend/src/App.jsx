@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
+import Skills from "./pages/Skills";
+import Messages from "./pages/Messages";
+import EditProfile from "./pages/EditProfile";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -26,77 +28,108 @@ const App = () => {
   }
 
   return (
-    <div className="h-screen" data-theme="coffee">
-      <Routes>
+  <div className="h-screen" data-theme="coffee">
+    <Routes>
 
-        {/* ✅ Landing – ALWAYS accessible */}
-        <Route path="/" element={<Landing />} />
+      {/* ✅ Landing – ALWAYS accessible */}
+      <Route path="/" element={<Landing />} />
 
-        {/* Auth Routes (no forced redirect) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      {/* Auth Routes (no forced redirect) */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+      {/* Protected Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/search"
-          element={
-            <ProtectedRoute>
-              <Search />
-            </ProtectedRoute>
-          }
-        />
+      {/* ✅ NEW: Skills Page */}
+      <Route
+        path="/skills"
+        element={
+          <ProtectedRoute>
+            <Skills />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/requests"
-          element={
-            <ProtectedRoute>
-              <Requests />
-            </ProtectedRoute>
-          }
-        />
+      {/* ✅ NEW: Messages Page */}
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/sessions"
-          element={
-            <ProtectedRoute>
-              <Sessions />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/search"
+        element={
+          <ProtectedRoute>
+            <Search />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/badges"
-          element={
-            <ProtectedRoute>
-              <Badges />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/requests"
+        element={
+          <ProtectedRoute>
+            <Requests />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" />} />
+      <Route
+        path="/sessions"
+        element={
+          <ProtectedRoute>
+            <Sessions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+  path="/edit-profile"
+  element={
+    <ProtectedRoute>
+      <EditProfile />
+    </ProtectedRoute>
+  }
+/>
 
-      </Routes>
-    </div>
-  );
+
+      <Route
+        path="/badges"
+        element={
+          <ProtectedRoute>
+            <Badges />
+          </ProtectedRoute>
+        }
+      />
+      
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" />} />
+
+    </Routes>
+  </div>
+);
 };
+
 
 export default App;

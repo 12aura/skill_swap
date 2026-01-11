@@ -9,10 +9,23 @@ import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
-
-
+import axios from "axios";
+import {useEffect,useState} from "react";
+import {userQuery} from "@tanstack/react-query";
+import { axiosInstance } from './lib/axios.jsx';
 const App = () => {
-  return (
+  const {data,isLoading,error}=useQuery({
+    queryKey:["todos"],
+    queryFn:async()=>{
+      const res=await axiosInstance.get("/auth/me");
+      return res.data;
+
+    },
+    retry:false,
+
+  });
+  
+   return (
     <div className="h-screen" data-theme="coffee">
 
       <Routes>

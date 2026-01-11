@@ -5,16 +5,38 @@ const Requests = () => {
     {
       id: 1,
       from: "Ankit Sharma",
+      email: "ankit@gmail.com",
       skillOffered: "Web Development",
       skillRequested: "Data Structures",
+      message: "I can help you build projects in MERN stack.",
       status: "pending",
     },
     {
       id: 2,
       from: "Priya Verma",
+      email: "priya@gmail.com",
       skillOffered: "UI/UX Design",
       skillRequested: "React",
+      message: "Looking to improve my React skills.",
       status: "pending",
+    },
+    {
+      id: 3,
+      from: "Rohit Mehta",
+      email: "rohit@gmail.com",
+      skillOffered: "Python",
+      skillRequested: "Machine Learning",
+      message: "I have experience with automation and scripting.",
+      status: "accepted",
+    },
+    {
+      id: 4,
+      from: "Sneha Kapoor",
+      email: "sneha@gmail.com",
+      skillOffered: "Java",
+      skillRequested: "System Design",
+      message: "Would love to exchange knowledge weekly.",
+      status: "rejected",
     },
   ]);
 
@@ -35,78 +57,98 @@ const Requests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden">
 
-      <h2 className="text-3xl font-bold mb-6">
-        Skill Requests
-      </h2>
-
-      {requests.length === 0 ? (
-        <div className="alert alert-info">
-          No skill requests available
+        {/* HEADER */}
+        <div className="bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 p-10">
+          <h2 className="text-3xl font-bold text-gray-800">
+            Skill Requests
+          </h2>
+          <p className="text-sm text-gray-700 mt-2">
+            Manage incoming skill exchange requests
+          </p>
         </div>
-      ) : (
-        <div className="grid gap-4">
 
-          {requests.map((req) => (
-            <div
-              key={req.id}
-              className="card bg-base-100 shadow-md"
-            >
-              <div className="card-body">
+        {/* CONTENT */}
+        <div className="p-10">
 
-                <h3 className="card-title">
-                  {req.from}
-                </h3>
+          {requests.length === 0 ? (
+            <p className="text-gray-500">
+              No skill requests available.
+            </p>
+          ) : (
+            <div className="grid gap-6">
 
-                <p>
-                  <span className="font-semibold">Offers:</span>{" "}
-                  {req.skillOffered}
-                </p>
+              {requests.map((req) => (
+                <div
+                  key={req.id}
+                  className="border rounded-2xl p-6 bg-gray-50 hover:shadow-md transition"
+                >
+                  {/* USER INFO */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        {req.from}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {req.email}
+                      </p>
+                    </div>
 
-                <p>
-                  <span className="font-semibold">Wants to learn:</span>{" "}
-                  {req.skillRequested}
-                </p>
-
-                <p>
-                  <span className="font-semibold">Status:</span>{" "}
-                  <span
-                    className={`badge ${
-                      req.status === "pending"
-                        ? "badge-warning"
-                        : req.status === "accepted"
-                        ? "badge-success"
-                        : "badge-error"
-                    }`}
-                  >
-                    {req.status}
-                  </span>
-                </p>
-
-                {req.status === "pending" && (
-                  <div className="card-actions justify-end mt-4">
-                    <button
-                      className="btn btn-success btn-sm"
-                      onClick={() => handleAccept(req.id)}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        req.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : req.status === "accepted"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
                     >
-                      Accept
-                    </button>
-                    <button
-                      className="btn btn-error btn-sm"
-                      onClick={() => handleReject(req.id)}
-                    >
-                      Reject
-                    </button>
+                      {req.status}
+                    </span>
                   </div>
-                )}
 
-              </div>
+                  {/* SKILLS */}
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    <span className="px-3 py-1 rounded-full bg-teal-100 text-teal-700 text-sm">
+                      Offers: {req.skillOffered}
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-sm">
+                      Wants: {req.skillRequested}
+                    </span>
+                  </div>
+
+                  {/* MESSAGE */}
+                  <p className="text-sm text-gray-600 mb-4">
+                    “{req.message}”
+                  </p>
+
+                  {/* ACTIONS */}
+                  {req.status === "pending" && (
+                    <div className="flex gap-4 justify-end">
+                      <button
+                        onClick={() => handleAccept(req.id)}
+                        className="px-4 py-2 rounded-lg bg-green-500 text-white text-sm hover:bg-green-600 transition"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleReject(req.id)}
+                        className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm hover:bg-red-600 transition"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
             </div>
-          ))}
+          )}
 
         </div>
-      )}
+      </div>
     </div>
   );
 };

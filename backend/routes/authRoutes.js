@@ -1,13 +1,24 @@
-const authMiddleware = require("../middleware/authMiddleware");
 const express = require("express");
-const { registerUser, loginUser } = require("../controllers/authController");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
+const {
+  registerUser,
+  loginUser,
+} = require("../controllers/authController");
+
+// ✅ REGISTER
 router.post("/register", registerUser);
+
+// ✅ LOGIN
 router.post("/login", loginUser);
 
-module.exports = router;
-
+// ✅ TEST PROTECTED ROUTE (optional, but useful)
 router.get("/me", authMiddleware, async (req, res) => {
-  res.json({ msg: "Protected Route Working", userId: req.user });
+  res.json({
+    msg: "Protected Route Working",
+    userId: req.user,
+  });
 });
+
+module.exports = router;

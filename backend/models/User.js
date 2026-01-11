@@ -7,7 +7,12 @@ const userSchema = new mongoose.Schema({
   skillsTeach: [String],
   skillsLearn: [String],
   xp: { type: Number, default: 0 },
-  badges: [String]
+  badges: [String],
+  avatar: {
+  type: String,
+  default: "",
+},
 });
+
 
 module.exports = mongoose.model("User", userSchema);

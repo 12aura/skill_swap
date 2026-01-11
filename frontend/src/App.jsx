@@ -1,5 +1,6 @@
-import React from 'react'
-import { Routes, Route } from "react-router-dom";
+import React, { useContext } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -9,39 +10,93 @@ import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
-import axios from "axios";
-import {useEffect,useState} from "react";
-import {userQuery} from "@tanstack/react-query";
-import { axiosInstance } from './lib/axios.jsx';
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthContext } from "./context/AuthContext";
+
 const App = () => {
-  const {data,isLoading,error}=useQuery({
-    queryKey:["todos"],
-    queryFn:async()=>{
-      const res=await axiosInstance.get("/auth/me");
-      return res.data;
+  const { loading } = useContext(AuthContext);
 
-    },
-    retry:false,
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
-  });
-  
-   return (
+  return (
     <div className="h-screen" data-theme="coffee">
-
       <Routes>
+
+        {/* ✅ Landing – ALWAYS accessible */}
         <Route path="/" element={<Landing />} />
+
+        {/* Auth Routes (no forced redirect) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/requests" element={<Requests />} />
-        <Route path="/sessions" element={<Sessions />} />
-        <Route path="/badges" element={<Badges />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <Search />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/requests"
+          element={
+            <ProtectedRoute>
+              <Requests />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/sessions"
+          element={
+            <ProtectedRoute>
+              <Sessions />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/badges"
+          element={
+            <ProtectedRoute>
+              <Badges />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" />} />
 
       </Routes>
     </div>
-  )
-}
+  );
+};
 
 export default App;

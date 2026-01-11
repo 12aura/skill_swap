@@ -9,6 +9,8 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    skillsTeach: "",
+    skillsLearn: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -100,6 +102,43 @@ const Register = () => {
               Password must be at least 6 characters long
             </p>
           </div>
+              {/* Skills Teach */}
+<div>
+  <label className="text-sm text-gray-600">
+    Skills you can teach
+  </label>
+  <input
+    type="text"
+    className="input input-bordered bg-white text-gray-800 w-full mt-1"
+    placeholder="e.g. React, Python, UI Design"
+    value={form.skillsTeach}
+    onChange={(e) =>
+      setForm({ ...form, skillsTeach: e.target.value })
+    }
+  />
+  <p className="text-xs opacity-70 mt-1">
+    Enter skills separated by commas
+  </p>
+</div>
+
+{/* Skills Learn */}
+<div>
+  <label className="text-sm text-gray-600">
+    Skills you want to learn
+  </label>
+  <input
+    type="text"
+    className="input input-bordered bg-white text-gray-800 w-full mt-1"
+    placeholder="e.g. Node.js, MongoDB"
+    value={form.skillsLearn}
+    onChange={(e) =>
+      setForm({ ...form, skillsLearn: e.target.value })
+    }
+  />
+  <p className="text-xs opacity-70 mt-1">
+    Enter skills separated by commas
+  </p>
+</div>
 
           {/* Terms */}
           <div className="form-control">

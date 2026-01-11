@@ -1,28 +1,7 @@
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
-// Update profile
-exports.updateProfile = async (req, res) => {
-  try {
-    console.log("USER FROM TOKEN =", req.user);
 
-    const { name, skillsTeach, skillsLearn } = req.body;
-
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { name, skillsTeach, skillsLearn },
-      { new: true }
-    );
-
-    res.json({
-      msg: "Profile Updated",
-      user
-    });
-
-  } catch (err) {
-    res.status(500).json({ msg: "Profile Update Failed" });
-  }
-};
 //  SEARCH USERS BY SKILL
 exports.searchUsers = async (req, res) => {
   try {
@@ -41,12 +20,25 @@ exports.searchUsers = async (req, res) => {
 //  GET LOGGED IN USER PROFILE
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    res.json({ user });
+    const user = await User.findById(req.user.id).select(
+      "name email avatar skillsTeach skillsLearn"
+    );
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        skillsTeach: user.skillsTeach,
+        skillsLearn: user.skillsLearn,
+      },
+    });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });
   }
 };
+
 
 //  USER DASHBOARD STATISTICS
 exports.getStats = async (req, res) => {
@@ -66,4 +58,50 @@ exports.getStats = async (req, res) => {
   } catch (err) {
     res.status(500).json({ msg: "Stats failed" });
   }
+
+  // ✅ Update profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, skillsTeach, skillsLearn } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, skillsTeach, skillsLearn },
+      { new: true }
+    );
+
+    res.json({ user });
+  } catch (err) {
+    res.status(500).json({ msg: "Profile update failed" });
+  }
+};
+
+
+ const cloudinary = require("../config/cloudinary");
+const User = require("../models/User");
+
+exports.uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ msg: "No file uploaded" });
+    }
+
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "skill_swap_profiles",
+    });
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: result.secure_url },
+      { new: true }
+    );
+
+    res.json({ avatar: user.avatar });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Image upload failed" });
+  }
+};
+
+
 };

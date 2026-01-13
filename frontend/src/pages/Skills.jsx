@@ -35,12 +35,12 @@ const Skills = () => {
 
           {user.skillsTeach?.length > 0 ? (
             <div className="flex flex-wrap gap-3">
-              {user.skillsTeach.map((skill, index) => (
+              {user.skillsTeach.map((skill) => (
                 <span
-                  key={index}
+                  key={skill._id}
                   className="px-4 py-2 rounded-full bg-teal-100 text-teal-700 text-sm font-medium"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
               ))}
             </div>
@@ -59,12 +59,12 @@ const Skills = () => {
 
           {user.skillsLearn?.length > 0 ? (
             <div className="flex flex-wrap gap-3">
-              {user.skillsLearn.map((skill, index) => (
+              {user.skillsLearn.map((skill) => (
                 <span
-                  key={index}
+                  key={skill._id}
                   className="px-4 py-2 rounded-full bg-sky-100 text-sky-700 text-sm font-medium"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
               ))}
             </div>

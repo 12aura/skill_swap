@@ -24,3 +24,5 @@ app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/request", require("./routes/requestRoutes"));
 
 app.use("/api/session", require("./routes/sessionRoutes"));
+
+app.use("/api/skills", require("./routes/skillRoutes"));

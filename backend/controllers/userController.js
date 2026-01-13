@@ -1,25 +1,76 @@
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
+const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
 
-// ✅ UPDATE PROFILE
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, skillsTeach, skillsLearn } = req.body;
+    let { skillsTeach = [], skillsLearn = [] } = req.body;
 
+    const normalize = (val) => {
+      if (Array.isArray(val)) return val;
+
+      if (typeof val === "string") {
+        try {
+          return JSON.parse(val.replace(/'/g, '"'));
+        } catch {
+          return [val];
+        }
+      }
+      return [];
+    };
+
+    skillsTeach = normalize(skillsTeach);
+    skillsLearn = normalize(skillsLearn);
+const escapeRegex = (str) =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const convertToSkillIds = async (skills) => {
+  const ids = [];
+
+  for (const skillName of skills) {
+    const safeName = escapeRegex(skillName);
+
+    let skill = await Skill.findOne({
+      name: new RegExp(`^${safeName}$`, "i"),
+    });
+
+    if (!skill) {
+      skill = await Skill.create({ name: skillName });
+    }
+
+    ids.push(skill._id);
+  }
+
+  return ids;
+};
+
+
+    const teachIds = await convertToSkillIds(skillsTeach);
+    const learnIds = await convertToSkillIds(skillsLearn);
+
+    // ✅ MERGE instead of replace
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, skillsTeach, skillsLearn },
+      {
+        $addToSet: {
+          skillsTeach: { $each: teachIds },
+          skillsLearn: { $each: learnIds },
+        },
+      },
       { new: true }
-    );
+    )
+      .populate("skillsTeach")
+      .populate("skillsLearn");
 
     res.json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("UPDATE PROFILE ERROR:", err);
     res.status(500).json({ msg: "Profile update failed" });
   }
 };
+
 
 // ✅ SEARCH USERS
 exports.searchUsers = async (req, res) => {
@@ -39,7 +90,8 @@ exports.searchUsers = async (req, res) => {
 // ✅ GET MY PROFILE
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate("skillsTeach")
+  .populate("skillsLearn");
     res.json({ user });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });

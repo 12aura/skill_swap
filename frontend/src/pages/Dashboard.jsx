@@ -34,12 +34,12 @@ const Dashboard = () => {
             Welcome back to SkillSwap! Track your learning and exchanges here.
           </p>
 
-          <Link
+          {/* <Link
             to="/profile"
             className="mt-8 text-sm text-teal-700 font-medium hover:underline"
           >
             View Profile →
-          </Link>
+          </Link> */}
         </div>
 
         {/* RIGHT DASHBOARD CONTENT */}
@@ -82,10 +82,10 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { title: "Search Skills", desc: "Find users", link: "/search" },
+                { title: "Badges", desc: "View your achievements", link: "/badges" },
                 { title: "Requests", desc: "Manage requests", link: "/requests" },
                 { title: "Sessions", desc: "View sessions", link: "/sessions" },
-                { title: "Profile", desc: "Edit profile", link: "/profile" },
+                { title: "Profile", desc: "View profile", link: "/profile" },
               ].map((item, i) => (
                 <Link
                   key={i}

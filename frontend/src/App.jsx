@@ -12,6 +12,8 @@ import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
+import Navbar from "./components/Navbar";
+
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthContext } from "./context/AuthContext";
@@ -27,14 +29,18 @@ const App = () => {
     );
   }
 
-  return (
+ return (
   <div className="h-screen" data-theme="coffee">
+
+    {/* ✅ GLOBAL NAVBAR (VISIBLE ON ALL PAGES) */}
+    <Navbar />
+
     <Routes>
 
       {/* ✅ Landing – ALWAYS accessible */}
       <Route path="/" element={<Landing />} />
 
-      {/* Auth Routes (no forced redirect) */}
+      {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -57,7 +63,6 @@ const App = () => {
         }
       />
 
-      {/* ✅ NEW: Skills Page */}
       <Route
         path="/skills"
         element={
@@ -67,7 +72,6 @@ const App = () => {
         }
       />
 
-      {/* ✅ NEW: Messages Page */}
       <Route
         path="/messages"
         element={
@@ -103,15 +107,15 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-  path="/edit-profile"
-  element={
-    <ProtectedRoute>
-      <EditProfile />
-    </ProtectedRoute>
-  }
-/>
 
+      <Route
+        path="/edit-profile"
+        element={
+          <ProtectedRoute>
+            <EditProfile />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/badges"
@@ -121,7 +125,6 @@ const App = () => {
           </ProtectedRoute>
         }
       />
-      
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/" />} />

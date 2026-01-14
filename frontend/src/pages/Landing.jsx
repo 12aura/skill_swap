@@ -1,75 +1,19 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
 const Landing = () => {
-  const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
+  const { user } = useContext(AuthContext);
   const isAuthenticated = Boolean(user);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
 
   return (
     <div className="min-h-screen bg-gray-100">
-
-      {/* NAVBAR */}
-      <div className="navbar bg-white px-10 shadow-sm">
-        <div className="flex-1">
-          <Link
-            to="/"
-            className="text-2xl font-bold text-gray-800 flex items-center gap-2"
-          >
-            <span className="text-teal-500 text-3xl">S</span>
-            SkillSwap
-          </Link>
-        </div>
-
-        <div className="flex gap-6 items-center text-sm font-medium text-gray-600">
-          {isAuthenticated ? (
-  <>
-    <Link to="/search" className="hover:text-teal-600">
-      Browse Skills
-    </Link>
-
-    <Link to="/profile" className="hover:text-teal-600">
-      Profile
-    </Link>
-
-    <button
-      onClick={handleLogout}
-      className="btn btn-outline btn-sm"
-    >
-      Logout
-    </button>
-  </>
-) : (
-
-            <>
-              <Link to="/search" className="hover:text-teal-600">
-                Browse Skills
-              </Link>
-
-              <Link to="/login" className="btn btn-outline btn-sm">
-                Login
-              </Link>
-
-              <Link to="/register" className="btn btn-neutral btn-sm">
-                Sign Up
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
 
       {/* HERO SECTION */}
       <div className="px-10 py-28 bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400">
         <div className="text-center max-w-4xl mx-auto">
 
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-snug">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-snug">
             Unlock Your Potential.
             <br />
             Share Your Skills. Learn Something New.
@@ -105,43 +49,43 @@ const Landing = () => {
 
           {/* FEATURED SKILLS */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
               Featured Skills
             </h2>
 
             <div className="space-y-4 max-w-sm">
-              <div className="bg-white rounded-xl shadow p-5">
-                <h3 className="font-semibold text-gray-800">
-                  💻 Coding & Development
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Learn to code, build projects, and master technologies.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow p-5">
-                <h3 className="font-semibold text-gray-800">
-                  🎨 Creative Arts
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Express creativity through art, design, and media.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl shadow p-5">
-                <h3 className="font-semibold text-gray-800">
-                  🌍 Language Exchange
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Practice languages with native speakers worldwide.
-                </p>
-              </div>
+              {[
+                {
+                  title: "💻 Coding & Development",
+                  desc: "Learn to code, build projects, and master technologies.",
+                },
+                {
+                  title: "🎨 Creative Arts",
+                  desc: "Express creativity through art, design, and media.",
+                },
+                {
+                  title: "🌍 Language Exchange",
+                  desc: "Practice languages with native speakers worldwide.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl shadow p-5"
+                >
+                  <h3 className="font-semibold text-gray-800">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {item.desc}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* HOW IT WORKS */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">
               How It Works
             </h2>
 
@@ -151,25 +95,20 @@ const Landing = () => {
                   step: 1,
                   title: "List Your Skills",
                   desc: "Add skills you can teach or want to learn.",
-                  color: "bg-teal-500",
                 },
                 {
                   step: 2,
                   title: "Find a Match",
                   desc: "Get matched with users based on interests.",
-                  color: "bg-cyan-500",
                 },
                 {
                   step: 3,
                   title: "Start Swapping",
                   desc: "Schedule sessions and exchange skills.",
-                  color: "bg-sky-500",
                 },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">
-                  <div
-                    className={`w-8 h-8 rounded-full ${item.color} text-white flex items-center justify-center font-bold`}
-                  >
+                  <div className="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center font-bold">
                     {item.step}
                   </div>
                   <div>
@@ -192,7 +131,6 @@ const Landing = () => {
       <footer className="bg-white text-center py-4 text-sm text-gray-500">
         © 2026 SkillSwap · Learn by Sharing
       </footer>
-
     </div>
   );
 };

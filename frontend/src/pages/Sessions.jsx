@@ -9,7 +9,7 @@ const Sessions = () => {
       skill: "Web Development",
       date: "15 Feb 2026",
       time: "6:00 PM",
-      status: "upcoming",
+      status: "not available",
     },
     {
       id: 2,

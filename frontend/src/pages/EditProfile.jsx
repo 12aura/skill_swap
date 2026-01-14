@@ -7,13 +7,13 @@ const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // ✅ Name is prefilled (correct)
   const [name, setName] = useState(user?.name || "");
-  const [skillsTeach, setSkillsTeach] = useState(
-    user?.skillsTeach?.join(", ") || ""
-  );
-  const [skillsLearn, setSkillsLearn] = useState(
-    user?.skillsLearn?.join(", ") || ""
-  );
+
+  // ✅ Skills fields start EMPTY (fix for [object Object])
+  const [skillsTeach, setSkillsTeach] = useState("");
+  const [skillsLearn, setSkillsLearn] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   const handleSave = async (e) => {

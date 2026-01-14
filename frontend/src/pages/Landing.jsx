@@ -34,9 +34,7 @@ const Landing = () => {
                 <Link to="/register" className="btn btn-neutral px-6">
                   Get Started
                 </Link>
-                <Link to="/login" className="btn btn-outline px-6">
-                  Login
-                </Link>
+                
               </>
             )}
           </div>

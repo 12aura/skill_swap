@@ -17,36 +17,50 @@ const Navbar = () => {
         </span>
       </Link>
 
-      {/* RIGHT MENU */}
-      {user && (
-        <div className="flex items-center gap-8 text-sm font-semibold">
+      {/* RIGHT SIDE */}
+      <div className="flex items-center gap-8 text-sm font-semibold">
 
-          <Link
-            to="/search"
-            className="text-gray-700 hover:text-teal-600 transition"
-          >
-            Browse Skills
-          </Link>
+        {/* ✅ ALWAYS SHOW */}
+        <Link
+          to={user ? "/search" : "/login"}
+          className="text-gray-700 hover:text-teal-600 transition"
+        >
+          Browse Skills
+        </Link>
 
-          <Link
-            to="/profile"
-            className="text-gray-700 hover:text-teal-600 transition"
-          >
-            Profile
-          </Link>
+        {/* 🔐 LOGGED IN */}
+        {user ? (
+          <>
+            <Link
+              to="/profile"
+              className="text-gray-700 hover:text-teal-600 transition"
+            >
+              Profile
+            </Link>
 
-          <button
-            onClick={() => {
-              logout();
-              navigate("/");
-            }}
-            className="px-5 py-2 rounded-xl border border-orange-400 text-orange-500 font-bold hover:bg-orange-50 transition"
-          >
-            Logout
-          </button>
+            <button
+              onClick={() => {
+                logout();
+                navigate("/");
+              }}
+              className="px-5 py-2 rounded-xl border border-orange-400 text-orange-500 font-bold hover:bg-orange-50 transition"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            {/* 🔓 LOGGED OUT */}
+            <Link
+              to="/login"
+              className="px-4 py-2 border rounded-lg hover:bg-gray-50 transition"
+            >
+              Login
+            </Link>
+          </>
+        )}
 
-        </div>
-      )}
+      </div>
     </nav>
   );
 };

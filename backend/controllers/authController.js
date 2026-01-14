@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const Skill = require("../models/Skill");
 
 
-// REGISTER
 exports.registerUser = async (req, res) => {
   try {
     let { name, email, password, skillsTeach = [], skillsLearn = [] } = req.body;
@@ -77,6 +76,8 @@ exports.registerUser = async (req, res) => {
     res.status(500).json({ msg: "Registration Failed" });
   }
 };
+
+
 
 // LOGIN
 exports.loginUser = async (req, res) => {

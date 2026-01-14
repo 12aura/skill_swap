@@ -4,6 +4,33 @@ const Session = require("../models/Session");
 const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
 
+
+async function convertToSkillIds(skillNames) {
+  const ids = [];
+
+  for (let raw of skillNames) {
+    const name = raw.trim().toLowerCase();
+
+    let skill = await Skill.findOne({ name });
+
+    if (!skill) {
+      try {
+        skill = await Skill.create({ name });
+      } catch (err) {
+        if (err.code === 11000) {
+          skill = await Skill.findOne({ name });
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    ids.push(skill._id);
+  }
+
+  return ids;
+}
+
 exports.updateProfile = async (req, res) => {
   try {
     let { skillsTeach = [], skillsLearn = [] } = req.body;
@@ -23,28 +50,8 @@ exports.updateProfile = async (req, res) => {
 
     skillsTeach = normalize(skillsTeach);
     skillsLearn = normalize(skillsLearn);
-const escapeRegex = (str) =>
-  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const convertToSkillIds = async (skills) => {
-  const ids = [];
 
-  for (const skillName of skills) {
-    const safeName = escapeRegex(skillName);
-
-    let skill = await Skill.findOne({
-      name: new RegExp(`^${safeName}$`, "i"),
-    });
-
-    if (!skill) {
-      skill = await Skill.create({ name: skillName });
-    }
-
-    ids.push(skill._id);
-  }
-
-  return ids;
-};
 
 
     const teachIds = await convertToSkillIds(skillsTeach);

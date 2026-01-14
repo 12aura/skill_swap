@@ -50,3 +50,48 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ msg: "Login Failed" });
   }
 };
+
+// password otp
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(404).json({ msg: "User not found" });
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.resetOTP = crypto.createHash("sha256").update(otp).digest("hex");
+    user.resetOTPExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+
+    await user.save();
+
+    // Send email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      subject: "SkillSwap Password Reset OTP",
+      html: `<h2>Your OTP is:</h2><h1>${otp}</h1><p>Valid for 10 minutes</p>`,
+    });
+
+    res.json({ msg: "OTP sent successfully" });
+  } catch (err) {
+  console.error("EMAIL ERROR:", err);
+  res.status(500).json({ msg: "Failed to send OTP" });
+}
+
+};
+

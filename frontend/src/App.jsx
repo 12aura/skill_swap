@@ -12,6 +12,7 @@ import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
+import ForgotPassword from "./pages/ForgotPassword";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthContext } from "./context/AuthContext";
@@ -36,6 +37,8 @@ const App = () => {
 
       {/* Auth Routes (no forced redirect) */}
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
       <Route path="/register" element={<Register />} />
 
       {/* Protected Routes */}

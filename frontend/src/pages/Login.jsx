@@ -4,6 +4,7 @@ import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
+  
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
@@ -89,6 +90,15 @@ const Login = () => {
               }
               required
             />
+            <div className="text-left mt-2 mb-4">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-teal-500 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+            </div>
+
           </div>
 
           <button

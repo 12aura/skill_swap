@@ -3,6 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Register = () => {
+  const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:5000/api/auth/google";
+};
+
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -20,6 +24,7 @@ const Register = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+  
 
     try {
       await axios.post("http://localhost:5000/api/auth/register", form);
@@ -44,6 +49,7 @@ const Register = () => {
         <p className="text-center text-gray-600 mt-2">
           Join SkillSwap and start sharing skills
         </p>
+        
 
         <form onSubmit={handleRegister} className="mt-8 space-y-5">
 
@@ -139,6 +145,26 @@ const Register = () => {
     Enter skills separated by commas
   </p>
 </div>
+<div className="flex items-center my-6">
+  <div className="flex-grow border-t border-gray-300"></div>
+  <span className="px-3 text-sm text-gray-500">or</span>
+  <div className="flex-grow border-t border-gray-300"></div>
+</div>
+
+ <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2 mb-6 hover:bg-gray-50 transition"
+        >
+          <img
+            src="https://developers.google.com/identity/images/g-logo.png"
+            alt="Google"
+            className="w-5 h-5"
+          />
+          <span className="text-sm font-medium text-gray-700">
+            Sign up with Google
+          </span>
+        </button>
 
           {/* Terms */}
           <div className="form-control">

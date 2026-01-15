@@ -13,6 +13,8 @@ import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
 import Navbar from "./components/Navbar";
+import MentorProfile from "./pages/MentorProfile";
+
 
 import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
 import { AuthContext } from "./context/AuthContext";
@@ -43,6 +45,15 @@ const App = () => {
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
         <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route
+  path="/mentor/:name"
+  element={
+    <ProtectedRoute>
+      <MentorProfile />
+    </ProtectedRoute>
+  }
+/>
+
         <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
         <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />

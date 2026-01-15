@@ -105,7 +105,6 @@ const Search = () => {
                   </span>
                 ))}
               </div>
-
               <button className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition">
                 View Details
               </button>

@@ -1,3 +1,4 @@
+
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
@@ -99,6 +100,7 @@ exports.getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate("skillsTeach")
   .populate("skillsLearn");
+
     res.json({ user });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });

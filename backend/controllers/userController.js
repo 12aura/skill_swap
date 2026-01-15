@@ -3,12 +3,17 @@ const Request = require("../models/Request");
 const Session = require("../models/Session");
 const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
+const mongoose = require("mongoose");
 
-async function convertToSkillIds(skillNames) {
+/* ------------------------------------
+   Helper: Convert skill names to IDs
+------------------------------------ */
+async function convertToSkillIds(skillNames = []) {
   const ids = [];
 
   for (let raw of skillNames) {
     const name = raw.trim().toLowerCase();
+    if (!name) continue;
 
     let skill = await Skill.findOne({ name });
 
@@ -29,60 +34,34 @@ async function convertToSkillIds(skillNames) {
 
   return ids;
 }
+
+/* ------------------------------------
+   UPDATE PROFILE (REPLACE SKILLS ✅)
+------------------------------------ */
 exports.updateProfile = async (req, res) => {
   try {
-    let { name, skillsTeach, skillsLearn } = req.body;
-
-    const updateData = {};
-
-    // ✅ Update name ONLY if sent
-    if (name) {
-      updateData.name = name;
-    }
+    let { name, skillsTeach = [], skillsLearn = [] } = req.body;
 
     const normalize = (val) => {
-      if (!val) return null;
       if (Array.isArray(val)) return val;
-
-      if (typeof val === "string") {
-        try {
-          return JSON.parse(val.replace(/'/g, '"'));
-        } catch {
-          return val.split(",").map((s) => s.trim());
-        }
-      }
-      return null;
+      if (typeof val === "string")
+        return val.split(",").map((s) => s.trim());
+      return [];
     };
 
     skillsTeach = normalize(skillsTeach);
     skillsLearn = normalize(skillsLearn);
 
-    // ✅ Update skillsTeach ONLY if provided
-    if (skillsTeach && skillsTeach.length > 0) {
-      const teachIds = await convertToSkillIds(skillsTeach);
-      updateData.$addToSet = {
-        ...(updateData.$addToSet || {}),
-        skillsTeach: { $each: teachIds },
-      };
-    }
-
-    // ✅ Update skillsLearn ONLY if provided
-    if (skillsLearn && skillsLearn.length > 0) {
-      const learnIds = await convertToSkillIds(skillsLearn);
-      updateData.$addToSet = {
-        ...(updateData.$addToSet || {}),
-        skillsLearn: { $each: learnIds },
-      };
-    }
-
-    // ✅ If nothing to update
-    if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ msg: "No changes provided" });
-    }
+    const teachIds = await convertToSkillIds(skillsTeach);
+    const learnIds = await convertToSkillIds(skillsLearn);
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      updateData,
+      {
+        name,
+        skillsTeach: teachIds,   // ✅ REPLACE
+        skillsLearn: learnIds,   // ✅ REPLACE
+      },
       { new: true }
     )
       .populate("skillsTeach")
@@ -95,23 +74,53 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
-// ✅ SEARCH USERS
-exports.searchUsers = async (req, res) => {
+/* ------------------------------------
+   GET ALL SKILLS (Browse Skills)
+------------------------------------ */
+exports.getAllSkills = async (req, res) => {
   try {
-    const { skill } = req.query;
+    const users = await User.find()
+      .select("name skillsTeach")
+      .lean();
 
-    const users = await User.find({
-      skillsTeach: { $regex: skill, $options: "i" },
-    }).select("name skillsTeach skillsLearn");
+    const skillMap = {};
 
-    res.json({ users });
+    users.forEach((user) => {
+      if (!Array.isArray(user.skillsTeach)) return;
+
+      user.skillsTeach.forEach((skillId) => {
+        if (!mongoose.Types.ObjectId.isValid(skillId)) return;
+
+        const id = skillId.toString();
+
+        if (!skillMap[id]) {
+          skillMap[id] = { mentors: [] };
+        }
+
+        skillMap[id].mentors.push(user.name);
+      });
+    });
+
+    const skillDocs = await Skill.find({
+      _id: { $in: Object.keys(skillMap) },
+    });
+
+    const result = skillDocs.map((skill) => ({
+      _id: skill._id,
+      name: skill.name,
+      mentors: skillMap[skill._id.toString()]?.mentors || [],
+    }));
+
+    res.json({ skills: result });
   } catch (err) {
-    res.status(500).json({ msg: "Search failed" });
+    console.error("GET ALL SKILLS ERROR:", err);
+    res.status(500).json({ msg: "Failed to load skills" });
   }
 };
 
-// ✅ GET MY PROFILE
+/* ------------------------------------
+   GET MY PROFILE
+------------------------------------ */
 exports.getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
@@ -124,7 +133,9 @@ exports.getMyProfile = async (req, res) => {
   }
 };
 
-// ✅ DASHBOARD STATS
+/* ------------------------------------
+   DASHBOARD STATS
+------------------------------------ */
 exports.getStats = async (req, res) => {
   try {
     const sent = await Request.countDocuments({ fromUser: req.user.id });
@@ -144,7 +155,9 @@ exports.getStats = async (req, res) => {
   }
 };
 
-// ✅ UPLOAD AVATAR
+/* ------------------------------------
+   UPLOAD AVATAR
+------------------------------------ */
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {

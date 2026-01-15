@@ -4,7 +4,6 @@ const Session = require("../models/Session");
 const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
 
-
 async function convertToSkillIds(skillNames) {
   const ids = [];
 
@@ -30,42 +29,60 @@ async function convertToSkillIds(skillNames) {
 
   return ids;
 }
-
 exports.updateProfile = async (req, res) => {
   try {
-    let { skillsTeach = [], skillsLearn = [] } = req.body;
+    let { name, skillsTeach, skillsLearn } = req.body;
+
+    const updateData = {};
+
+    // ✅ Update name ONLY if sent
+    if (name) {
+      updateData.name = name;
+    }
 
     const normalize = (val) => {
+      if (!val) return null;
       if (Array.isArray(val)) return val;
 
       if (typeof val === "string") {
         try {
           return JSON.parse(val.replace(/'/g, '"'));
         } catch {
-          return [val];
+          return val.split(",").map((s) => s.trim());
         }
       }
-      return [];
+      return null;
     };
 
     skillsTeach = normalize(skillsTeach);
     skillsLearn = normalize(skillsLearn);
 
+    // ✅ Update skillsTeach ONLY if provided
+    if (skillsTeach && skillsTeach.length > 0) {
+      const teachIds = await convertToSkillIds(skillsTeach);
+      updateData.$addToSet = {
+        ...(updateData.$addToSet || {}),
+        skillsTeach: { $each: teachIds },
+      };
+    }
 
+    // ✅ Update skillsLearn ONLY if provided
+    if (skillsLearn && skillsLearn.length > 0) {
+      const learnIds = await convertToSkillIds(skillsLearn);
+      updateData.$addToSet = {
+        ...(updateData.$addToSet || {}),
+        skillsLearn: { $each: learnIds },
+      };
+    }
 
+    // ✅ If nothing to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ msg: "No changes provided" });
+    }
 
-    const teachIds = await convertToSkillIds(skillsTeach);
-    const learnIds = await convertToSkillIds(skillsLearn);
-
-    // ✅ MERGE instead of replace
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        $addToSet: {
-          skillsTeach: { $each: teachIds },
-          skillsLearn: { $each: learnIds },
-        },
-      },
+      updateData,
       { new: true }
     )
       .populate("skillsTeach")
@@ -97,8 +114,10 @@ exports.searchUsers = async (req, res) => {
 // ✅ GET MY PROFILE
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("skillsTeach")
-  .populate("skillsLearn");
+    const user = await User.findById(req.user.id)
+      .populate("skillsTeach")
+      .populate("skillsLearn");
+
     res.json({ user });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });

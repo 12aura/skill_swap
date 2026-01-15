@@ -7,7 +7,7 @@ const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // ✅ Name is prefilled (correct)
+  // ✅ Name is prefilled (correct) 
   const [name, setName] = useState(user?.name || "");
 
   // ✅ Skills fields start EMPTY (fix for [object Object])
@@ -123,3 +123,4 @@ const EditProfile = () => {
 };
 
 export default EditProfile;
+

@@ -20,24 +20,32 @@
 
 // module.exports = mongoose.model("User", userSchema);
 
+// const mongoose = require("mongoose");
+
+// const userSchema = new mongoose.Schema({
+//   name: String,
+//   email: { type: String, unique: true },
+//   password: String,
+//   skillsTeach: [{
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Skill"
+//   }],
+//   skillsLearn: [{
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Skill"
+//   }],
+//   otp: String,
+//   otpExpiry: Date,
+// }, { timestamps: true });
+
+// module.exports = mongoose.model("User", userSchema);
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-
-  password: {
-    type: String,
-    required: false,   // ✅ allow Google users
-  },
+  name: String,
+  email: { type: String, unique: true },
+  password: String,
 
   authProvider: {
     type: String,
@@ -45,19 +53,21 @@ const userSchema = new mongoose.Schema({
     default: "local",
   },
 
-  resetOTP: String,
-  resetOTPExpire: Date,
+  googleId: String,
 
-  skillsTeach: [String],
-  skillsLearn: [String],
+  skillsTeach: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Skill"
+  }],
 
-  xp: { type: Number, default: 0 },
-  badges: [String],
+  skillsLearn: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Skill"
+  }],
 
-  avatar: {
-    type: String,
-    default: "",
-  },
-});
+  otp: String,
+  otpExpiry: Date,
+
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

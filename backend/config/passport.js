@@ -36,6 +36,47 @@
 
 // module.exports = passport;
 
+// const passport = require("passport");
+// const GoogleStrategy = require("passport-google-oauth20").Strategy;
+// const User = require("../models/User");
+
+// passport.use(
+//   new GoogleStrategy(
+//     {
+//       clientID: process.env.GOOGLE_CLIENT_ID,
+//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+//       callbackURL: "http://localhost:5000/api/auth/google/callback",
+//     },
+//     async (accessToken, refreshToken, profile, done) => {
+//       try {
+//         const email = profile.emails[0].value;
+//         const googleName = profile.displayName;
+
+//         let user = await User.findOne({ email });
+
+//         if (!user) {
+//           // ✅ CREATE user with Google name
+//           user = new User({
+//             name: googleName,          // <-- THIS is important
+//             email: email,
+//             password: null,            // or ""
+//             authProvider: "google"
+//           });
+
+//           await user.save();
+//         }
+
+//         return done(null, user);
+//       } catch (err) {
+//         return done(err, null);
+//       }
+//     }
+//   )
+// );
+
+// module.exports = passport;
+
+
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
@@ -45,28 +86,28 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:5000/api/auth/google/callback",
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
-        const googleName = profile.displayName;
 
         let user = await User.findOne({ email });
 
+        // If new user → SIGNUP
         if (!user) {
-          // ✅ CREATE user with Google name
-          user = new User({
-            name: googleName,          // <-- THIS is important
+          user = await User.create({
+            name: profile.displayName,
             email: email,
-            password: null,            // or ""
-            authProvider: "google"
+            authProvider: "google",
+            googleId: profile.id,
+            password: null,
           });
-
-          await user.save();
         }
 
+        // Existing user → LOGIN
         return done(null, user);
+
       } catch (err) {
         return done(err, null);
       }
@@ -75,5 +116,3 @@ passport.use(
 );
 
 module.exports = passport;
-
-

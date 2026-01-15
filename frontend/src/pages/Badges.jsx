@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { DarkModeContext } from "../context/DarkModeContext";
 
 const Badges = () => {
+  const { darkMode } = useContext(DarkModeContext); // <-- dark mode context
+
   const badges = [
     {
       id: 1,
@@ -35,14 +39,17 @@ const Badges = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 px-10 py-12">
-
+    <div
+      className={`min-h-screen px-10 py-12 transition-colors ${
+        darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-gray-900"
+      }`}
+    >
       {/* HEADER */}
       <div className="max-w-6xl mx-auto mb-10">
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>
           My Badges
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className={`${darkMode ? "text-gray-300" : "text-gray-600"} mt-2`}>
           Achievements earned through your SkillSwap journey
         </p>
 
@@ -56,44 +63,52 @@ const Badges = () => {
 
       {/* BADGES GRID */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-
         {badges.map((badge) => (
           <div
             key={badge.id}
             className={`rounded-3xl p-6 shadow transition ${
               badge.earned
-                ? "bg-white"
-                : "bg-white opacity-50"
+                ? darkMode
+                  ? "bg-slate-800 text-white"
+                  : "bg-white text-gray-800"
+                : darkMode
+                  ? "bg-slate-700 text-gray-300 opacity-70"
+                  : "bg-white text-gray-500 opacity-50"
             }`}
           >
-            <div className="text-4xl mb-4">
-              {badge.icon}
-            </div>
+            <div className="text-4xl mb-4">{badge.icon}</div>
 
-            <h3 className="text-lg font-semibold text-gray-800">
-              {badge.title}
-            </h3>
+            <h3 className="text-lg font-semibold">{badge.title}</h3>
 
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm mt-2">
               {badge.description}
             </p>
 
             <div className="mt-4">
               {badge.earned ? (
-                <span className="inline-block px-4 py-1 rounded-full bg-teal-100 text-teal-700 text-sm font-medium">
+                <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${
+                  darkMode
+                    ? "bg-teal-800 text-teal-300"
+                    : "bg-teal-100 text-teal-700"
+                }`}>
                   Earned
                 </span>
               ) : (
-                <span className="inline-block px-4 py-1 rounded-full bg-gray-200 text-gray-600 text-sm font-medium">
+                <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${
+                  darkMode
+                    ? "bg-slate-700 text-gray-400"
+                    : "bg-gray-200 text-gray-600"
+                }`}>
                   Locked
                 </span>
               )}
             </div>
           </div>
         ))}
-
       </div>
     </div>
   );
 };
+
 export default Badges;
+

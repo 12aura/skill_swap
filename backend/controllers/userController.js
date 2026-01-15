@@ -1,25 +1,100 @@
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
+const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
 
-// ✅ UPDATE PROFILE
+async function convertToSkillIds(skillNames) {
+  const ids = [];
+
+  for (let raw of skillNames) {
+    const name = raw.trim().toLowerCase();
+
+    let skill = await Skill.findOne({ name });
+
+    if (!skill) {
+      try {
+        skill = await Skill.create({ name });
+      } catch (err) {
+        if (err.code === 11000) {
+          skill = await Skill.findOne({ name });
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    ids.push(skill._id);
+  }
+
+  return ids;
+}
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, skillsTeach, skillsLearn } = req.body;
+    let { name, skillsTeach, skillsLearn } = req.body;
+
+    const updateData = {};
+
+    // ✅ Update name ONLY if sent
+    if (name) {
+      updateData.name = name;
+    }
+
+    const normalize = (val) => {
+      if (!val) return null;
+      if (Array.isArray(val)) return val;
+
+      if (typeof val === "string") {
+        try {
+          return JSON.parse(val.replace(/'/g, '"'));
+        } catch {
+          return val.split(",").map((s) => s.trim());
+        }
+      }
+      return null;
+    };
+
+    skillsTeach = normalize(skillsTeach);
+    skillsLearn = normalize(skillsLearn);
+
+    // ✅ Update skillsTeach ONLY if provided
+    if (skillsTeach && skillsTeach.length > 0) {
+      const teachIds = await convertToSkillIds(skillsTeach);
+      updateData.$addToSet = {
+        ...(updateData.$addToSet || {}),
+        skillsTeach: { $each: teachIds },
+      };
+    }
+
+    // ✅ Update skillsLearn ONLY if provided
+    if (skillsLearn && skillsLearn.length > 0) {
+      const learnIds = await convertToSkillIds(skillsLearn);
+      updateData.$addToSet = {
+        ...(updateData.$addToSet || {}),
+        skillsLearn: { $each: learnIds },
+      };
+    }
+
+    // ✅ If nothing to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ msg: "No changes provided" });
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, skillsTeach, skillsLearn },
+      updateData,
       { new: true }
-    );
+    )
+      .populate("skillsTeach")
+      .populate("skillsLearn");
 
     res.json({ user });
   } catch (err) {
-    console.error(err);
+    console.error("UPDATE PROFILE ERROR:", err);
     res.status(500).json({ msg: "Profile update failed" });
   }
 };
+
 
 // ✅ SEARCH USERS
 exports.searchUsers = async (req, res) => {
@@ -39,7 +114,10 @@ exports.searchUsers = async (req, res) => {
 // ✅ GET MY PROFILE
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id)
+      .populate("skillsTeach")
+      .populate("skillsLearn");
+
     res.json({ user });
   } catch (err) {
     res.status(500).json({ msg: "Failed to load profile" });

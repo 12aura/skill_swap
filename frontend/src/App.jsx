@@ -12,12 +12,20 @@ import Search from "./pages/Search";
 import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
+import Navbar from "./components/Navbar";
+import LoginSuccess from "./pages/LoginSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
+import SkillCategory from "./pages/SkillCategory";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+
+
+
+import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
 import { AuthContext } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
+  const { darkMode } = useContext(DarkModeContext);
   const { loading } = useContext(AuthContext);
 
   if (loading) {
@@ -29,110 +37,31 @@ const App = () => {
   }
 
   return (
-  <div className="h-screen" data-theme="coffee">
-    <Routes>
+    <div className={darkMode ? "bg-slate-900 text-white min-h-screen" : "bg-white text-gray-900 min-h-screen"}>
+      <Navbar />
 
-      {/* ✅ Landing – ALWAYS accessible */}
-      <Route path="/" element={<Landing />} />
-
-      {/* Auth Routes (no forced redirect) */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-
-      <Route path="/register" element={<Register />} />
-
-      {/* Protected Routes */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ✅ NEW: Skills Page */}
-      <Route
-        path="/skills"
-        element={
-          <ProtectedRoute>
-            <Skills />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ✅ NEW: Messages Page */}
-      <Route
-        path="/messages"
-        element={
-          <ProtectedRoute>
-            <Messages />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/search"
-        element={
-          <ProtectedRoute>
-            <Search />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/requests"
-        element={
-          <ProtectedRoute>
-            <Requests />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/sessions"
-        element={
-          <ProtectedRoute>
-            <Sessions />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-  path="/edit-profile"
-  element={
-    <ProtectedRoute>
-      <EditProfile />
-    </ProtectedRoute>
-  }
-/>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
+        <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
+        <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
+        <Route path="/login-success" element={<LoginSuccess />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/skills/:category" element={<SkillCategory />} />
 
 
-      <Route
-        path="/badges"
-        element={
-          <ProtectedRoute>
-            <Badges />
-          </ProtectedRoute>
-        }
-      />
-      
-
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" />} />
-
-    </Routes>
-  </div>
-);
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </div>
+  );
 };
-
 
 export default App;

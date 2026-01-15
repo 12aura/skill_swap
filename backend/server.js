@@ -3,6 +3,9 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/db");
 
+const skillSwapRoutes = require("./routes/skillSwapRoutes");
+
+app.use("/api/swaps", skillSwapRoutes);
 
 const passport = require("./config/passport");
 
@@ -21,11 +24,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/authRoutes"));
 
 app.listen(5000, () => console.log("Server running on port 5000"));
-
+app.use("/api/swaps", skillSwapRoutes);
 app.use("/api/user", require("./routes/userRoutes"));
 
 app.use("/api/request", require("./routes/requestRoutes"));
 
 app.use("/api/session", require("./routes/sessionRoutes"));
 
-
+app.use("/api/skills", require("./routes/skillRoutes"));

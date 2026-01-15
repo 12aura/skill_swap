@@ -2,10 +2,12 @@ import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { DarkModeContext } from "../context/DarkModeContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+  const { darkMode } = useContext(DarkModeContext); // <-- added dark mode
 
   const [form, setForm] = useState({
     email: "",
@@ -26,13 +28,9 @@ const Login = () => {
         form
       );
 
-      // 🔥 VERY IMPORTANT
-      // store token + update auth state
       login(res.data.token);
-
-      // redirect to profile
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/");
-
     } catch (err) {
       setError(err.response?.data?.msg || "Login failed");
     } finally {
@@ -41,47 +39,69 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl p-8">
-
-        <h2 className="text-3xl font-bold text-gray-800 text-center">
-          Welcome Back
-        </h2>
-
-        <p className="text-center text-gray-600 mt-2">
+    <div
+      className={`min-h-screen flex items-center justify-center px-6 transition-colors ${
+        darkMode
+          ? "bg-slate-900 text-white"
+          : "bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 text-gray-800"
+      }`}
+    >
+      <div
+        className={`w-full max-w-md rounded-3xl shadow-xl p-8 transition-colors ${
+          darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-800"
+        }`}
+      >
+        <h2 className="text-3xl font-bold text-center">Welcome Back</h2>
+        <p
+          className={`text-center mt-2 ${
+            darkMode ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
           Login to continue SkillSwap
         </p>
 
         <form onSubmit={handleLogin} className="mt-8 space-y-5">
-
-          {/* Error */}
           {error && (
-            <div className="alert alert-error text-sm">
+            <div
+              className={`alert text-sm ${
+                darkMode ? "text-red-400" : "text-red-600"
+              }`}
+            >
               {error}
             </div>
           )}
 
           {/* Email */}
           <div>
-            <label className="text-sm text-gray-600">Email</label>
+            <label className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+              Email
+            </label>
             <input
               type="email"
-              className="input input-bordered bg-white text-gray-800 w-full mt-1"
+              className={`input input-bordered w-full mt-1 transition-colors ${
+                darkMode
+                  ? "bg-slate-700 text-white border-slate-600"
+                  : "bg-white text-gray-800 border-gray-300"
+              }`}
               placeholder="you@example.com"
               value={form.email}
-              onChange={(e) =>
-                setForm({ ...form, email: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="text-sm text-gray-600">Password</label>
+            <label className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+              Password
+            </label>
             <input
               type="password"
-              className="input input-bordered bg-white text-gray-800 w-full mt-1"
+              className={`input input-bordered w-full mt-1 transition-colors ${
+                darkMode
+                  ? "bg-slate-700 text-white border-slate-600"
+                  : "bg-white text-gray-800 border-gray-300"
+              }`}
               placeholder="••••••••"
               value={form.password}
               onChange={(e) =>
@@ -92,17 +112,23 @@ const Login = () => {
           </div>
 
           <button
-            className="btn btn-neutral w-full mt-4"
+            className={`btn w-full mt-4 ${
+              darkMode
+                ? "btn-neutral bg-teal-600 hover:bg-teal-500 text-white"
+                : "btn-neutral"
+            }`}
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
           Don’t have an account?
-          <Link to="/register" className="text-teal-600 font-medium ml-1">
+          <Link
+            to="/register"
+            className="text-teal-600 font-medium ml-1"
+          >
             Sign Up
           </Link>
         </p>

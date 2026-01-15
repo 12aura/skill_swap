@@ -1,16 +1,19 @@
-
 const User = require("../models/User");
 const Request = require("../models/Request");
 const Session = require("../models/Session");
 const Skill = require("../models/Skill");
 const cloudinary = require("../config/cloudinary");
+const mongoose = require("mongoose");
 
-
-async function convertToSkillIds(skillNames) {
+/* ------------------------------------
+   Helper: Convert skill names to IDs
+------------------------------------ */
+async function convertToSkillIds(skillNames = []) {
   const ids = [];
 
   for (let raw of skillNames) {
     const name = raw.trim().toLowerCase();
+    if (!name) continue;
 
     let skill = await Skill.findOne({ name });
 
@@ -32,40 +35,32 @@ async function convertToSkillIds(skillNames) {
   return ids;
 }
 
+/* ------------------------------------
+   UPDATE PROFILE (REPLACE SKILLS ✅)
+------------------------------------ */
 exports.updateProfile = async (req, res) => {
   try {
-    let { skillsTeach = [], skillsLearn = [] } = req.body;
+    let { name, skillsTeach = [], skillsLearn = [] } = req.body;
 
     const normalize = (val) => {
       if (Array.isArray(val)) return val;
-
-      if (typeof val === "string") {
-        try {
-          return JSON.parse(val.replace(/'/g, '"'));
-        } catch {
-          return [val];
-        }
-      }
+      if (typeof val === "string")
+        return val.split(",").map((s) => s.trim());
       return [];
     };
 
     skillsTeach = normalize(skillsTeach);
     skillsLearn = normalize(skillsLearn);
 
-
-
-
     const teachIds = await convertToSkillIds(skillsTeach);
     const learnIds = await convertToSkillIds(skillsLearn);
 
-    // ✅ MERGE instead of replace
     const user = await User.findByIdAndUpdate(
       req.user.id,
       {
-        $addToSet: {
-          skillsTeach: { $each: teachIds },
-          skillsLearn: { $each: learnIds },
-        },
+        name,
+        skillsTeach: teachIds,   // ✅ REPLACE
+        skillsLearn: learnIds,   // ✅ REPLACE
       },
       { new: true }
     )
@@ -79,27 +74,58 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
-// ✅ SEARCH USERS
-exports.searchUsers = async (req, res) => {
+/* ------------------------------------
+   GET ALL SKILLS (Browse Skills)
+------------------------------------ */
+exports.getAllSkills = async (req, res) => {
   try {
-    const { skill } = req.query;
+    const users = await User.find()
+      .select("name skillsTeach")
+      .lean();
 
-    const users = await User.find({
-      skillsTeach: { $regex: skill, $options: "i" },
-    }).select("name skillsTeach skillsLearn");
+    const skillMap = {};
 
-    res.json({ users });
+    users.forEach((user) => {
+      if (!Array.isArray(user.skillsTeach)) return;
+
+      user.skillsTeach.forEach((skillId) => {
+        if (!mongoose.Types.ObjectId.isValid(skillId)) return;
+
+        const id = skillId.toString();
+
+        if (!skillMap[id]) {
+          skillMap[id] = { mentors: [] };
+        }
+
+        skillMap[id].mentors.push(user.name);
+      });
+    });
+
+    const skillDocs = await Skill.find({
+      _id: { $in: Object.keys(skillMap) },
+    });
+
+    const result = skillDocs.map((skill) => ({
+      _id: skill._id,
+      name: skill.name,
+      mentors: skillMap[skill._id.toString()]?.mentors || [],
+    }));
+
+    res.json({ skills: result });
   } catch (err) {
-    res.status(500).json({ msg: "Search failed" });
+    console.error("GET ALL SKILLS ERROR:", err);
+    res.status(500).json({ msg: "Failed to load skills" });
   }
 };
 
-// ✅ GET MY PROFILE
+/* ------------------------------------
+   GET MY PROFILE
+------------------------------------ */
 exports.getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("skillsTeach")
-  .populate("skillsLearn");
+    const user = await User.findById(req.user.id)
+      .populate("skillsTeach")
+      .populate("skillsLearn");
 
     res.json({ user });
   } catch (err) {
@@ -107,7 +133,9 @@ exports.getMyProfile = async (req, res) => {
   }
 };
 
-// ✅ DASHBOARD STATS
+/* ------------------------------------
+   DASHBOARD STATS
+------------------------------------ */
 exports.getStats = async (req, res) => {
   try {
     const sent = await Request.countDocuments({ fromUser: req.user.id });
@@ -127,7 +155,9 @@ exports.getStats = async (req, res) => {
   }
 };
 
-// ✅ UPLOAD AVATAR
+/* ------------------------------------
+   UPLOAD AVATAR
+------------------------------------ */
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.file) {

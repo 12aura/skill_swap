@@ -1,65 +1,36 @@
 const express = require("express");
 const router = express.Router();
+const { getMentorProfile } = require("../controllers/userController");
 
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
-const {
-  updateProfile,
-  searchUsers,
-  getMyProfile,
-  getStats,
-  uploadAvatar,
-} = require("../controllers/userController");
-
-const User = require("../models/User"); // Import User model for remove skill route
+const userController = require("../controllers/userController");
 
 // ==============================
-// ROUTES
+// USER ROUTES
 // ==============================
 
-// ✅ UPDATE PROFILE
-router.put("/update", auth, updateProfile);
+// UPDATE PROFILE
+router.put("/update", auth, userController.updateProfile);
 
-// ✅ UPLOAD AVATAR
-router.post("/upload-avatar", auth, upload.single("avatar"), uploadAvatar);
+// UPLOAD AVATAR
+router.post(
+  "/upload-avatar",
+  auth,
+  upload.single("avatar"),
+  userController.uploadAvatar
+);
 
-// ✅ SEARCH USERS
-router.get("/search", auth, searchUsers);
+// GET MY PROFILE
+router.get("/me", auth, userController.getMyProfile);
 
-// ✅ GET MY PROFILE
-router.get("/me", auth, getMyProfile);
+// DASHBOARD STATS
+router.get("/stats", auth, userController.getStats);
 
-// ✅ STATS
-router.get("/stats", auth, getStats);
+// GET ALL SKILLS (PUBLIC)
+router.get("/skills/all", userController.getAllSkills);
 
-// ✅ REMOVE SKILL
-router.put("/remove-skill", auth, async (req, res) => {
-  const { type, skillId } = req.body;
 
-  try {
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (type === "teach") {
-      user.skillsTeach = user.skillsTeach.filter(id => id.toString() !== skillId);
-    } else if (type === "learn") {
-      user.skillsLearn = user.skillsLearn.filter(id => id.toString() !== skillId);
-    } else {
-      return res.status(400).json({ message: "Invalid skill type" });
-    }
-
-    await user.save();
-
-    // Populate skill names for frontend
-    await user.populate("skillsTeach", "name");
-    await user.populate("skillsLearn", "name");
-
-    res.json({ message: "Skill removed", user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 module.exports = router;

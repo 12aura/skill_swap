@@ -1,163 +1,118 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
 const Search = () => {
-  const [query, setQuery] = useState("");
+  const [skillsData, setSkillsData] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const skills = [
-    {
-      id: 1,
-      title: "Python for Beginners",
-      category: "Coding & Development",
-      instructor: "Sarah Chen",
-      level: "Beginner",
-      rating: "4.8 · 120 learners",
-    },
-    {
-      id: 2,
-      title: "Digital Painting",
-      category: "Creative Arts",
-      instructor: "Alex Morgan",
-      level: "Beginner",
-      rating: "4.9 · 95 learners",
-    },
-    {
-      id: 3,
-      title: "Spanish Conversation Practice",
-      category: "Language Exchange",
-      instructor: "Maria Gomez",
-      level: "Intermediate",
-      rating: "4.7 · 210 learners",
-    },
-    {
-      id: 4,
-      title: "Mobile App Design (UI/UX)",
-      category: "Design",
-      instructor: "Emily Jones",
-      level: "All Levels",
-      rating: "4.8 · 210 learners",
-    },
-    {
-      id: 5,
-      title: "Guitar Riffs & Chords",
-      category: "Music",
-      instructor: "Alex Lee",
-      level: "All Levels",
-      rating: "4.6 · 210 learners",
-    },
-    {
-      id: 6,
-      title: "Music Exchange",
-      category: "Music",
-      instructor: "Freestyle",
-      level: "All Levels",
-      rating: "4.6 · 88 learners",
-    },
-  ];
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/user/skills/all")
+      .then((res) => setSkillsData(res.data.skills))
+      .catch((err) => console.error("Failed to load skills", err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const filteredSkills = skills.filter((skill) =>
-    skill.title.toLowerCase().includes(query.toLowerCase())
-  );
+  /* -----------------------------------------
+     GROUP SKILLS UNDER EACH MENTOR
+  ----------------------------------------- */
+  const mentors = useMemo(() => {
+    const map = {};
+
+    skillsData.forEach((skill) => {
+      skill.mentors.forEach((mentor) => {
+        if (!map[mentor]) {
+          map[mentor] = {
+            name: mentor,
+            skills: new Set(),
+          };
+        }
+        map[mentor].skills.add(skill.name);
+      });
+    });
+
+    return Object.values(map)
+      .map((m) => ({
+        name: m.name,
+        skills: Array.from(m.skills),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [skillsData]);
+
+  /* -----------------------------------------
+     SEARCH FILTER
+  ----------------------------------------- */
+  const filteredMentors = useMemo(() => {
+    if (!search.trim()) return mentors;
+
+    const query = search.toLowerCase();
+
+    return mentors.filter((mentor) =>
+      mentor.skills.some((skill) =>
+        skill.toLowerCase().includes(query)
+      )
+    );
+  }, [search, mentors]);
+
+  if (loading) {
+    return <p className="p-10">Loading skills...</p>;
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-10 py-12">
+    <div className="min-h-screen bg-gray-100 p-10">
 
-      {/* PAGE HEADER */}
-      <div className="max-w-6xl mx-auto mb-10">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Browse Skills
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Discover skills shared by mentors and learners
-        </p>
-      </div>
+      <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        Browse Skills
+      </h1>
+      <p className="text-gray-600 mb-6">
+        Discover skills shared by mentors and learners
+      </p>
 
-      {/* SEARCH & FILTERS */}
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow p-6 mb-12">
+      {/* SEARCH BAR */}
+      <input
+        type="text"
+        placeholder="Search skill (e.g. React, Java, C++)"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full max-w-xl px-4 py-3 mb-10 border rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-400"
+      />
 
-        {/* Search bar */}
-        <input
-          type="text"
-          placeholder="Search skills like React, Python, Design..."
-          className="input input-bordered bg-white text-gray-800 w-full mb-5"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+      {filteredMentors.length === 0 ? (
+        <p className="text-gray-500">No mentors found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {filteredMentors.map((mentor) => (
+            <div
+              key={mentor.name}
+              className="bg-white rounded-2xl shadow p-6 hover:shadow-lg transition"
+            >
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {mentor.name}
+              </h3>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-4">
-          <select className="select select-bordered bg-white text-gray-800">
-            <option>Category</option>
-            <option>Coding</option>
-            <option>Design</option>
-            <option>Music</option>
-          </select>
-
-          <select className="select select-bordered bg-white text-gray-800">
-            <option>Skill Level</option>
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
-
-          <select className="select select-bordered bg-white text-gray-800">
-            <option>Availability</option>
-            <option>Weekdays</option>
-            <option>Weekends</option>
-          </select>
-        </div>
-      </div>
-
-      {/* SKILLS GRID */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-
-        {filteredSkills.map((skill) => (
-          <div
-            key={skill.id}
-            className="bg-white rounded-3xl shadow hover:shadow-lg transition p-6"
-          >
-            <div className="text-3xl mb-4">📘</div>
-
-            <h3 className="text-lg font-semibold text-gray-800">
-              {skill.title}
-            </h3>
-
-            <p className="text-sm text-gray-500 mt-1">
-              {skill.category}
-            </p>
-
-            <div className="mt-4 space-y-1 text-sm text-gray-600">
-              <p>
-                <span className="font-medium">Instructor:</span>{" "}
-                {skill.instructor}
+              <p className="text-sm text-gray-600 mb-3">
+                Teaches:
               </p>
-              <p>
-                <span className="font-medium">Level:</span>{" "}
-                {skill.level}
-              </p>
-              <p>
-                ⭐ {skill.rating}
-              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {mentor.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1 text-sm bg-teal-50 text-teal-700 rounded-full"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+
+              <button className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition">
+                View Details
+              </button>
             </div>
-
-            <button className="btn btn-outline w-full mt-6">
-              View Details
-            </button>
-          </div>
-        ))}
-
-      </div>
-
-      {/* PAGINATION */}
-      <div className="flex justify-center mt-14">
-        <div className="join">
-          <button className="join-item btn">Prev</button>
-          <button className="join-item btn btn-active">1</button>
-          <button className="join-item btn">2</button>
-          <button className="join-item btn">3</button>
-          <button className="join-item btn">Next</button>
+          ))}
         </div>
-      </div>
-
+      )}
     </div>
   );
 };

@@ -124,7 +124,7 @@ exports.forgotPassword = async (req, res) => {
     // Save hashed OTP
     user.otp = crypto.createHash("sha256").update(otp).digest("hex");
     user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
-
+    
     await user.save();
 
     // Send email
@@ -157,6 +157,9 @@ exports.resetPassword = async (req, res) => {
    console.log("Found user:", user);
   if(!user) {
     return res.status(404).json({ msg: "User not found" });
+  }
+  if(otp!=crypto.createHash("sha256").update(otp).digest("hex")|| Date.now() > user.otpExpiry) {
+    return  res.status(400).json({ msg: "Invalid or expired OTP" });
   }
   user.password = await bcrypt.hash(newPassword, 10);
   user.otp = null;

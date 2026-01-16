@@ -152,13 +152,12 @@ exports.forgotPassword = async (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
-
+   console.log("resetPassword called with:", { email, otp, newPassword });
   const user = await User.findOne({ email });
-
-  if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
-    return res.status(400).json({ msg: "Invalid or expired OTP" });
+   console.log("Found user:", user);
+  if(!user) {
+    return res.status(404).json({ msg: "User not found" });
   }
-
   user.password = await bcrypt.hash(newPassword, 10);
   user.otp = null;
   user.otpExpiry = null;

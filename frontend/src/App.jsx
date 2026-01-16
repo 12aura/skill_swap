@@ -13,10 +13,9 @@ import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
 import Navbar from "./components/Navbar";
-import MentorProfile from "./pages/MentorProfile";
 import PublicProfile from "./pages/PublicProfile";
 import Settings from "./pages/Settings";
-
+import EditPublicProfile from "./pages/EditPublicProfile.jsx";
 
 import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
 import { AuthContext } from "./context/AuthContext";
@@ -49,16 +48,9 @@ const App = () => {
         <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
                <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+               <Route path="/edit-public-profile" element={<EditPublicProfile />} />
  
 
-        <Route
-  path="/mentor/:name"
-  element={
-    <ProtectedRoute>
-      <MentorProfile />
-    </ProtectedRoute>
-  }
-/>
 
         <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
         <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />

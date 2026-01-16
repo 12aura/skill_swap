@@ -35,7 +35,7 @@ const EditProfile = () => {
           skillsLearn: skillsLearn.split(",").map((s) => s.trim()).filter(Boolean),
         },
         {
-          headers: { Authorization: `Bearer ${token}`},
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -47,7 +47,7 @@ const EditProfile = () => {
         setUser(res.data.user);
         navigate("/home"); // or /dashboard
       }, 1500);
-    }catch(err) {
+    } catch (err) {
       console.error("Profile update failed", err);
       setLoading(false);
     }

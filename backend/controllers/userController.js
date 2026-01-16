@@ -97,7 +97,11 @@ exports.getAllSkills = async (req, res) => {
           skillMap[id] = { mentors: [] };
         }
 
-        skillMap[id].mentors.push(user.name);
+        skillMap[id].mentors.push({
+  id: user._id,
+  name: user.name
+});
+
       });
     });
 
@@ -154,6 +158,26 @@ exports.getStats = async (req, res) => {
     res.status(500).json({ msg: "Stats failed" });
   }
 };
+// GET PUBLIC PROFILE BY ID
+exports.getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("+skillsTeach +skillsLearn")
+  .populate("skillsTeach", "name")
+  .populate("skillsLearn", "name");
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json(user); // important: send user directly
+  } catch (err) {
+    console.error("PUBLIC PROFILE ERROR:", err);
+    res.status(500).json({ msg: "Failed to load public profile" });
+  }
+};
+
+
 
 /* ------------------------------------
    UPLOAD AVATAR

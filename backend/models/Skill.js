@@ -8,9 +8,13 @@ const SkillSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true
-    }
-  },
-  { timestamps: true }
-);
+    },
+   mentors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+});
 
 module.exports = mongoose.model("Skill", SkillSchema);

@@ -39,8 +39,11 @@ exports.createSkill = async (req, res) => {
  */
 exports.getAllSkills = async (req, res) => {
   try {
-    const skills = await Skill.find().sort({ name: 1 });
-    res.json(skills);
+    const skills = await Skill.find()
+      .populate("mentors", "_id name")
+      .sort({ name: 1 });
+
+    res.json({ skills });
   } catch (err) {
     console.error("GET SKILLS ERROR:", err);
     res.status(500).json({ error: err.message });

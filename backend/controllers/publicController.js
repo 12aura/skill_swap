@@ -1,19 +1,15 @@
 const User = require("../models/User");
 
-exports.getPublicProfile = async (req, res) => {
+exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select("name avatar bio skillsTeach skillsLearn createdAt")
-      .populate("skillsTeach", "name")
-      .populate("skillsLearn", "name");
+      .select("name email skillsTeach")
+      .populate("skillsTeach", "name");
 
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    res.json({ user });
+    res.json(user);
   } catch (err) {
-    console.error("PUBLIC PROFILE ERROR:", err);
-    res.status(500).json({ msg: "Failed to load public profile" });
+    res.status(500).json({ error: err.message });
   }
 };

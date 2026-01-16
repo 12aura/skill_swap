@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { getUserById } = require("../controllers/publicController");
 
-const { getPublicProfile } = require("../controllers/publicController");
-
-router.get("/users/:id", getPublicProfile);
+// router.get("/user-by-name/:name", getUserByName);
+router.get("/user/:id", getUserById);
 
 module.exports = router;

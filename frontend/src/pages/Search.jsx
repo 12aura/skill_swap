@@ -1,10 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Search = () => {
   const [skillsData, setSkillsData] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+const openProfile = async (name) => {
+  try {
+    const res = await axios.get(
+      `/api/public/user-by-name/${encodeURIComponent(name)}`
+    );
+
+    const userId = res.data._id;
+
+    navigate(`/profile/${userId}`);
+  } catch (err) {
+    console.error("Profile open failed", err);
+    alert("User not found");
+  }
+};
+
+
+  
 
   useEffect(() => {
     axios
@@ -17,28 +37,30 @@ const Search = () => {
   /* -----------------------------------------
      GROUP SKILLS UNDER EACH MENTOR
   ----------------------------------------- */
-  const mentors = useMemo(() => {
-    const map = {};
+    const mentors = useMemo(() => {
+  const map = {};
 
-    skillsData.forEach((skill) => {
-      skill.mentors.forEach((mentor) => {
-        if (!map[mentor]) {
-          map[mentor] = {
-            name: mentor,
-            skills: new Set(),
-          };
-        }
-        map[mentor].skills.add(skill.name);
-      });
+  skillsData.forEach((skill) => {
+    skill.mentors.forEach((mentor) => {
+      if (!map[mentor.id]) {
+        map[mentor.id] = {
+          id: mentor.id,
+          name: mentor.name,
+          skills: new Set(),
+        };
+      }
+      map[mentor.id].skills.add(skill.name);
     });
+  });
 
-    return Object.values(map)
-      .map((m) => ({
-        name: m.name,
-        skills: Array.from(m.skills),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [skillsData]);
+  return Object.values(map)
+    .map((m) => ({
+      id: m.id,
+      name: m.name,
+      skills: Array.from(m.skills),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}, [skillsData]);
 
   /* -----------------------------------------
      SEARCH FILTER
@@ -105,9 +127,15 @@ const Search = () => {
                   </span>
                 ))}
               </div>
-              <button className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition">
-                View Details
-              </button>
+              <button
+onClick={() => navigate(`/profile/${mentor.id}`)}
+
+  className="mt-5 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
+>
+  View Details
+</button>
+
+
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getMentorProfile } = require("../controllers/userController");
+const { getPublicProfile } = require("../controllers/userController");
 
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
@@ -31,6 +31,8 @@ router.get("/stats", auth, userController.getStats);
 // GET ALL SKILLS (PUBLIC)
 router.get("/skills/all", userController.getAllSkills);
 
+
+router.get("/public/profile/:id", getPublicProfile);
 
 
 module.exports = router;

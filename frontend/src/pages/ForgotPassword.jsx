@@ -96,14 +96,14 @@ const ForgotPassword = () => {
   const [msg, setMsg] = useState("");
 
   const sendOtp = async () => {
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
-      setMsg(res.data.msg);
-      setStep(2);
-    } catch (err) {
-      setMsg(err.response?.data?.msg || "Error sending OTP");
-    }
-  };
+  try {
+    const res = await axios.post("http://localhost:5000/api/auth/send-otp", { email });
+    setMsg(res.data.message || "OTP sent successfully");
+    setStep(2);
+  } catch (err) {
+    setMsg(err.response?.data?.message || "Error sending OTP");
+  }
+};
 
   const resetPassword = async () => {
     try {

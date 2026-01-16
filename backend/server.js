@@ -1,17 +1,22 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+require("dotenv").config({ override: true });
+
 const connectDB = require("./config/db");
 
 const skillSwapRoutes = require("./routes/skillSwapRoutes");
 
-app.use("/api/swaps", skillSwapRoutes);
 
 const passport = require("./config/passport");
 
 const app = express();
+console.log("EMAIL_USER =", process.env.EMAIL_USER);
+
 app.use(express.json());
 app.use(cors());
+app.use("/api/swaps", skillSwapRoutes);
+app.use(express.json());
+app.use("/api/auth", require("./routes/auth"));
 
 // connect DB
 connectDB();

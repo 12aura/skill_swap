@@ -85,12 +85,24 @@ const Profile = () => {
             <h2 className="text-xl font-semibold uppercase">{user.name}</h2>
             <p className="text-sm opacity-90">{user.email}</p>
 
-            <Link
-              to="/edit-profile"
-              className="mt-6 px-6 py-2 rounded-full border border-white hover:bg-white hover:text-teal-600 transition text-sm"
-            >
-              Edit Profile
-            </Link>
+            <div className="mt-6 flex flex-col gap-3 w-full items-center">
+  {/* Edit Profile */}
+  <Link
+    to="/edit-profile"
+    className="px-6 py-2 w-48 text-center rounded-full border border-white hover:bg-white hover:text-teal-600 transition text-sm"
+  >
+    Edit Profile
+  </Link>
+
+  {/* Edit Public Profile */}
+  <Link
+    to="/edit-public-profile"
+    className="px-6 py-2 w-48 text-center rounded-full bg-white text-teal-600 hover:bg-teal-50 transition text-sm font-medium"
+  >
+    Edit Public Profile
+  </Link>
+</div>
+
 
             <p className="text-sm opacity-90 mt-12">
               Welcome to SkillSwap! <br />

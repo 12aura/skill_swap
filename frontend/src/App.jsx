@@ -14,6 +14,7 @@ import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
 import Navbar from "./components/Navbar";
 import MentorProfile from "./pages/MentorProfile";
+import Settings from "./pages/Settings";
 
 
 import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
@@ -45,6 +46,9 @@ const App = () => {
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
         <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+ 
+
         <Route
   path="/mentor/:name"
   element={

@@ -6,7 +6,7 @@ import { DarkModeContext } from "../context/DarkModeContext";
 const PublicProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
-
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -14,9 +14,6 @@ const PublicProfile = () => {
   const [bio, setBio] = useState("");
   const [demoVideo, setDemoVideo] = useState("");
 
-  /* -----------------------------------------
-     INIT FORM WITH USER DATA
-  ----------------------------------------- */
   useEffect(() => {
     if (user) {
       setTagline(user.tagline || "");
@@ -26,9 +23,6 @@ const PublicProfile = () => {
     }
   }, [user]);
 
-  /* -----------------------------------------
-     SAVE PUBLIC PROFILE
-  ----------------------------------------- */
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -47,7 +41,7 @@ const PublicProfile = () => {
       setUser(res.data.user);
       alert("Public profile updated successfully");
     } catch (err) {
-      console.error("Public profile update failed", err);
+      console.error(err);
       alert("Failed to update public profile");
     } finally {
       setSaving(false);
@@ -60,22 +54,30 @@ const PublicProfile = () => {
 
   return (
     <div
-      className={`min-h-screen p-10 ${
-        darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-slate-900"
+      className={`min-h-screen flex justify-center items-start py-14 px-4 ${
+        darkMode
+          ? "bg-slate-900 text-white"
+          : "bg-gradient-to-b from-slate-50 to-slate-100 text-slate-900"
       }`}
     >
       <div
-        className={`max-w-3xl mx-auto rounded-3xl shadow p-8 ${
+        className={`w-full max-w-4xl rounded-3xl shadow-xl p-10 ${
           darkMode ? "bg-slate-800" : "bg-white"
         }`}
       >
-        <h1 className="text-2xl font-bold mb-6">
-          Edit Public Profile
-        </h1>
+        {/* HEADER */}
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold mb-2">
+            Edit Public Profile
+          </h1>
+          <p className="text-slate-500">
+            Update your information to stand out to the community.
+          </p>
+        </div>
 
         {/* TAGLINE */}
-        <div className="mb-5">
-          <label className="block font-medium mb-1">
+        <div className="mb-8">
+          <label className="block font-semibold mb-2">
             Tagline
           </label>
           <input
@@ -83,29 +85,37 @@ const PublicProfile = () => {
             placeholder="Helping learners master web development"
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            className="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 text-black"
+            className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+              darkMode
+                ? "bg-slate-700 border-slate-600 text-white"
+                : "bg-slate-50 border-slate-200"
+            }`}
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-2">
             Short one-line description shown on your public profile
           </p>
         </div>
 
         {/* BIO */}
-        <div className="mb-5">
-          <label className="block font-medium mb-1">
+        <div className="mb-8">
+          <label className="block font-semibold mb-2">
             Bio
           </label>
           <textarea
             placeholder="Tell learners about your experience, teaching style, and skills..."
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="w-full border rounded-xl px-4 py-2 h-32 focus:outline-none focus:ring-2 focus:ring-teal-400 text-black"
+            className={`w-full rounded-xl px-4 py-3 h-36 border resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+              darkMode
+                ? "bg-slate-700 border-slate-600 text-white"
+                : "bg-slate-50 border-slate-200"
+            }`}
           />
         </div>
 
         {/* DEMO VIDEO */}
-        <div className="mb-6">
-          <label className="block font-medium mb-1">
+        <div className="mb-10">
+          <label className="block font-semibold mb-2">
             Demo Video Link
           </label>
           <input
@@ -113,9 +123,13 @@ const PublicProfile = () => {
             placeholder="https://youtube.com/..."
             value={demoVideo}
             onChange={(e) => setDemoVideo(e.target.value)}
-            className="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 text-black"
+            className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+              darkMode
+                ? "bg-slate-700 border-slate-600 text-white"
+                : "bg-slate-50 border-slate-200"
+            }`}
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-slate-500 mt-2">
             Optional – link to a demo teaching video
           </p>
         </div>
@@ -124,7 +138,7 @@ const PublicProfile = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3 rounded-xl bg-teal-500 text-white font-semibold hover:bg-teal-600 transition disabled:opacity-50"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold text-lg hover:opacity-90 transition disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save Public Profile"}
         </button>

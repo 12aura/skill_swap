@@ -13,6 +13,16 @@ const upload = require("../middleware/upload");
 // ==============================
 
 // UPDATE PROFILE
+// manshi
+const {
+  updateProfile,
+  searchUsers,
+  getMyProfile,
+  getStats,
+  uploadAvatar,
+} = require("../controllers/userController");
+
+// const User = require("../models/User"); // Import User model for remove skill route
 router.put("/update", auth, userController.updateProfile);
 
 // UPLOAD AVATAR
@@ -28,6 +38,21 @@ router.get("/me", auth, userController.getMyProfile);
 
 // DASHBOARD STATS
 router.get("/stats", auth, userController.getStats);
+
+// manshi
+router.get("/by-skill", async (req, res) => {
+  try {
+    const { skill } = req.query;
+
+    const users = await User.find({
+      skills: { $regex: skill, $options: "i" },
+    }).select("-password");
+
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // GET ALL SKILLS (PUBLIC)
 router.get("/skills/all", userController.getAllSkills);

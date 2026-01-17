@@ -5,6 +5,9 @@ import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
 
 const Login = () => {
+  const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:5000/api/auth/google";
+};
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext); // <-- added dark mode
@@ -109,6 +112,14 @@ const Login = () => {
               }
               required
             />
+            <div className="text-left mt-2 mb-4">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-teal-500 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+            </div>
           </div>
 
           <button
@@ -121,6 +132,26 @@ const Login = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+          {/* manshi */}
+          <div className="flex items-center my-4">
+  <div className="flex-grow border-t border-gray-300"></div>
+  <span className="px-3 text-sm text-gray-400">OR</span>
+  <div className="flex-grow border-t border-gray-300"></div>
+</div>
+
+{/* Google Login Button */}
+<button
+  type="button"
+  onClick={handleGoogleLogin}
+  className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2 bg-white hover:bg-gray-100 transition"
+>
+  <img
+    src="https://developers.google.com/identity/images/g-logo.png"
+    alt="Google"
+    className="w-5 h-5"
+  />
+  <span className="text-gray-700 font-medium">Continue with Google</span>
+</button>
         </form>
 
         <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>

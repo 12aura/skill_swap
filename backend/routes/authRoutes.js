@@ -11,10 +11,10 @@ const {
   resetPassword,
 } = require("../controllers/authController");
 
-// ✅ REGISTER
+//  REGISTER
 router.post("/register", registerUser);
 
-// ✅ LOGIN
+// LOGIN
 router.post("/login", loginUser);
 
 // manshi
@@ -22,7 +22,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/send-otp", forgotPassword); // Alias for compatibility
 router.post("/reset-password", resetPassword);
 
-// ✅ TEST PROTECTED ROUTE (optional, but useful)
+// TEST PROTECTED ROUTE 
 router.get("/me", authMiddleware, async (req, res) => {
   res.json({
     msg: "Protected Route Working",

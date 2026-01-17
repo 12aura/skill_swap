@@ -7,7 +7,6 @@ const Register = () => {
   const handleGoogleLogin = () => {
   window.location.href = "http://localhost:5000/api/auth/google";
 };
-
   const navigate = useNavigate();
   const { darkMode } = useContext(DarkModeContext); // <-- get darkMode
 
@@ -181,8 +180,8 @@ const Register = () => {
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
-          {/* Divider */}
-<div className="flex items-center my-4">
+            {/* mans */}
+            <div className="flex items-center my-4">
   <div className="flex-grow border-t border-gray-500"></div>
   <span className="px-3 text-sm text-gray-400">OR</span>
   <div className="flex-grow border-t border-gray-500"></div>
@@ -201,7 +200,6 @@ const Register = () => {
   />
   Continue with Google
 </button>
-
         </form>
 
         <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>

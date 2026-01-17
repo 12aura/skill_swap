@@ -47,12 +47,12 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
 
+  // manshi
   authProvider: {
     type: String,
     enum: ["local", "google"],
     default: "local",
   },
-
   googleId: String,
 
   skillsTeach: [{
@@ -64,10 +64,12 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill"
   }],
-
   otp: String,
   otpExpiry: Date,
 
+  // manshi
+
 }, { timestamps: true });
+
 
 module.exports = mongoose.model("User", userSchema);

@@ -17,12 +17,12 @@ router.post("/register", registerUser);
 // ✅ LOGIN
 router.post("/login", loginUser);
 
-// ✅ PASSWORD RESET
+// manshi
 router.post("/forgot-password", forgotPassword);
 router.post("/send-otp", forgotPassword); // Alias for compatibility
 router.post("/reset-password", resetPassword);
 
-// ✅ TEST PROTECTED ROUTE
+// ✅ TEST PROTECTED ROUTE (optional, but useful)
 router.get("/me", authMiddleware, async (req, res) => {
   res.json({
     msg: "Protected Route Working",
@@ -30,7 +30,7 @@ router.get("/me", authMiddleware, async (req, res) => {
   });
 });
 
-// ✅ GOOGLE AUTH
+// manshi
 router.get("/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
@@ -47,5 +47,4 @@ router.get("/google/callback",
     res.redirect(`http://localhost:5173/login-success?token=${token}`);
   }
 );
-
 module.exports = router;

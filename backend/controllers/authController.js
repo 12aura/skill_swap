@@ -105,7 +105,6 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ msg: "Login Failed" });
   }
 };
-
 // password otp
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
@@ -150,24 +149,55 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+// exports.resetPassword = async (req, res) => {
+//   const { email, otp, newPassword } = req.body;
+//    console.log("resetPassword called with:", { email, otp, newPassword });
+//   const user = await User.findOne({ email });
+//    console.log("Found user:", user);
+//   if(!user) {
+//     return res.status(404).json({ msg: "User not found" });
+//   }
+//   if(otp!=crypto.createHash("sha256").update(otp).digest("hex")|| Date.now() > user.otpExpiry) {
+//     return  res.status(400).json({ msg: "Invalid or expired OTP" });
+//   }
+//   user.password = await bcrypt.hash(newPassword, 10);
+//   user.otp = null;
+//   user.otpExpiry = null;
+
+//   await user.save();
+
+//   res.json({ msg: "Password reset successful" });
+// };
 exports.resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-   console.log("resetPassword called with:", { email, otp, newPassword });
-  const user = await User.findOne({ email });
-   console.log("Found user:", user);
-  if(!user) {
-    return res.status(404).json({ msg: "User not found" });
-  }
-  if(otp!=crypto.createHash("sha256").update(otp).digest("hex")|| Date.now() > user.otpExpiry) {
-    return  res.status(400).json({ msg: "Invalid or expired OTP" });
-  }
-  user.password = await bcrypt.hash(newPassword, 10);
-  user.otp = null;
-  user.otpExpiry = null;
+  try {
+    const { email, otp, newPassword } = req.body;
 
-  await user.save();
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
 
-  res.json({ msg: "Password reset successful" });
+    // hash incoming OTP
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    // compare with stored OTP
+    if (hashedOtp !== user.otp || Date.now() > user.otpExpiry) {
+      return res.status(400).json({ msg: "Invalid or expired OTP" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    res.json({ msg: "Password reset successful" });
+
+  } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err);
+    res.status(500).json({ msg: "Something went wrong" });
+  }
 };
-
-

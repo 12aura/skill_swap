@@ -8,8 +8,6 @@ const Login = () => {
   const handleGoogleLogin = () => {
   window.location.href = "http://localhost:5000/api/auth/google";
 };
-
-  
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext); // <-- added dark mode
@@ -122,7 +120,6 @@ const Login = () => {
                   Forgot password?
                 </Link>
             </div>
-
           </div>
 
           <button
@@ -135,9 +132,8 @@ const Login = () => {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
-          {/* Divider */}
-<div className="flex items-center my-4">
+          {/* manshi */}
+          <div className="flex items-center my-4">
   <div className="flex-grow border-t border-gray-300"></div>
   <span className="px-3 text-sm text-gray-400">OR</span>
   <div className="flex-grow border-t border-gray-300"></div>
@@ -156,7 +152,6 @@ const Login = () => {
   />
   <span className="text-gray-700 font-medium">Continue with Google</span>
 </button>
-
         </form>
 
         <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>

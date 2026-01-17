@@ -13,13 +13,12 @@ import Requests from "./pages/Requests";
 import Sessions from "./pages/Sessions";
 import Badges from "./pages/Badges";
 import Navbar from "./components/Navbar";
+import PublicProfile from "./pages/PublicProfile";
+import Settings from "./pages/Settings";
+import EditPublicProfile from "./pages/EditPublicProfile.jsx";
 import LoginSuccess from "./pages/LoginSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
 import SkillCategory from "./pages/SkillCategory";
-
-
-
-
 import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -46,18 +45,20 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
         <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/edit-public-profile" element={<EditPublicProfile />} />
         <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
         <Route path="/sessions" element={<ProtectedRoute><Sessions /></ProtectedRoute>} />
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/badges" element={<ProtectedRoute><Badges /></ProtectedRoute>} />
-        <Route path="/login-success" element={<LoginSuccess />} />
+         <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
-
-
+ 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>

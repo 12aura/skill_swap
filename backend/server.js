@@ -1,49 +1,47 @@
 const express = require("express");
 const cors = require("cors");
-// require("dotenv").config();
 require("dotenv").config({ override: true });
+
 const connectDB = require("./config/db");
-// manshi
-const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const passport = require("./config/passport");
+
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const sessionRoutes = require("./routes/sessionRoutes");
+const skillRoutes = require("./routes/skillRoutes");
+const publicRoutes = require("./routes/publicRoutes");
+const skillSwapRoutes = require("./routes/skillSwapRoutes");
+
 
 const app = express();
-console.log("EMAIL_USER =", process.env.EMAIL_USER);
 
-app.use(express.json());
+/* ------------------ MIDDLEWARE ------------------ */
 app.use(cors());
-app.use("/api/swaps", skillSwapRoutes);
 app.use(express.json());
-
-// connect DB
-connectDB();
 app.use(passport.initialize());
+
+/* ------------------ DATABASE ------------------ */
+connectDB();
+
+/* ------------------ TEST ------------------ */
 app.get("/", (req, res) => {
   res.send("SkillSwap Backend Running");
 });
 
-// routes
-app.use("/api/auth", require("./routes/authRoutes"));
-
-app.listen(5000, () => console.log("Server running on port 5000"));
-app.use("/api/swaps", skillSwapRoutes);
-
-app.use("/api/user", require("./routes/userRoutes"));
-app.use("/api/request", require("./routes/requestRoutes"));
-
-const userRoutes = require("./routes/userRoutes");
-
+/* ------------------ ROUTES ------------------ */
+app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-
-app.use("/api/session", require("./routes/sessionRoutes"));
-
-app.use("/api/skills", require("./routes/skillRoutes"));
-
-app.use("/api/public", require("./routes/publicRoutes"));
-
-app.use("/api/public", require("./routes/publicRoutes"));
-
+app.use("/api/requests", requestRoutes);
+app.use("/api/sessions", sessionRoutes);
+app.use("/api/skills", skillRoutes);
+app.use("/api/public", publicRoutes);
+app.use("/api/swaps", skillSwapRoutes);
 app.use("/api/requests", requestRoutes);
 
 
+/* ------------------ SERVER ------------------ */
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

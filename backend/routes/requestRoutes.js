@@ -1,5 +1,33 @@
+// const express = require("express");
+// const auth = require("../middleware/authMiddleware");
+
+// const {
+//   getIncomingRequests,
+//   updateRequestStatus,
+// } = require("../controllers/requestController");
+
+// const router = express.Router();
+
+// /* ------------------------------
+//    GET INCOMING REQUESTS
+// -------------------------------- */
+// router.get("/incoming", auth, getIncomingRequests);
+
+// /* ------------------------------
+//    ACCEPT / REJECT REQUEST
+// -------------------------------- */
+// router.put("/:id/status", auth, updateRequestStatus);
+
+// /* ------------------------------
+//    TEST ROUTE
+// -------------------------------- */
+// router.get("/", (req, res) => {
+//   res.send("Request routes working");
+// });
+
+// module.exports = router;
+
 const express = require("express");
-const router = express.Router();
 const auth = require("../middleware/authMiddleware");
 
 const {
@@ -8,13 +36,10 @@ const {
   updateRequestStatus,
 } = require("../controllers/requestController");
 
-// Send request
+const router = express.Router();
+
 router.post("/send", auth, sendRequest);
-
-// Get incoming requests
 router.get("/incoming", auth, getIncomingRequests);
-
-// Update request status
 router.put("/:id/status", auth, updateRequestStatus);
 
 module.exports = router;

@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 // manshi
 const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const passport = require("./config/passport");
+const requestRoutes = require("./routes/requestRoutes");
 
 const app = express();
 console.log("EMAIL_USER =", process.env.EMAIL_USER);
@@ -42,3 +43,7 @@ app.use("/api/skills", require("./routes/skillRoutes"));
 app.use("/api/public", require("./routes/publicRoutes"));
 
 app.use("/api/public", require("./routes/publicRoutes"));
+
+app.use("/api/requests", requestRoutes);
+
+

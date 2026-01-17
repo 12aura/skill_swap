@@ -1,13 +1,20 @@
 const express = require("express");
-const { getReceivedRequests, sendRequest, updateRequest } = require("../controllers/requestController");
-const auth = require("../middleware/authMiddleware");
 const router = express.Router();
-router.post("/", auth, sendRequest);
-router.put("/:id/accept", auth, getReceivedRequests);
+const auth = require("../middleware/authMiddleware");
 
-router.get("/received", auth, getReceivedRequests);
+const {
+  sendRequest,
+  getIncomingRequests,
+  updateRequestStatus,
+} = require("../controllers/requestController");
+
+// Send request
 router.post("/send", auth, sendRequest);
-router.put("/update", auth, updateRequest);
+
+// Get incoming requests
+router.get("/incoming", auth, getIncomingRequests);
+
+// Update request status
+router.put("/:id/status", auth, updateRequestStatus);
 
 module.exports = router;
-

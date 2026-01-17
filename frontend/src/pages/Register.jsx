@@ -4,6 +4,9 @@ import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext"; // <-- import context
 
 const Register = () => {
+  const handleGoogleLogin = () => {
+  window.location.href = "http://localhost:5000/api/auth/google";
+};
   const navigate = useNavigate();
   const { darkMode } = useContext(DarkModeContext); // <-- get darkMode
 
@@ -175,6 +178,26 @@ const Register = () => {
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
+            {/* mans */}
+            <div className="flex items-center my-4">
+  <div className="flex-grow border-t border-gray-500"></div>
+  <span className="px-3 text-sm text-gray-400">OR</span>
+  <div className="flex-grow border-t border-gray-500"></div>
+</div>
+
+{/* Google Signup Button */}
+<button
+  type="button"
+  onClick={handleGoogleLogin}
+  className="w-full flex items-center justify-center gap-3 border border-gray-500 rounded-lg py-2 bg-white text-black hover:bg-gray-100 transition"
+>
+  <img
+    src="https://developers.google.com/identity/images/g-logo.png"
+    alt="Google"
+    className="w-5 h-5"
+  />
+  Continue with Google
+</button>
         </form>
 
         <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>

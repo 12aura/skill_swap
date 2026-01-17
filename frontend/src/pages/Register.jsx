@@ -25,6 +25,7 @@ const Register = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+  
 
     try {
       await axios.post("http://localhost:5000/api/auth/register", form);
@@ -56,6 +57,7 @@ const Register = () => {
         <p className={`text-center mt-2 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
           Join SkillSwap and start sharing skills
         </p>
+        
 
         <form onSubmit={handleRegister} className="mt-8 space-y-5">
 

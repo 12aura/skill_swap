@@ -73,6 +73,21 @@ router.get("/by-skill", async (req, res) => {
   }
 });
 
+// manshi
+router.get("/by-skill", async (req, res) => {
+  try {
+    const { skill } = req.query;
+
+    const users = await User.find({
+      skills: { $regex: skill, $options: "i" },
+    }).select("-password");
+
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // ✅ REMOVE SKILL
 router.put("/remove-skill", auth, async (req, res) => {
   const { type, skillId } = req.body;

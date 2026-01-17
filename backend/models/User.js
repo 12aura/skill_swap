@@ -1,3 +1,45 @@
+// const mongoose = require("mongoose");
+
+// const userSchema = new mongoose.Schema({
+//   name: String,
+//   email: { type: String, unique: true },
+//   password: String,
+//   resetOTP: String,
+// resetOTPExpire: Date,
+
+//   skillsTeach: [String],
+//   skillsLearn: [String],
+//   xp: { type: Number, default: 0 },
+//   badges: [String],
+//   avatar: {
+//   type: String,
+//   default: "",
+// },
+// });
+
+
+// module.exports = mongoose.model("User", userSchema);
+
+// const mongoose = require("mongoose");
+
+// const userSchema = new mongoose.Schema({
+//   name: String,
+//   email: { type: String, unique: true },
+//   password: String,
+//   skillsTeach: [{
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Skill"
+//   }],
+//   skillsLearn: [{
+//     type: mongoose.Schema.Types.ObjectId,
+//     ref: "Skill"
+//   }],
+//   otp: String,
+//   otpExpiry: Date,
+// }, { timestamps: true });
+
+// module.exports = mongoose.model("User", userSchema);
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
@@ -17,6 +59,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill"
   }],
+
   skillsLearn: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill"

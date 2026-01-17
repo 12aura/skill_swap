@@ -1,11 +1,12 @@
+
+
 const express = require("express");
 const router = express.Router();
-const { getPublicProfile } = require("../controllers/userController");
 const User = require("../models/User");
+const userController = require("../controllers/userController");
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
-const userController = require("../controllers/userController");
 
 // ==============================
 // USER ROUTES
@@ -32,7 +33,54 @@ router.get("/stats", auth, userController.getStats);
 router.get("/skills/all", userController.getAllSkills);
 
 
-router.get("/public/profile/:id", getPublicProfile);
+router.get("/public/profile/:id", userController.getPublicProfile);
+
+router.get("/by-skill", async (req, res) => {
+  try {
+    const { skill } = req.query;
+
+    const users = await User.find({
+      skills: { $regex: skill, $options: "i" },
+    }).select("-password");
+
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ REMOVE SKILL
+router.put("/remove-skill", auth, async (req, res) => {
+  const { type, skillId } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (type === "teach") {
+      user.skillsTeach = user.skillsTeach.filter(
+        (skill) => skill._id.toString() !== skillId
+      );
+    } else if (type === "learn") {
+      user.skillsLearn = user.skillsLearn.filter(
+        (skill) => skill._id.toString() !== skillId
+      );
+    } else {
+      return res.status(400).json({ message: "Invalid skill type" });
+    }
+
+    await user.save();
+
+    await user.populate("skillsTeach", "name");
+    await user.populate("skillsLearn", "name");
+
+    res.json({ message: "Skill removed", user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // PUBLIC mentor profile
 router.get("/mentor/:name", auth, async (req, res) => {
@@ -49,5 +97,7 @@ router.get("/mentor/:name", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
 
 module.exports = router;

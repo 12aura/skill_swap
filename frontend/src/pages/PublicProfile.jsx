@@ -17,6 +17,35 @@ const PublicProfile = () => {
       })
       .catch((err) => console.error(err));
   }, [id]);
+  const sendRequest = async (skill) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    await axios.post(
+      "http://localhost:5000/api/requests/send",
+      {
+        toUser: user._id,
+        skill: skill,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert("Request sent successfully!");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to send request");
+  }
+};
+
 
   if (!user) return <p className="p-10">Loading...</p>;
 

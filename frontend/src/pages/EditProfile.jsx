@@ -5,7 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
 
 const EditProfile = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext); // <-- dark mode
   const navigate = useNavigate();
 

@@ -1,11 +1,18 @@
+
 const express = require("express");
-const { createSession, getMySessions, updateSession } = require("../controllers/sessionController");
+
 const auth = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.post("/create", auth, createSession);
+const {
+  createSessionFromRequest,
+  getMySessions,
+  deleteSession,
+} = require("../controllers/sessionController");
+
+router.post("/create-from-request", auth, createSessionFromRequest);
 router.get("/my", auth, getMySessions);
-router.put("/update", auth, updateSession);
+router.delete("/:id", auth, deleteSession);
 
 module.exports = router;

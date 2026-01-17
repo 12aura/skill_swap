@@ -1,54 +1,76 @@
 const Session = require("../models/Session");
+const Request = require("../models/Request");
 
-// Create session after request acceptance
-exports.createSession = async (req, res) => {
+// ✅ Create session FROM request
+exports.createSessionFromRequest = async (req, res) => {
   try {
-    const { learner, skill, scheduleTime } = req.body;
+    const { requestId } = req.body;
 
-    const session = await Session.create({
-      host: req.user.id,
-      learner,
-      skill,
-      scheduleTime
+    const request = await Request.findById(requestId);
+
+    if (!request || request.status !== "accepted") {
+      return res.status(400).json({ msg: "Invalid request" });
+    }
+
+    // prevent duplicate sessions
+    const existing = await Session.findOne({
+      userA: request.fromUser,
+      userB: request.toUser,
+      skill: request.skill,
     });
 
-    res.json({ msg: "Session Created", session });
+    if (existing) {
+      return res.json({ msg: "Session already exists", session: existing });
+    }
 
+    const session = await Session.create({
+      userA: request.fromUser,
+      userB: request.toUser,
+      skill: request.skill,
+    });
+
+    res.json({ msg: "Session created", session });
   } catch (err) {
-    res.status(500).json({ msg: "Session create failed" });
+    console.error(err);
+    res.status(500).json({ msg: "Session creation failed" });
   }
 };
 
-// Get my sessions
+// ✅ Get my sessions
 exports.getMySessions = async (req, res) => {
   try {
     const sessions = await Session.find({
-      $or: [{ host: req.user.id }, { learner: req.user.id }]
+      $or: [{ userA: req.user.id }, { userB: req.user.id }],
     })
-    .populate("host", "name")
-    .populate("learner", "name");
+      .populate("userA", "name email")
+      .populate("userB", "name email")
+      .sort({ createdAt: -1 });
 
-    res.json({ sessions });
-
+    res.json(sessions);
   } catch (err) {
     res.status(500).json({ msg: "Failed to load sessions" });
   }
 };
-
-// Update session status
-exports.updateSession = async (req, res) => {
+// ❌ Delete session
+exports.deleteSession = async (req, res) => {
   try {
-    const { sessionId, status } = req.body;
+    const session = await Session.findById(req.params.id);
 
-    const updated = await Session.findByIdAndUpdate(
-      sessionId,
-      { status },
-      { new: true }
-    );
+    if (!session) {
+      return res.status(404).json({ msg: "Session not found" });
+    }
 
-    res.json({ msg: "Session Updated", updated });
+    // Allow only participants
+    if (
+      session.userA.toString() !== req.user.id &&
+      session.userB.toString() !== req.user.id
+    ) {
+      return res.status(403).json({ msg: "Not authorized" });
+    }
 
+    await session.deleteOne();
+    res.json({ msg: "Session deleted" });
   } catch (err) {
-    res.status(500).json({ msg: "Session update failed" });
+    res.status(500).json({ msg: "Failed to delete session" });
   }
 };

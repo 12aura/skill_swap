@@ -105,6 +105,21 @@ router.put("/remove-skill", auth, async (req, res) => {
   }
 });
 
+// PUBLIC mentor profile
+router.get("/mentor/:name", auth, async (req, res) => {
+  try {
+    const mentor = await User.findOne({ name: req.params.name })
+      .select("name avatar bio skillsTeach rating reviewsCount");
+
+    if (!mentor) {
+      return res.status(404).json({ message: "Mentor not found" });
+    }
+
+    res.json(mentor);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 

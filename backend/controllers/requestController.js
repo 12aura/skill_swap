@@ -1,58 +1,57 @@
-
 const Request = require("../models/Request");
-const User = require("../models/User");
-exports.sendRequest = async (req, res) => {
+
+/* ------------------------------
+   GET INCOMING REQUESTS
+-------------------------------- */
+exports.getIncomingRequests = async (req, res) => {
   try {
-    const { toUser, skill } = req.body;
+    const requests = await Request.find({ toUser: req.user.id })
+      .populate("fromUser", "name email avatar")
+      .sort({ createdAt: -1 });
 
-    const newReq = await Request.create({
-      fromUser: req.user.id,
-      toUser,
-      skill,
-      status: "pending"
-    });
-
-    res.json({
-      msg: "Request Sent",
-      newReq
-    });
-
+    res.json(requests);
   } catch (err) {
-    res.status(500).json({ msg: "Request Failed" });
+    res.status(500).json({ msg: "Failed to fetch requests" });
   }
 };
-exports.updateRequest = async (req, res) => {
-  try {
-    const { requestId, status } = req.body;
 
-    const updated = await Request.findByIdAndUpdate(
-      requestId,
+/* ------------------------------
+   UPDATE REQUEST STATUS
+-------------------------------- */
+exports.updateRequestStatus = async (req, res) => {
+  const { status } = req.body;
+
+  if (!["accepted", "rejected"].includes(status)) {
+    return res.status(400).json({ msg: "Invalid status" });
+  }
+
+  try {
+    const request = await Request.findByIdAndUpdate(
+      req.params.id,
       { status },
       { new: true }
     );
 
-    res.json({
-      msg: "Request Updated",
-      updated
-    });
-
+    res.json(request);
   } catch (err) {
-    res.status(500).json({ msg: "Update Failed" });
+    res.status(500).json({ msg: "Failed to update request" });
   }
 };
-exports.getReceivedRequests = async (req, res) => {
+exports.sendRequest = async (req, res) => {
   try {
-    const requests = await Request.find({ toUser: req.user.id })
-      .populate("fromUser", "name email skillsTeach skillsLearn")
-      .populate("toUser", "name email");
+    const { toUser, skill, message } = req.body;
 
-    res.json({
-      msg: "Received Requests Fetched",
-      requests
+    const request = await Request.create({
+      fromUser: req.user.id,
+      toUser,
+      skill,
+      message,
+      status: "pending",
     });
 
+    res.json({ msg: "Request sent", request });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ msg: "Failed to fetch received requests" });
+    console.error(err);
+    res.status(500).json({ msg: "Failed to send request" });
   }
 };

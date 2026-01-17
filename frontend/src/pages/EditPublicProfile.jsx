@@ -119,16 +119,16 @@ const PublicProfile = () => {
             Demo Video Link
           </label>
           <input
-            type="url"
-            placeholder="https://youtube.com/..."
-            value={demoVideo}
-            onChange={(e) => setDemoVideo(e.target.value)}
-            className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
-              darkMode
-                ? "bg-slate-700 border-slate-600 text-white"
-                : "bg-slate-50 border-slate-200"
-            }`}
-          />
+    type="url"
+    placeholder="https://youtube.com/..."
+    value={demoVideo}
+    onChange={(e) => setDemoVideo(e.target.value)}
+    className={`w-full rounded-xl px-4 py-3 border focus:outline-none focus:ring-2 focus:ring-teal-400 ${
+      darkMode
+        ? "bg-slate-700 border-slate-600 text-white"
+        : "bg-slate-50 border-slate-200"
+    }`}
+  />
           <p className="text-sm text-slate-500 mt-2">
             Optional – link to a demo teaching video
           </p>

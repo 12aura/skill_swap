@@ -24,6 +24,13 @@ app.get("/", (req, res) => {
 
 // routes
 app.use("/api/auth", require("./routes/authRoutes"));
+app.get("/api/users", (req, res) => {
+  res.json([
+    { id: 1, name: "Palak" },
+    { id: 2, name: "Ayushi" }
+  ]);
+});
+
 
 app.listen(5000, () => console.log("Server running on port 5000"));
 app.use("/api/swaps", skillSwapRoutes);

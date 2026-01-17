@@ -1,54 +1,70 @@
 const Session = require("../models/Session");
 
-// Create session after request acceptance
+// Create a new session
 exports.createSession = async (req, res) => {
   try {
-    const { learner, skill, scheduleTime } = req.body;
+    const { user1, user2, skill, scheduledAt } = req.body;
+
+    if (!user1 || !user2 || !skill) {
+      return res.status(400).json({ message: "user1, user2, and skill are required" });
+    }
 
     const session = await Session.create({
-      host: req.user.id,
-      learner,
+      user1,
+      user2,
       skill,
-      scheduleTime
+      scheduledAt: scheduledAt || null,
     });
 
-    res.json({ msg: "Session Created", session });
-
+    res.status(201).json(session);
   } catch (err) {
-    res.status(500).json({ msg: "Session create failed" });
+    console.error("Error creating session:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Get my sessions
-exports.getMySessions = async (req, res) => {
+// Get all sessions for a user
+exports.getUserSessions = async (req, res) => {
   try {
+    const { userId } = req.params;
+
+    // Fetch sessions where user is either user1 or user2
     const sessions = await Session.find({
-      $or: [{ host: req.user.id }, { learner: req.user.id }]
+      $or: [{ user1: userId }, { user2: userId }],
     })
-    .populate("host", "name")
-    .populate("learner", "name");
+      .populate("user1", "name email") // show only name and email
+      .populate("user2", "name email")
+      .sort({ scheduledAt: -1 });
 
-    res.json({ sessions });
-
+    res.json(sessions);
   } catch (err) {
-    res.status(500).json({ msg: "Failed to load sessions" });
+    console.error("Error fetching sessions:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // Update session status
-exports.updateSession = async (req, res) => {
+exports.updateSessionStatus = async (req, res) => {
   try {
-    const { sessionId, status } = req.body;
+    const { id } = req.params;
+    const { status } = req.body;
 
-    const updated = await Session.findByIdAndUpdate(
-      sessionId,
+    if (!["active", "completed", "cancelled"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const session = await Session.findByIdAndUpdate(
+      id,
       { status },
       { new: true }
     );
 
-    res.json({ msg: "Session Updated", updated });
+    if (!session) return res.status(404).json({ message: "Session not found" });
 
+    res.json(session);
   } catch (err) {
-    res.status(500).json({ msg: "Session update failed" });
+    console.error("Error updating session:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };

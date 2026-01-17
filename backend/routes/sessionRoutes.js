@@ -1,11 +1,18 @@
 const express = require("express");
-const { createSession, getMySessions, updateSession } = require("../controllers/sessionController");
-const auth = require("../middleware/authMiddleware");
-
 const router = express.Router();
+const {
+  createSession,
+  getUserSessions,
+  updateSessionStatus,
+} = require("../controllers/sessionController");
 
-router.post("/create", auth, createSession);
-router.get("/my", auth, getMySessions);
-router.put("/update", auth, updateSession);
+// Create a new session
+router.post("/", createSession);
+
+// Get all sessions for a user
+router.get("/user/:userId", getUserSessions);
+
+// Update session status
+router.put("/:id", updateSessionStatus);
 
 module.exports = router;

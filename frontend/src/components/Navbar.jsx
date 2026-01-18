@@ -46,6 +46,18 @@ const Navbar = () => {
           Browse Skills
         </Link>
 
+        {user && (
+  <Link
+     to="/matches"
+    className={`hover:text-teal-600 transition ${
+      darkMode ? "text-white" : "text-gray-700"
+    }`}
+  >
+    Skill Matches
+  </Link>
+)}
+
+
         {user ? (
           <>
             <Link

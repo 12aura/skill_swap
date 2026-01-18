@@ -2,113 +2,193 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { DarkModeContext } from "../context/DarkModeContext";
 
+/* Badge Icon */
+const BadgeIcon = ({ earned }) => (
+  <div
+    className={`w-20 h-20 rounded-full flex items-center justify-center
+      ${earned ? "bg-teal-50" : "bg-slate-100"}
+    `}
+  >
+    <div
+      className={`w-8 h-8 rounded-full ${
+        earned ? "bg-teal-500" : "bg-slate-300"
+      }`}
+    />
+  </div>
+);
+
 const Badges = () => {
-  const { darkMode } = useContext(DarkModeContext); // <-- dark mode context
+  const { darkMode } = useContext(DarkModeContext);
 
   const badges = [
     {
       id: 1,
       title: "First Swap",
-      description: "Completed your first skill exchange",
+      desc: "Completed your first successful skill exchange on the platform.",
       earned: true,
     },
     {
       id: 2,
       title: "Active Learner",
-      description: "Attended 5 learning sessions",
+      desc: "Attended at least 5 different skill sessions in a single month.",
       earned: true,
     },
     {
       id: 3,
       title: "Community Helper",
-      description: "Accepted 5 skill requests",
+      desc: "Received 10+ positive reviews for your helpful feedback.",
       earned: true,
     },
     {
       id: 4,
       title: "Skill Mentor",
-      description: "Taught 5 sessions successfully",
+      desc: "Guide 5 new members through their first skill session.",
       earned: false,
+      progress: 40,
+      label: "2 / 5",
     },
     {
       id: 5,
       title: "Consistent User",
-      description: "Active for 7 consecutive days",
+      desc: "Login and interact with the community for 30 consecutive days.",
       earned: false,
+      progress: 75,
+      label: "22 / 30",
+    },
+    {
+      id: 6,
+      title: "Master Teacher",
+      desc: "Host 50+ total hours of skill-sharing sessions.",
+      earned: false,
+      progress: 10,
+      label: "5 / 50",
     },
   ];
 
-  return (
-    <div
-      className={`min-h-screen px-10 py-12 transition-colors ${
-        darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-gray-900"
-      }`}
-    >
-      {/* HEADER */}
-      <div className="max-w-6xl mx-auto mb-10">
-        <h1 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-gray-800"}`}>
-          My Badges
-        </h1>
-        <p className={`${darkMode ? "text-gray-300" : "text-gray-600"} mt-2`}>
-          Achievements earned through your SkillSwap journey
-        </p>
+  const earnedCount = badges.filter((b) => b.earned).length;
 
-        <Link
-          to="/profile"
-          className="inline-block mt-4 text-sm text-teal-600 hover:underline"
-        >
-          ← Back to Profile
-        </Link>
+  return (
+    <div className={`${darkMode ? "bg-slate-900" : "bg-slate-50"}`}>
+      {/* HERO HEADER */}
+      <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-10 py-16">
+        <div className="max-w-7xl mx-auto text-white">
+          <h1 className="text-4xl font-bold">My Badges</h1>
+          <p className="mt-2 max-w-xl text-teal-50">
+            Track your achievements and milestones as you master new skills and
+            help the community grow.
+          </p>
+        </div>
       </div>
 
       {/* BADGES GRID */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {badges.map((badge) => (
-          <div
-            key={badge.id}
-            className={`rounded-3xl p-6 shadow transition ${
-              badge.earned
-                ? darkMode
-                  ? "bg-slate-800 text-white"
-                  : "bg-white text-gray-800"
-                : darkMode
-                  ? "bg-slate-700 text-gray-300 opacity-70"
-                  : "bg-white text-gray-500 opacity-50"
-            }`}
-          >
-            <div className="text-4xl mb-4">{badge.icon}</div>
+      <div className="max-w-7xl mx-auto px-10 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {badges.map((badge) =>
+          badge.earned ? (
+            /* EARNED CARD */
+            <div
+              key={badge.id}
+              className={`rounded-3xl p-8 shadow-md ${
+                darkMode ? "bg-slate-800" : "bg-white"
+              }`}
+            >
+              <div className="flex justify-center mb-6">
+                <BadgeIcon earned />
+              </div>
 
-            <h3 className="text-lg font-semibold">{badge.title}</h3>
+              <span className="block mx-auto mb-4 w-fit px-4 py-1 rounded-full text-xs font-semibold bg-teal-100 text-teal-700">
+                EARNED
+              </span>
 
-            <p className="text-sm mt-2">
-              {badge.description}
-            </p>
-
-            <div className="mt-4">
-              {badge.earned ? (
-                <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${
-                  darkMode
-                    ? "bg-teal-800 text-teal-300"
-                    : "bg-teal-100 text-teal-700"
-                }`}>
-                  Earned
-                </span>
-              ) : (
-                <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium ${
-                  darkMode
-                    ? "bg-slate-700 text-gray-400"
-                    : "bg-gray-200 text-gray-600"
-                }`}>
-                  Locked
-                </span>
-              )}
+              <h3
+                className={`text-xl font-bold text-center ${
+                  darkMode ? "text-white" : "text-slate-900"
+                }`}
+              >
+                {badge.title}
+              </h3>
+              <p
+                className={`text-sm text-center mt-2 ${
+                  darkMode ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
+                {badge.desc}
+              </p>
             </div>
+          ) : (
+            /* LOCKED CARD */
+            <div
+              key={badge.id}
+              className={`rounded-3xl p-8 border-2 border-dashed ${
+                darkMode
+                  ? "bg-slate-800 border-slate-700"
+                  : "bg-white border-slate-200"
+              }`}
+            >
+              <div className="flex justify-center mb-6">
+                <BadgeIcon earned={false} />
+              </div>
+
+              <span className="block mx-auto mb-4 w-fit px-4 py-1 rounded-full text-xs bg-slate-100 text-slate-500">
+                LOCKED
+              </span>
+
+              <h3
+                className={`text-lg font-semibold text-center ${
+                  darkMode ? "text-slate-200" : "text-slate-700"
+                }`}
+              >
+                {badge.title}
+              </h3>
+
+              <p
+                className={`text-sm text-center mt-2 ${
+                  darkMode ? "text-slate-400" : "text-slate-500"
+                }`}
+              >
+                {badge.desc}
+              </p>
+
+              {/* PROGRESS */}
+              <div className="mt-6">
+                <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-teal-400 h-2"
+                    style={{ width: `${badge.progress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-slate-400 text-center mt-2">
+                  Progress: {badge.label}
+                </p>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+
+      {/* FOOTER STATS */}
+      <div className="max-w-7xl mx-auto px-10 pb-14 flex items-center justify-between">
+        <div className="flex gap-12">
+          <div>
+            <p className="text-xs text-slate-400 font-semibold">BADGES EARNED</p>
+            <p className="text-2xl font-bold text-slate-800">
+              {earnedCount} / {badges.length}
+            </p>
           </div>
-        ))}
+          <div>
+            <p className="text-xs text-slate-400 font-semibold">TOTAL POINTS</p>
+            <p className="text-2xl font-bold text-slate-800">1,250</p>
+          </div>
+        </div>
+
+        <Link
+          to="/achievements"
+          className="px-6 py-3 rounded-full bg-teal-500 text-white font-semibold shadow hover:bg-teal-600 transition"
+        >
+          View All Achievements
+        </Link>
       </div>
     </div>
   );
 };
 
 export default Badges;
-

@@ -39,6 +39,9 @@ exports.createSessionFromRequest = async (req, res) => {
 // ✅ Get my sessions
 exports.getMySessions = async (req, res) => {
   try {
+    const { userId } = req.params;
+
+    // Fetch sessions where user is either user1 or user2
     const sessions = await Session.find({
       $or: [{ userA: req.user.id }, { userB: req.user.id }],
     })
@@ -48,7 +51,8 @@ exports.getMySessions = async (req, res) => {
 
     res.json(sessions);
   } catch (err) {
-    res.status(500).json({ msg: "Failed to load sessions" });
+    console.error("Error fetching sessions:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 // ❌ Delete session

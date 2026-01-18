@@ -22,6 +22,7 @@ import SkillCategory from "./pages/SkillCategory";
 import { DarkModeContext } from "./context/DarkModeContext"; // <-- import context
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SkillMatch from "./pages/SkillMatch";
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
@@ -59,7 +60,10 @@ const App = () => {
          <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
-        
+        <Route path="/profile/:id" element={<PublicProfile />} />
+      <Route path="/matches" element={<SkillMatch />} />
+
+
  
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

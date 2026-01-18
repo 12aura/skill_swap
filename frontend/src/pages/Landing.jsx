@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import { useEffect, useState, useContext } from "react";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import FeaturedSkillSwaps from "../components/FeaturedSkillSwaps";
 
 const Landing = () => {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { darkMode } = useContext(DarkModeContext);
 
@@ -95,58 +98,76 @@ const Landing = () => {
       </section>
 
       {/* ================= FEATURED SKILLS ================= */}
-      <section
-        className={`py-20 ${
-          darkMode ? "bg-slate-900" : "bg-slate-50"
+      {/* ================= SKILLSWAP FEATURES ================= */}
+<section
+  className={`py-20 ${darkMode ? "bg-slate-900" : "bg-slate-50"}`}
+>
+  <div className="max-w-7xl mx-auto px-6">
+    <div className="mb-10">
+      <h2 className="text-2xl font-bold">Why Choose SkillSwap?</h2>
+      <p
+        className={`text-sm ${
+          darkMode ? "text-slate-300" : "text-slate-600"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold">Featured Skills</h2>
-            <p
-              className={`text-sm ${
-                darkMode ? "text-slate-300" : "text-slate-600"
-              }`}
-            >
-              Master the most in-demand skills from our community experts.
-            </p>
+        Powerful features that make learning simple and collaborative.
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-6">
+      {[
+        {
+          title: "1-to-1 Skill Exchange",
+          desc: "Teach what you know and learn what you need without money.",
+          icon: "🔁",
+        },
+        {
+          title: "Smart Matching",
+          desc: "Find users who want your skills and offer what you need.",
+          icon: "🤝",
+        },
+        {
+          title: "Verified Profiles",
+          desc: "Real users with ratings and trusted profiles.",
+          icon: "⭐",
+        },
+        {
+          title: "Flexible Learning",
+          desc: "Learn anytime based on your schedule.",
+          icon: "⏱",
+        },
+        {
+          title: "Global Community",
+          desc: "Connect with learners worldwide.",
+          icon: "🌍",
+        },
+        {
+          title: "Completely Free",
+          desc: "No payments, only knowledge exchange.",
+          icon: "🆓",
+        },
+      ].map((item) => (
+        <motion.div
+          key={item.title}
+          whileHover={{ y: -6 }}
+          className={`rounded-xl p-6 shadow-sm transition ${
+            darkMode
+              ? "bg-slate-800 hover:bg-slate-700"
+              : "bg-white hover:bg-slate-100"
+          }`}
+        >
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-teal-100 text-teal-600 mb-4 text-lg">
+            {item.icon}
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Coding & Development",
-                desc: "Build real-world projects and modern applications.",
-                icon: "💻",
-              },
-              {
-                title: "Creative Arts",
-                desc: "Design, illustrate, and express creativity.",
-                icon: "🎨",
-              },
-              {
-                title: "Language Exchange",
-                desc: "Practice languages with native speakers.",
-                icon: "🌍",
-              },
-            ].map((item) => (
-              <motion.div
-                key={item.title}
-                whileHover={{ y: -6 }}
-                className={`rounded-xl p-6 shadow-sm ${
-                  darkMode ? "bg-slate-800" : "bg-white"
-                }`}
-              >
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-teal-100 text-teal-600 mb-4 text-lg">
-                  {item.icon}
-                </div>
-                <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-500">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h3 className="font-semibold mb-2">{item.title}</h3>
+          <p className="text-sm text-slate-500">{item.desc}</p>
+        </motion.div>
+      ))}
+    </div>
+  </div>
+</section>
+
       {/* ================= HOW IT WORKS ================= */}
 <section
   id="how-it-works"

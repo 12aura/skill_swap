@@ -20,38 +20,94 @@ const EditProfile = () => {
     console.log("Saved state:", saved);
   }, [saved]);
 
+  // const handleSave = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const token = localStorage.getItem("token");
+
+  //     const res = await axios.put(
+  //       "http://localhost:5000/api/user/update",
+  //       {
+  //         name,
+  //         skillsTeach: skillsTeach.split(",").map((s) => s.trim()).filter(Boolean),
+  //         skillsLearn: skillsLearn.split(",").map((s) => s.trim()).filter(Boolean),
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     setLoading(false);
+  //     setSaved(true); // ✅ SHOW UI FIRST
+
+  //     // ✅ update context AFTER UI feedback
+  //     setTimeout(() => {
+  //       setUser(res.data.user);
+  //       navigate("/home"); // or /dashboard
+  //     }, 1500);
+  //   } catch (err) {
+  //     console.error("Profile update failed", err);
+  //     setLoading(false);
+  //   }
+  // };
   const handleSave = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const token = localStorage.getItem("token");
+  try {
+    const token = localStorage.getItem("token");
 
-      const res = await axios.put(
-        "http://localhost:5000/api/user/update",
-        {
-          name,
-          skillsTeach: skillsTeach.split(",").map((s) => s.trim()).filter(Boolean),
-          skillsLearn: skillsLearn.split(",").map((s) => s.trim()).filter(Boolean),
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+    const newTeach = skillsTeach
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
 
-      setLoading(false);
-      setSaved(true); // ✅ SHOW UI FIRST
+    const newLearn = skillsLearn
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
 
-      // ✅ update context AFTER UI feedback
-      setTimeout(() => {
-        setUser(res.data.user);
-        navigate("/home"); // or /dashboard
-      }, 1500);
-    } catch (err) {
-      console.error("Profile update failed", err);
-      setLoading(false);
-    }
-  };
+    const mergedTeach = [
+      ...new Set([
+        ...(user.skillsTeach || []).map(s => s.name),
+        ...newTeach
+      ])
+    ];
+
+    const mergedLearn = [
+      ...new Set([
+        ...(user.skillsLearn || []).map(s => s.name),
+        ...newLearn
+      ])
+    ];
+
+    const res = await axios.put(
+      "http://localhost:5000/api/user/update",
+      {
+        name,
+        skillsTeach: mergedTeach,
+        skillsLearn: mergedLearn,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    setSaved(true);
+
+    setTimeout(() => {
+      setUser(res.data.user);
+      navigate("/home");
+    }, 1500);
+  } catch (err) {
+    console.error("Profile update failed", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Handle OK click in modal
   const handleOk = () => {

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const passport = require("../config/passport");
+
 const userController = require("../controllers/userController");
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
@@ -19,10 +21,34 @@ const {
   getStats,
   uploadAvatar,
 } = require("../controllers/userController");
-
+router.put("/update", auth, userController.updateProfile);
 // const User = require("../models/User"); // Import User model for remove skill route
 router.put("/update", auth, userController.updateProfile);
-
+router.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
+  try {
+    const users = await User.find().select("_id name email");
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+// Get public profile
+router.get("/public-profile/:userId", async (req, res) => {
+    const user = await User.findById(req.params.userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+});
+// Update public profile
+router.put("/public-profile/:userId", async (req, res) => {
+    const { name, skillsTeach, skillsLearn } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+        req.params.userId,
+        { name, skillsTeach, skillsLearn },
+        { new: true }
+    ).select("-password");
+    res.json(updatedUser);
+});
 // UPLOAD AVATAR
 router.post(
   "/upload-avatar",
@@ -33,6 +59,7 @@ router.post(
 
 // GET MY PROFILE
 router.get("/me", auth, userController.getMyProfile);
+router.put("/public-profile", auth, userController.updatePublicProfile);
 
 // DASHBOARD STATS
 router.get("/stats", auth, userController.getStats);

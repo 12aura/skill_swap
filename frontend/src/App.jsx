@@ -58,6 +58,8 @@ const App = () => {
          <Route path="/login-success" element={<LoginSuccess />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
+        <Route path="/profile/:id" element={<PublicProfile />} />
+
  
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

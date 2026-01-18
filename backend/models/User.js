@@ -64,12 +64,29 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill"
   }],
+
   otp: String,
   otpExpiry: Date,
-
   // manshi
 
-}, { timestamps: true });
+  // 🔹 PUBLIC PROFILE FIELDS (ADD THESE)
+  tagline: {
+    type: String,
+    maxLength: 100,
+    default: "",
+  },
 
+  bio: {
+    type: String,
+    maxLength: 500,
+    default: "",
+  },
+
+  demoVideo: {
+    type: String,
+    default: "",
+  },
+
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

@@ -73,6 +73,36 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ msg: "Profile update failed" });
   }
 };
+/* ------------------------------------
+   UPDATE PUBLIC PROFILE
+------------------------------------ */
+exports.updatePublicProfile = async (req, res) => {
+  try {
+    const { tagline, bio, demoVideo } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id, // comes from auth middleware
+      {
+        tagline,
+        bio,
+        demoVideo,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.json({
+      msg: "Public profile updated successfully",
+      user,
+    });
+  } catch (err) {
+    console.error("UPDATE PUBLIC PROFILE ERROR:", err);
+    res.status(500).json({ msg: "Failed to update public profile" });
+  }
+};
 
 /* ------------------------------------
    GET ALL SKILLS (Browse Skills)
@@ -162,15 +192,15 @@ exports.getStats = async (req, res) => {
 exports.getPublicProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select("+skillsTeach +skillsLearn")
-  .populate("skillsTeach", "name")
-  .populate("skillsLearn", "name");
+      .select("name tagline bio demoVideo skillsTeach skillsLearn") // ✅ include demoVideo
+      .populate("skillsTeach", "name")
+      .populate("skillsLearn", "name");
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    res.json(user); // important: send user directly
+    res.json(user); // frontend will get demoVideo
   } catch (err) {
     console.error("PUBLIC PROFILE ERROR:", err);
     res.status(500).json({ msg: "Failed to load public profile" });

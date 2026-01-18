@@ -4,7 +4,7 @@ import { FaRegCommentDots } from "react-icons/fa";
 import axios from "axios";
 
 const PublicProfile = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // public profile user id
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -55,15 +55,14 @@ const PublicProfile = () => {
       <div className="flex items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold">{user.name}</h1>
 
-        {/* Message Icon */}
-       <button
-  onClick={() => navigate("/messages")}
-  className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
-  title="Message"
->
-  <FaRegCommentDots size={20} />
-</button>
-
+        {/* ✅ Message Icon */}
+        <button
+          onClick={() => navigate(`/messages/${user._id}`)}
+          className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
+          title="Message"
+        >
+          <FaRegCommentDots size={20} />
+        </button>
       </div>
 
       <h3 className="font-semibold mb-3">Teaches:</h3>

@@ -1,124 +1,165 @@
-import { useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
 
 const Messages = () => {
+  const { id } = useParams(); // 👈 chat partner id
+  const { user } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
 
-  // 🧪 Dummy conversations
-  const conversations = [
-    {
-      id: 1,
-      name: "MANSH",
-      email: "mansh@gmail.com",
-      lastMessage: "See you in the session 👍",
-      messages: [
-        { from: "them", text: "Hey! Ready for Java?" },
-        { from: "me", text: "Yes, looking forward to it 😄" },
-        { from: "them", text: "See you in the session 👍" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Ayushi",
-      email: "ayushi@gmail.com",
-      lastMessage: "Thanks for accepting!",
-      messages: [
-        { from: "them", text: "Thanks for accepting!" },
-        { from: "me", text: "No problem 😊" },
-      ],
-    },
-  ];
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [activeChat, setActiveChat] = useState(conversations[0]);
+  const bottomRef = useRef(null);
+
+  /* -----------------------------
+     FETCH CHAT
+  ------------------------------ */
+  useEffect(() => {
+    if (!id) return;
+    fetchMessages();
+  }, [id]);
+
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const res = await axios.get(
+        `http://localhost:5000/api/messages/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setMessages(res.data);
+    } catch (err) {
+      console.error("Failed to load messages", err.response?.data || err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* -----------------------------
+     SEND MESSAGE
+  ------------------------------ */
+  const sendMessage = async () => {
+    if (!newMessage.trim()) return;
+    if (!id) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        "http://localhost:5000/api/messages/send",
+        {
+          receiverId: id,
+          text: newMessage.trim(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setMessages((prev) => [...prev, res.data]);
+      setNewMessage("");
+    } catch (err) {
+      console.error("Failed to send message", err.response?.data || err);
+    }
+  };
+
+  /* -----------------------------
+     AUTO SCROLL
+  ------------------------------ */
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div
-      className={`min-h-screen p-6 ${
+      className={`min-h-screen flex justify-center p-6 ${
         darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
       <div
-        className={`max-w-6xl mx-auto h-[80vh] rounded-3xl shadow-xl overflow-hidden flex ${
+        className={`w-full max-w-3xl rounded-2xl shadow-lg flex flex-col ${
           darkMode ? "bg-slate-800" : "bg-white"
         }`}
       >
-        {/* LEFT SIDEBAR */}
+        {/* HEADER */}
         <div
-          className={`w-1/3 border-r p-4 ${
+          className={`p-5 border-b font-semibold text-lg ${
             darkMode ? "border-slate-700" : "border-gray-200"
           }`}
         >
-          <h2 className="text-xl font-bold mb-4">Messages</h2>
-
-          <div className="space-y-3">
-            {conversations.map((conv) => (
-              <div
-                key={conv.id}
-                onClick={() => setActiveChat(conv)}
-                className={`p-3 rounded-xl cursor-pointer transition ${
-                  activeChat.id === conv.id
-                    ? "bg-teal-100 text-teal-800"
-                    : darkMode
-                    ? "hover:bg-slate-700"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                <p className="font-semibold">{conv.name}</p>
-                <p className="text-xs text-gray-500 truncate">
-                  {conv.lastMessage}
-                </p>
-              </div>
-            ))}
-          </div>
+          Messages
         </div>
 
-        {/* RIGHT CHAT AREA */}
-        <div className="w-2/3 flex flex-col">
-          {/* CHAT HEADER */}
-          <div
-            className={`p-4 border-b ${
-              darkMode ? "border-slate-700" : "border-gray-200"
-            }`}
-          >
-            <h3 className="font-semibold">{activeChat.name}</h3>
-            <p className="text-xs text-gray-500">{activeChat.email}</p>
-          </div>
+        {/* CHAT */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {loading && <p className="text-center">Loading messages...</p>}
 
-          {/* MESSAGES */}
-          <div className="flex-1 p-4 space-y-3 overflow-y-auto">
-            {activeChat.messages.map((msg, index) => (
+          {!loading && messages.length === 0 && (
+            <p className="text-gray-500 text-center">
+              No messages yet. Say hi 👋
+            </p>
+          )}
+
+          {messages.map((msg) => {
+            const isMe = msg.sender?._id === user?._id;
+
+            return (
               <div
-                key={index}
-                className={`max-w-xs px-4 py-2 rounded-xl text-sm ${
-                  msg.from === "me"
-                    ? "ml-auto bg-teal-500 text-white"
-                    : darkMode
-                    ? "bg-slate-700"
-                    : "bg-gray-200"
-                }`}
+                key={msg._id}
+                className={`flex ${isMe ? "justify-end" : "justify-start"}`}
               >
-                {msg.text}
+                <div
+                  className={`max-w-xs px-4 py-2 rounded-xl text-sm ${
+                    isMe
+                      ? "bg-teal-500 text-white"
+                      : darkMode
+                      ? "bg-slate-700 text-white"
+                      : "bg-gray-200 text-gray-900"
+                  }`}
+                >
+                  {msg.text}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          {/* INPUT (DISABLED FOR NOW) */}
-          <div
-            className={`p-4 border-t ${
-              darkMode ? "border-slate-700" : "border-gray-200"
+          <div ref={bottomRef} />
+        </div>
+
+        {/* INPUT */}
+        <div
+          className={`p-4 border-t flex gap-3 ${
+            darkMode ? "border-slate-700" : "border-gray-200"
+          }`}
+        >
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type a message..."
+            className={`flex-1 px-4 py-2 rounded-lg outline-none ${
+              darkMode
+                ? "bg-slate-700 text-white"
+                : "bg-gray-100 text-gray-900"
             }`}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          />
+
+          <button
+            onClick={sendMessage}
+            className="px-5 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition"
           >
-            <input
-              type="text"
-              placeholder="Messaging feature coming soon 🚀"
-              disabled
-              className={`w-full px-4 py-2 rounded-lg text-sm ${
-                darkMode
-                  ? "bg-slate-700 text-white"
-                  : "bg-gray-100 text-gray-600"
-              }`}
-            />
-          </div>
+            Send
+          </button>
         </div>
       </div>
     </div>

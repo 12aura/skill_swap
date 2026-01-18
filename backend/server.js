@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config({ override: true });
+const messageRoutes = require("./routes/messageRoutes");
 
 const connectDB = require("./config/db");
 const passport = require("./config/passport");
@@ -38,6 +39,7 @@ app.use("/api/skills", skillRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/swaps", skillSwapRoutes);
 app.use("/api/requests", requestRoutes);
+app.use("/api/messages", messageRoutes);
 
 
 /* ------------------ SERVER ------------------ */

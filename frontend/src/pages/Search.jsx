@@ -107,8 +107,7 @@ const openProfile = async (name) => {
             darkMode ? "text-slate-300" : "text-gray-600"
           }`}
         >
-          Connect with world-class experts sharing their craft in a
-          peer-to-peer ecosystem designed for growth.
+          Connect with peers who are eager to share skills and learn together in a collaborative environment.
         </p>
       </div>
 

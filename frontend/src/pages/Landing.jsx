@@ -118,7 +118,7 @@ const Landing = () => {
       {[
         {
           title: "1-to-1 Skill Exchange",
-          desc: "Teach what you know and learn what you need without money.",
+          desc: "Teach what you know and learn what you need.",
           icon: "🔁",
         },
         {
@@ -136,10 +136,10 @@ const Landing = () => {
           desc: "Learn anytime based on your schedule.",
           icon: "⏱",
         },
-        {
-          title: "Global Community",
-          desc: "Connect with learners worldwide.",
-          icon: "🌍",
+         {
+          title: "Peer to Peer Learning",
+          desc: "“Learn, share, and grow with students across the university in a collaborative peer-to-peer learning platform.”",
+          icon: "👥",
         },
         {
           title: "Completely Free",

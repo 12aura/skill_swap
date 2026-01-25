@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { motion } from "framer-motion";
+import SkillCube from '../components/FeaturedSkillSwap/SkillCube';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);

@@ -20,6 +20,8 @@ import LoginSuccess from "./pages/LoginSuccess";
 import ForgotPassword from "./pages/ForgotPassword";
 import SkillCategory from "./pages/SkillCategory";
 import SkillMatch from "./pages/SkillMatch";
+import VideoCall from "./pages/VideoCall";
+
 
 import Navbar from "./components/Navbar";
 import SkillSwap3D from "./components/SkillSwap3D";
@@ -27,6 +29,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
+import ScheduleSession from "./pages/ScheduleSession";
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
@@ -172,6 +175,16 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/skills/:category" element={<SkillCategory />} />
         <Route path="/matches" element={<SkillMatch />} />
+        <Route
+  path="/sessions/:id/schedule"
+  element={
+    <ProtectedRoute>
+      <ScheduleSession />
+    </ProtectedRoute>
+  }
+/>
+<Route path="/video-call/:roomId" element={<VideoCall />} />
+
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

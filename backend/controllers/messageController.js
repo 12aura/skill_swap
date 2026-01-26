@@ -51,3 +51,11 @@ exports.getMessages = async (req, res) => {
     res.status(500).json({ msg: "Failed to load messages" });
   }
 };
+exports.sendSystemMessage = async (receiverId, content) => {
+  await Message.create({
+    sender: null,
+    receiver: receiverId,
+    content,
+    isSystem: true,
+  });
+};

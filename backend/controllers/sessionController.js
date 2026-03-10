@@ -1,7 +1,6 @@
 const Session = require("../models/Session");
 const Request = require("../models/Request");
 const generateVideoLink = require("../utils/generateVideoLink");
-const { sendSystemMessage } = require("./messageController");
 const { v4: uuidv4 } = require("uuid");
 
 // ✅ Create session FROM request

@@ -1,66 +1,99 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
-import { socket } from "../socket";
-import ChatList from "./ChatList";
-import MessageBox from "./Messages";
+import { StreamChat } from "stream-chat";
+import {
+  Chat,
+  Channel,
+  Window,
+  ChannelHeader,
+  MessageList,
+  MessageInput,
+  Thread,
+} from "stream-chat-react";
+import "stream-chat-react/dist/css/v2/index.css";
 import { AuthContext } from "../context/AuthContext";
 
+const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
+
 const ChatPage = () => {
-  const { user } = useContext(AuthContext);
-  const [chats, setChats] = useState([]);
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const { userId: targetUserId } = useParams();
+  const { user: authUser } = useContext(AuthContext);
 
-  // Fetch all chats for this user
-  const fetchChats = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/chats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setChats(res.data);
-    } catch (error) {
-      console.error("Failed to fetch chats", error);
-    }
-  };
-
-  // Fetch messages for selected chat
-  const fetchMessages = async (chatID) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/messages/${chatID}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMessages(res.data);
-    } catch (error) {
-      console.error("Failed to fetch messages", error);
-    }
-  };
+  const [chatClient, setChatClient] = useState(null);
+  const [channel, setChannel] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchChats();
+    if (!authUser) return;
 
-    socket.on("new-message", (message) => {
-      if (message.chatID === selectedChat?._id) {
-        setMessages((prev) => [...prev, message]);
+    let client;
+const initChat = async () => {
+  try {
+    const authToken = localStorage.getItem("token");
+
+    // 1. Get token for logged-in user (also upserts them)
+    const { data } = await axios.get(
+      "http://localhost:5000/api/chat/token",
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+
+    // 2. Upsert the TARGET user so they exist in Stream ← THIS IS THE FIX
+    await axios.post(
+      `http://localhost:5000/api/chat/upsert-user/${targetUserId}`,
+      {},
+      { headers: { Authorization: `Bearer ${authToken}` } }
+    );
+
+    client = StreamChat.getInstance(STREAM_API_KEY);
+
+    if (!client.userID) {
+      await client.connectUser(
+        { id: authUser._id, name: authUser.name, image: authUser.profilePic },
+        data.token
+      );
+    }
+
+        const membersSorted = [authUser._id.toString(), targetUserId.toString()].sort();
+        const channelId = `chat-${membersSorted[0]}-${membersSorted[1]}`;
+
+        const newChannel = client.channel("messaging", channelId, {
+          members: membersSorted,
+        });
+
+        await newChannel.watch();
+
+        setChatClient(client);
+        setChannel(newChannel);
+      } catch (error) {
+        console.error("Chat init error:", error.message);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    initChat();
 
     return () => {
-      socket.off("new-message");
+      if (client) client.disconnectUser();
     };
-  }, [selectedChat]);
+  }, [targetUserId, authUser]);
 
-  const handleSelectChat = (chat) => {
-    setSelectedChat(chat);
-    fetchMessages(chat._id);
-    socket.emit("join-room", chat._id);
-  };
+  if (loading) return <div className="flex items-center justify-center h-screen">Loading chat...</div>;
+  if (!chatClient || !channel) return <div className="flex items-center justify-center h-screen">Could not load chat.</div>;
 
   return (
-    <div className="flex h-screen">
-      <ChatList chats={chats} onSelectChat={handleSelectChat} currentUser={user} />
-      {selectedChat && <MessageBox messages={messages} chat={selectedChat} />}
+    <div style={{ height: "90vh" }}>
+      <Chat client={chatClient} theme="messaging light">
+        <Channel channel={channel}>
+          <Window>
+            <ChannelHeader />
+            <MessageList />
+            <MessageInput />
+          </Window>
+          <Thread />
+        </Channel>
+      </Chat>
     </div>
   );
 };

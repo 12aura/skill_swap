@@ -4,11 +4,11 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { motion } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
-
+  const navigate = useNavigate();
   const handleImageUpload = async (file) => {
     if (!file) return;
 
@@ -118,7 +118,12 @@ const Profile = () => {
             <div className="space-y-6">
               <ProfileItem title="Dashboard" icon="📊" link="/dashboard" darkMode={darkMode} />
               <ProfileItem title="Skills" icon="✨" link="/skills" darkMode={darkMode} />
-              <ProfileItem title="Messages" icon="💬" link="/messages" darkMode={darkMode} />
+              <ProfileItem
+  title="Messages"
+  icon="💬"
+  link="/messages"
+  darkMode={darkMode}
+/>
             </div>
           </motion.div>
         </motion.div>

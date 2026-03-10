@@ -70,16 +70,16 @@ const PublicProfile = () => {
         <div className="flex justify-center items-center gap-3">
           <h1 className="text-4xl font-bold">{profileUser.name}</h1>
 
-          {/* MESSAGE BUTTON */}
-          {loggedInUser?._id !== profileUser._id && (
-            <button
-              onClick={() => navigate("/messages")}
-              className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
-              title="Message"
-            >
-              <FaRegCommentDots size={20} />
-            </button>
-          )}
+  {/* MESSAGE BUTTON */}
+{loggedInUser?._id !== profileUser._id && (
+  <button
+    onClick={() => navigate(`/chat/${profileUser._id}`)}
+    className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
+    title="Message"
+  >
+    <FaRegCommentDots size={20} />
+  </button>
+)}
         </div>
 
         {profileUser.tagline && (

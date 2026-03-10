@@ -207,12 +207,7 @@ onClick={() => navigate(`/profile/${mentor.id}`)}
 >
   View Details
 </button>
-<button
-  onClick={() => navigate(`/messages/${mentor.id}`)}
-  className="mt-2 w-full py-2 rounded-xl bg-teal-500 text-white hover:bg-teal-600 transition"
->
-  Message
-</button>
+
 
 
             </div>

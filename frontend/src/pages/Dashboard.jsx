@@ -102,6 +102,7 @@ const Dashboard = () => {
               <DashboardItem title="Requests" icon="📩" link="/requests" darkMode={darkMode} />
               <DashboardItem title="Sessions" icon="⏱️" link="/sessions" darkMode={darkMode} />
               <DashboardItem title="Profile" icon="👤" link="/profile" darkMode={darkMode} />
+              
             </div>
           </motion.div>
         </motion.div>

@@ -1,14 +1,3 @@
-// const mongoose = require("mongoose");
-
-// const sessionSchema = new mongoose.Schema({
-//   host: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-//   learner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-//   scheduleTime: Date,
-//   status: { type: String, default: "scheduled" }
-// });
-
-// module.exports = mongoose.model("Session", sessionSchema);
-
 const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
@@ -27,20 +16,17 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
- date: { type: String, default: null },
+    date: { type: String, default: null },
     time: { type: String, default: null },
-    
     notes: { type: String, default: null },
-
-videoCallLink: {
-  type: String,
-},
-
-
+    videoCallLink: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
-      enum: ["pending", "scheduled", "completed", "cancelled"],
+      // ✅ Added "upcoming" to enum
+      enum: ["pending", "upcoming", "scheduled", "completed", "cancelled"],
       default: "pending",
     },
   },

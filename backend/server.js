@@ -140,8 +140,8 @@ const skillRoutes     = require("./routes/skillRoutes");
 const publicRoutes    = require("./routes/publicRoutes");
 const skillSwapRoutes = require("./routes/skillSwapRoutes");
 const matchRoutes     = require("./routes/match");
-const messageRoutes   = require("./routes/messageRoutes");
-const chatRoutes      = require("./routes/chat");
+
+
 const videoRoutes     = require("./routes/videoRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const http     = require("http");
@@ -240,8 +240,8 @@ app.use("/api/skills",    skillRoutes);
 app.use("/api/public",    publicRoutes);
 app.use("/api/swaps",     skillSwapRoutes);
 app.use("/api/match",     matchRoutes);
-app.use("/api/chats",     chatRoutes);
-app.use("/api/messages",  messageRoutes);
+
+
 app.use("/api/video",     videoRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 

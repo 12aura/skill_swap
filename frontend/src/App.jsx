@@ -221,7 +221,7 @@ import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SkillMatch from "./pages/SkillMatch";
 import VideoCall from "./pages/VideoCall";
-import ChatPage from "./pages/ChatPage";
+
 
 
 
@@ -255,8 +255,7 @@ const App = () => {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
-        <Route path="/messages/:id" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-        <Route path="/messages" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/edit-public-profile" element={<EditPublicProfile />} />

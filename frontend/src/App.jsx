@@ -33,6 +33,7 @@ import ChatPage from "./pages/ChatPage";
 
 
 
+
 import ScheduleSession from "./pages/ScheduleSession";
 
 
@@ -60,6 +61,7 @@ const App = () => {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />
         <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
+        
         <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/edit-public-profile" element={<EditPublicProfile />} />

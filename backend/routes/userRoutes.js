@@ -2,28 +2,32 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const passport = require("../config/passport");
-
 const userController = require("../controllers/userController");
 const auth = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 
+// ─── Get my profile ───────────────────────────────────────
+router.get("/me", auth, userController.getMyProfile);
 
-// ==============================
-// USER ROUTES
-// ==============================
+// ─── Update profile (settings + skills) ──────────────────
+router.put("/update", auth, userController.updateProfile);
 
-// UPDATE PROFILE
-// manshi
-const {
-  updateProfile,
-  searchUsers,
-  getMyProfile,
-  getStats,
-  uploadAvatar,
-} = require("../controllers/userController");
-router.put("/update", auth, userController.updateProfile);
-// const User = require("../models/User"); // Import User model for remove skill route
-router.put("/update", auth, userController.updateProfile);
+// ─── Update public profile ────────────────────────────────
+router.put("/public-profile", auth, userController.updatePublicProfile);
+
+// ─── Upload avatar ────────────────────────────────────────
+router.post("/upload-avatar", auth, upload.single("avatar"), userController.uploadAvatar);
+
+// ─── Dashboard stats ──────────────────────────────────────
+router.get("/stats", auth, userController.getStats);
+
+// ─── Get all skills (public) ──────────────────────────────
+router.get("/skills/all", userController.getAllSkills);
+
+// ─── Get public profile by ID ─────────────────────────────
+router.get("/public/profile/:id", userController.getPublicProfile);
+
+// ─── Get all users ────────────────────────────────────────
 router.get("/", passport.authenticate("jwt", { session: false }), async (req, res) => {
   try {
     const users = await User.find().select("_id name email");
@@ -33,89 +37,19 @@ router.get("/", passport.authenticate("jwt", { session: false }), async (req, re
     res.status(500).json({ message: "Server error" });
   }
 });
-// Get public profile
+
+// ─── Get public profile by userId ────────────────────────
 router.get("/public-profile/:userId", async (req, res) => {
+  try {
     const user = await User.findById(req.params.userId).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user);
-});
-// Update public profile
-router.put("/public-profile/:userId", async (req, res) => {
-    const { name, skillsTeach, skillsLearn } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-        req.params.userId,
-        { name, skillsTeach, skillsLearn },
-        { new: true }
-    ).select("-password");
-    res.json(updatedUser);
-});
-// UPLOAD AVATAR
-router.post(
-  "/upload-avatar",
-  auth,
-  upload.single("avatar"),
-  userController.uploadAvatar
-);
-
-// GET MY PROFILE
-router.get("/me", auth, userController.getMyProfile);
-router.put("/public-profile", auth, userController.updatePublicProfile);
-
-// DASHBOARD STATS
-router.get("/stats", auth, userController.getStats);
-
-// manshi
-router.get("/by-skill", async (req, res) => {
-  try {
-    const { skill } = req.query;
-
-    const users = await User.find({
-      skills: { $regex: skill, $options: "i" },
-    }).select("-password");
-
-    res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// GET ALL SKILLS (PUBLIC)
-router.get("/skills/all", userController.getAllSkills);
-
-
-router.get("/public/profile/:id", userController.getPublicProfile);
-
-router.get("/by-skill", async (req, res) => {
-  try {
-    const { skill } = req.query;
-
-    const users = await User.find({
-      skills: { $regex: skill, $options: "i" },
-    }).select("-password");
-
-    res.json(users);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// manshi
-router.get("/by-skill", async (req, res) => {
-  try {
-    const { skill } = req.query;
-
-    const users = await User.find({
-      skills: { $regex: skill, $options: "i" },
-    }).select("-password");
-
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// ✅ REMOVE SKILL
+// ─── Remove skill ─────────────────────────────────────────
 router.put("/remove-skill", auth, async (req, res) => {
   const { type, skillId } = req.body;
 
@@ -136,7 +70,6 @@ router.put("/remove-skill", auth, async (req, res) => {
     }
 
     await user.save();
-
     await user.populate("skillsTeach", "name");
     await user.populate("skillsLearn", "name");
 
@@ -147,7 +80,20 @@ router.put("/remove-skill", auth, async (req, res) => {
   }
 });
 
-// PUBLIC mentor profile
+// ─── Get users by skill ───────────────────────────────────
+router.get("/by-skill", async (req, res) => {
+  try {
+    const { skill } = req.query;
+    const users = await User.find({
+      skills: { $regex: skill, $options: "i" },
+    }).select("-password");
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ─── Get mentor by name ───────────────────────────────────
 router.get("/mentor/:name", auth, async (req, res) => {
   try {
     const mentor = await User.findOne({ name: req.params.name })
@@ -162,7 +108,5 @@ router.get("/mentor/:name", auth, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
-
 
 module.exports = router;

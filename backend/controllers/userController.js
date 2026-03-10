@@ -38,30 +38,97 @@ async function convertToSkillIds(skillNames = []) {
 /* ------------------------------------
    UPDATE PROFILE (REPLACE SKILLS ✅)
 ------------------------------------ */
+// exports.updateProfile = async (req, res) => {
+//   try {
+//     let { name, skillsTeach = [], skillsLearn = [] } = req.body;
+
+//     const normalize = (val) => {
+//       if (Array.isArray(val)) return val;
+//       if (typeof val === "string")
+//         return val.split(",").map((s) => s.trim());
+//       return [];
+//     };
+
+//     skillsTeach = normalize(skillsTeach);
+//     skillsLearn = normalize(skillsLearn);
+
+//     const teachIds = await convertToSkillIds(skillsTeach);
+//     const learnIds = await convertToSkillIds(skillsLearn);
+
+//     const user = await User.findByIdAndUpdate(
+//       req.user.id,
+//       {
+//         name,
+//         skillsTeach: teachIds,   // ✅ REPLACE
+//         skillsLearn: learnIds,   // ✅ REPLACE
+//       },
+//       { new: true }
+//     )
+//       .populate("skillsTeach")
+//       .populate("skillsLearn");
+
+//     res.json({ user });
+//   } catch (err) {
+//     console.error("UPDATE PROFILE ERROR:", err);
+//     res.status(500).json({ msg: "Profile update failed" });
+//   }
+// };
+
 exports.updateProfile = async (req, res) => {
   try {
-    let { name, skillsTeach = [], skillsLearn = [] } = req.body;
+    let {
+      name,
+      skillsTeach = [],
+      skillsLearn = [],
+      gender,
+      location,
+      birthday,
+      work,
+      education,
+      email,
+      password,
+      username,
+      language,
+    } = req.body;
 
     const normalize = (val) => {
       if (Array.isArray(val)) return val;
-      if (typeof val === "string")
-        return val.split(",").map((s) => s.trim());
+      if (typeof val === "string") return val.split(",").map((s) => s.trim());
       return [];
     };
 
     skillsTeach = normalize(skillsTeach);
     skillsLearn = normalize(skillsLearn);
 
-    const teachIds = await convertToSkillIds(skillsTeach);
-    const learnIds = await convertToSkillIds(skillsLearn);
+    const teachIds = skillsTeach.length > 0
+      ? await convertToSkillIds(skillsTeach)
+      : undefined;
+    const learnIds = skillsLearn.length > 0
+      ? await convertToSkillIds(skillsLearn)
+      : undefined;
+
+    const updateFields = {
+      ...(name      !== undefined && { name }),
+      ...(teachIds  !== undefined && { skillsTeach: teachIds }),
+      ...(learnIds  !== undefined && { skillsLearn: learnIds }),
+      ...(gender    !== undefined && { gender }),
+      ...(location  !== undefined && { location }),
+      ...(birthday  !== undefined && { birthday }),
+      ...(work      !== undefined && { work }),
+      ...(education !== undefined && { education }),
+      ...(email     !== undefined && { email }),
+      ...(username  !== undefined && { username }),
+      ...(language  !== undefined && { language }),
+    };
+
+    if (password && password !== "********") {
+      const bcrypt = require("bcryptjs");
+      updateFields.password = await bcrypt.hash(password, 10);
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      {
-        name,
-        skillsTeach: teachIds,   // ✅ REPLACE
-        skillsLearn: learnIds,   // ✅ REPLACE
-      },
+      updateFields,
       { new: true }
     )
       .populate("skillsTeach")

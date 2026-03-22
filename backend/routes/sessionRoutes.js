@@ -43,6 +43,7 @@ const {
 } = require("../controllers/sessionController");
 
 router.post("/create-from-request", auth, createSessionFromRequest);
+router.get("/", auth, getMySessions);  
 router.get("/my", auth, getMySessions);
 router.get("/completed", auth, getCompletedSessions); // ✅ new — must be BEFORE /:id routes
 

@@ -1,106 +1,233 @@
+// const mongoose = require("mongoose");
+
+// const userSchema = new mongoose.Schema(
+// {
+//   name: String,
+
+//   email: {
+//     type: String,
+//     unique: true,
+//     required: true
+//   },
+
+//   password: String,
+
+//   // Authentication
+//   authProvider: {
+//     type: String,
+//     enum: ["local", "google"],
+//     default: "local",
+//   },
+
+//   googleId: String,
+
+//   // Skills
+//   skillsTeach: [
+//     {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Skill",
+//     },
+//   ],
+
+//   skillsLearn: [
+//     {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Skill",
+//     },
+//   ],
+
+//   // OTP
+//   otp: String,
+//   otpExpiry: Date,
+
+//   // -------- PUBLIC PROFILE --------
+//   tagline: {
+//     type: String,
+//     maxLength: 100,
+//     default: "",
+//   },
+
+//   bio: {
+//     type: String,
+//     maxLength: 500,
+//     default: "",
+//   },
+
+//   demoVideo: {
+//     type: String,
+//     default: "",
+//   },
+
+//   avatar: {
+//     type: String,
+//     default: "",
+//   },
+
+//   // -------- SETTINGS --------
+//   gender: {
+//     type: String,
+//     default: "",
+//   },
+
+//   location: {
+//     type: String,
+//     default: "",
+//   },
+
+//   birthday: {
+//     type: String,
+//     default: "",
+//   },
+
+//   work: {
+//     type: String,
+//     default: "",
+//   },
+
+//   education: {
+//     type: String,
+//     default: "",
+//   },
+
+//   username: {
+//     type: String,
+//     default: "",
+//   },
+
+//   language: {
+//     type: String,
+//     default: "English",
+//   },
+
+// },
+// { timestamps: true }
+// );
+
+// module.exports = mongoose.model("User", userSchema);
+
+
+
+
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
-{
-  name: String,
+  {
+    name: String,
 
-  email: {
-    type: String,
-    unique: true,
-    required: true
-  },
-
-  password: String,
-
-  // Authentication
-  authProvider: {
-    type: String,
-    enum: ["local", "google"],
-    default: "local",
-  },
-
-  googleId: String,
-
-  // Skills
-  skillsTeach: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Skill",
+    email: {
+      type: String,
+      unique: true,
+      required: true,
     },
-  ],
 
-  skillsLearn: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Skill",
+    password: String,
+
+    // Authentication
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
     },
-  ],
 
-  // OTP
-  otp: String,
-  otpExpiry: Date,
+    googleId: String,
 
-  // -------- PUBLIC PROFILE --------
-  tagline: {
-    type: String,
-    maxLength: 100,
-    default: "",
+    // Skills
+    skillsTeach: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill",
+      },
+    ],
+
+    skillsLearn: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Skill",
+      },
+    ],
+
+    // OTP
+    otp: String,
+    otpExpiry: Date,
+
+    // -------- PUBLIC PROFILE --------
+    tagline: {
+      type: String,
+      maxLength: 100,
+      default: "",
+    },
+
+    bio: {
+      type: String,
+      maxLength: 500,
+      default: "",
+    },
+
+    demoVideo: {
+      type: String,
+      default: "",
+    },
+
+    avatar: {
+      type: String,
+      default: "",
+    },
+
+    // -------- SETTINGS --------
+    gender: {
+      type: String,
+      default: "",
+    },
+
+    location: {
+      type: String,
+      default: "",
+    },
+
+    birthday: {
+      type: String,
+      default: "",
+    },
+
+    work: {
+      type: String,
+      default: "",
+    },
+
+    education: {
+      type: String,
+      default: "",
+    },
+
+    username: {
+      type: String,
+      default: "",
+    },
+
+    language: {
+      type: String,
+      default: "English",
+    },
+
+    // -------- GAMIFICATION --------
+    xp: {
+      type: Number,
+      default: 0,
+    },
+
+    // -------- REVIEWS --------
+    averageRating: {
+      type: Number,
+      default: null,
+    },
+
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
   },
-
-  bio: {
-    type: String,
-    maxLength: 500,
-    default: "",
-  },
-
-  demoVideo: {
-    type: String,
-    default: "",
-  },
-
-  avatar: {
-    type: String,
-    default: "",
-  },
-
-  // -------- SETTINGS --------
-  gender: {
-    type: String,
-    default: "",
-  },
-
-  location: {
-    type: String,
-    default: "",
-  },
-
-  birthday: {
-    type: String,
-    default: "",
-  },
-
-  work: {
-    type: String,
-    default: "",
-  },
-
-  education: {
-    type: String,
-    default: "",
-  },
-
-  username: {
-    type: String,
-    default: "",
-  },
-
-  language: {
-    type: String,
-    default: "English",
-  },
-
-},
-{ timestamps: true }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("User", userSchema);

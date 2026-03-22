@@ -5,7 +5,7 @@ const apiKey = process.env.STREAM_API_KEY;
 const apiSecret = process.env.STREAM_API_SECRET;
 const agent = new https.Agent({ rejectUnauthorized: false });
 const serverClient = StreamChat.getInstance(apiKey, apiSecret);
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const getStreamToken = async (req, res) => {
   try {
     const userId = req.user._id.toString();

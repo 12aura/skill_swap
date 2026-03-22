@@ -47,7 +47,9 @@ const Search = () => {
         map[mentor.id] = {
           id:     mentor.id,
           name:   mentor.name,
-          avatar: mentor.avatar || "",
+          avatar: mentor.avatar
+  ? mentor.avatar
+  : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || "U")}&background=0d9488&color=fff&size=128`,
           skills: new Set(),
         };
       }
@@ -179,23 +181,20 @@ const Search = () => {
               </button>
 
               {/* AVATAR + NAME */}
-              <div className="flex items-center gap-3 mb-4">
-                {mentor.avatar ? (
-                  <img
-                    src={mentor.avatar}
-                    alt={mentor.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-teal-400"
-                  />
-                ) : (
-                  // ✅ Fallback avatar with initials
-                  <div className="w-12 h-12 rounded-full bg-teal-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                    {mentor.name?.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <h3 className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>
-                  {mentor.name}
-                </h3>
-              </div>
+<div className="flex items-center gap-3 mb-4">
+  <img
+    src={
+      mentor.avatar
+        ? mentor.avatar
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || "U")}&background=0d9488&color=fff&size=128`
+    }
+    alt={mentor.name}
+    className="w-12 h-12 rounded-full object-cover border-2 border-teal-400 flex-shrink-0"
+  />
+  <h3 className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>
+    {mentor.name}
+  </h3>
+</div>
 
               {/* SKILLS */}
               <p className={`text-sm mb-3 ${darkMode ? "text-slate-300" : "text-gray-500"}`}>

@@ -36,44 +36,8 @@ async function convertToSkillIds(skillNames = []) {
 }
 
 /* ------------------------------------
-   UPDATE PROFILE (REPLACE SKILLS ✅)
+   UPDATE PROFILE
 ------------------------------------ */
-// exports.updateProfile = async (req, res) => {
-//   try {
-//     let { name, skillsTeach = [], skillsLearn = [] } = req.body;
-
-//     const normalize = (val) => {
-//       if (Array.isArray(val)) return val;
-//       if (typeof val === "string")
-//         return val.split(",").map((s) => s.trim());
-//       return [];
-//     };
-
-//     skillsTeach = normalize(skillsTeach);
-//     skillsLearn = normalize(skillsLearn);
-
-//     const teachIds = await convertToSkillIds(skillsTeach);
-//     const learnIds = await convertToSkillIds(skillsLearn);
-
-//     const user = await User.findByIdAndUpdate(
-//       req.user.id,
-//       {
-//         name,
-//         skillsTeach: teachIds,   // ✅ REPLACE
-//         skillsLearn: learnIds,   // ✅ REPLACE
-//       },
-//       { new: true }
-//     )
-//       .populate("skillsTeach")
-//       .populate("skillsLearn");
-
-//     res.json({ user });
-//   } catch (err) {
-//     console.error("UPDATE PROFILE ERROR:", err);
-//     res.status(500).json({ msg: "Profile update failed" });
-//   }
-// };
-
 exports.updateProfile = async (req, res) => {
   try {
     let {
@@ -140,6 +104,7 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ msg: "Profile update failed" });
   }
 };
+
 /* ------------------------------------
    UPDATE PUBLIC PROFILE
 ------------------------------------ */
@@ -148,12 +113,8 @@ exports.updatePublicProfile = async (req, res) => {
     const { tagline, bio, demoVideo } = req.body;
 
     const user = await User.findByIdAndUpdate(
-      req.user.id, // comes from auth middleware
-      {
-        tagline,
-        bio,
-        demoVideo,
-      },
+      req.user.id,
+      { tagline, bio, demoVideo },
       { new: true }
     );
 
@@ -161,10 +122,7 @@ exports.updatePublicProfile = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    res.json({
-      msg: "Public profile updated successfully",
-      user,
-    });
+    res.json({ msg: "Public profile updated successfully", user });
   } catch (err) {
     console.error("UPDATE PUBLIC PROFILE ERROR:", err);
     res.status(500).json({ msg: "Failed to update public profile" });
@@ -176,8 +134,9 @@ exports.updatePublicProfile = async (req, res) => {
 ------------------------------------ */
 exports.getAllSkills = async (req, res) => {
   try {
+    // ✅ FIX 1: added avatar to select
     const users = await User.find()
-      .select("name skillsTeach")
+      .select("name avatar skillsTeach")
       .lean();
 
     const skillMap = {};
@@ -194,11 +153,12 @@ exports.getAllSkills = async (req, res) => {
           skillMap[id] = { mentors: [] };
         }
 
+        // ✅ FIX 2: added avatar to mentor object
         skillMap[id].mentors.push({
-  id: user._id,
-  name: user.name
-});
-
+          id: user._id,
+          name: user.name,
+          avatar: user.avatar || null,
+        });
       });
     });
 
@@ -255,11 +215,15 @@ exports.getStats = async (req, res) => {
     res.status(500).json({ msg: "Stats failed" });
   }
 };
-// GET PUBLIC PROFILE BY ID
+
+/* ------------------------------------
+   GET PUBLIC PROFILE BY ID
+------------------------------------ */
 exports.getPublicProfile = async (req, res) => {
   try {
+    // ✅ FIX 3: added avatar to select
     const user = await User.findById(req.params.id)
-      .select("name tagline bio demoVideo skillsTeach skillsLearn") // ✅ include demoVideo
+      .select("name avatar tagline bio demoVideo skillsTeach skillsLearn")
       .populate("skillsTeach", "name")
       .populate("skillsLearn", "name");
 
@@ -267,14 +231,12 @@ exports.getPublicProfile = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    res.json(user); // frontend will get demoVideo
+    res.json(user);
   } catch (err) {
     console.error("PUBLIC PROFILE ERROR:", err);
     res.status(500).json({ msg: "Failed to load public profile" });
   }
 };
-
-
 
 /* ------------------------------------
    UPLOAD AVATAR

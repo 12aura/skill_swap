@@ -210,11 +210,28 @@ const userSchema = new mongoose.Schema(
       default: "English",
     },
 
-    // -------- GAMIFICATION --------
+   // -------- GAMIFICATION --------
     xp: {
       type: Number,
       default: 0,
     },
+
+    // ✅ ADD THESE TWO BLOCKS HERE ↓
+
+    xpEvents: {
+      type: [String],
+      default: [],
+    },
+
+    badges: [
+      {
+        id:          { type: String, required: true },
+        title:       { type: String, required: true },
+        description: { type: String, default: "" },
+        icon:        { type: String, default: "🏅" },
+        earnedAt:    { type: Date,   default: Date.now },
+      },
+    ],
 
     // -------- REVIEWS --------
     averageRating: {

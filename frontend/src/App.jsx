@@ -139,7 +139,7 @@ import ChatPage from "./pages/ChatPage";
 import CompletedSessions from "./pages/Completedsessions";
 import ScheduleSession from "./pages/ScheduleSession";
 import PostCallReview from "./pages/PostCallReview";
-
+import LeaderboardPage from "./pages/LeaderboardPage";
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -188,7 +188,7 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route path="/matches" element={<SkillMatch />} />
-
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route
           path="/sessions/:id/schedule"
           element={

@@ -23,6 +23,7 @@ const { Server } = require("socket.io");
 const app    = express();
 const server = http.createServer(app);
 const reviewRoutes = require("./routes/review");
+const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -113,6 +114,7 @@ app.use("/api/dashboard",     dashboardRoutes);
 app.use("/api/ai",            aiRoutes);                               // ✅ added
 app.use("/api/notifications", notificationRoutes);                     // ✅ added
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

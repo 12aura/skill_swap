@@ -1,25 +1,38 @@
-
-
-
-
-
 const Session = require("../models/Session");
 const Request = require("../models/Request");
 const Notification = require("../models/Notification");
 const generateVideoLink = require("../utils/generateVideoLink");
 const { v4: uuidv4 } = require("uuid");
+const { awardXP, hasEarnedOneTimeXP, markOneTimeXP, XP } = require("../utils/xpUtils");
+
+// ─── Helper: award session XP to both users ───────────────
+async function awardSessionXP(session) {
+  const userAId = session.userA?.toString();
+  const userBId = session.userB?.toString();
+  if (!userAId || !userBId) return;
+
+  for (const userId of [userAId, userBId]) {
+    // +20 XP for completing a session
+    await awardXP(userId, XP.COMPLETE_SESSION, "Session completed");
+
+    // +25 XP one-time bonus for FIRST session ever
+    const alreadyGotFirst = await hasEarnedOneTimeXP(userId, "first_session");
+    if (!alreadyGotFirst) {
+      await awardXP(userId, XP.FIRST_SESSION, "First session ever!");
+      await markOneTimeXP(userId, "first_session");
+    }
+  }
+}
 
 // ✅ Create session FROM request
 exports.createSessionFromRequest = async (req, res) => {
   try {
     const { requestId } = req.body;
-
     const request = await Request.findById(requestId);
 
     if (!request || request.status !== "accepted") {
       return res.status(400).json({ msg: "Invalid or unaccepted request" });
     }
-
 
     const session = await Session.create({
       userA: request.fromUser,
@@ -28,7 +41,6 @@ exports.createSessionFromRequest = async (req, res) => {
       status: "pending",
     });
 
-    // 🔔 Notify both users that session was created
     const notificationA = await Notification.create({
       user: request.fromUser,
       message: `Your learning session for ${request.skill} has been created`,
@@ -43,7 +55,6 @@ exports.createSessionFromRequest = async (req, res) => {
       read: false,
     });
 
-    // realtime socket notifications
     global.io.to(request.fromUser.toString()).emit("notification", notificationA);
     global.io.to(request.toUser.toString()).emit("notification", notificationB);
 
@@ -92,7 +103,7 @@ exports.scheduleSession = async (req, res) => {
     const session = await Session.findByIdAndUpdate(
       req.params.id,
       { date, time, notes, status: "upcoming", videoCallLink },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!session) return res.status(404).json({ success: false, message: "Session not found" });
     res.status(200).json({ success: true, message: "Session scheduled", session });
@@ -108,9 +119,13 @@ exports.completeSession = async (req, res) => {
     const session = await Session.findByIdAndUpdate(
       req.params.id,
       { status: "completed" },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!session) return res.status(404).json({ message: "Session not found" });
+
+    // ⚡ Award XP to both users
+    await awardSessionXP(session);
+
     res.json({ success: true, session });
   } catch (error) {
     console.error("Complete session error:", error);
@@ -125,9 +140,13 @@ exports.completeByRoom = async (req, res) => {
     const session = await Session.findOneAndUpdate(
       { videoCallLink: { $regex: roomId } },
       { status: "completed" },
-      { new: true }
+      { returnDocument: "after" }
     );
     if (!session) return res.status(404).json({ message: "Session not found" });
+
+    // ⚡ Award XP to both users
+    await awardSessionXP(session);
+
     res.json({ success: true, session });
   } catch (error) {
     console.error("Complete by room error:", error);
@@ -139,12 +158,8 @@ exports.completeByRoom = async (req, res) => {
 exports.deleteSession = async (req, res) => {
   try {
     const session = await Session.findById(req.params.id);
+    if (!session) return res.status(404).json({ msg: "Session not found" });
 
-    if (!session) {
-      return res.status(404).json({ msg: "Session not found" });
-    }
-
-    // Allow only participants
     if (
       session.userA.toString() !== req.user.id &&
       session.userB.toString() !== req.user.id
@@ -160,7 +175,7 @@ exports.deleteSession = async (req, res) => {
   }
 };
 
-// ✅ GET /api/sessions/completed — all completed sessions for the logged-in user
+// ✅ GET /api/sessions/completed
 exports.getCompletedSessions = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -178,7 +193,6 @@ exports.getCompletedSessions = async (req, res) => {
     const shaped = sessions.map((s) => {
       const isTaught = s.userB?._id?.toString() === userId.toString();
       const partner  = isTaught ? s.userA : s.userB;
-
       return {
         _id:           s._id,
         skillName:     s.skill?.name     || "Skill Exchange",

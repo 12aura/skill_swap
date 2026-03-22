@@ -1,109 +1,3 @@
-// import {
-//   StreamVideo,
-//   StreamCall,
-//   CallControls,
-//   SpeakerLayout
-// } from "@stream-io/video-react-sdk";
-
-// import { StreamVideoClient } from "@stream-io/video-client";
-// import { useEffect, useState, useContext } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import { AuthContext } from "../context/AuthContext";
-
-// function VideoCall() {
-//   const { roomId } = useParams();
-//   const navigate = useNavigate();
-//   const { user } = useContext(AuthContext);
-
-//   const [client, setClient] = useState(null);
-//   const [call, setCall] = useState(null);
-
-//   useEffect(() => {
-//     if (!user) return;
-
-//     const initVideo = async () => {
-//       const res = await fetch("http://localhost:5000/api/video/token", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ userId: user._id })
-//       });
-
-//       const data = await res.json();
-
-//       const videoClient = new StreamVideoClient({
-//         apiKey: import.meta.env.VITE_STREAM_API_KEY,
-//         user: {
-//           id: user._id,
-//           name: user.name || "User"
-//         },
-//         token: data.token
-//       });
-
-//       const videoCall = videoClient.call("default", roomId);
-//       await videoCall.join({ create: true });
-
-//       // ✅ Enable camera and mic on join
-//       await videoCall.camera.enable();
-//       await videoCall.microphone.enable();
-
-//       setClient(videoClient);
-//       setCall(videoCall);
-//     };
-
-//     initVideo();
-
-//     // ✅ Cleanup on unmount
-//     return () => {
-//       call?.leave();
-//     };
-//   }, [roomId, user]);
-
-//   const leaveCall = async () => {
-//     if (call) await call.leave();
-//     navigate("/sessions");
-//   };
-
-//   if (!client || !call) return (
-//     <div className="h-screen flex items-center justify-center text-xl">
-//       Joining call...
-//     </div>
-//   );
-
-//   return (
-//     <div style={{ position: "relative", height: "100vh", display: "flex", flexDirection: "column" }}>
-
-//       {/* Leave Call button */}
-//       <button
-//         onClick={leaveCall}
-//         className="absolute top-4 right-4 z-50 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-//       >
-//         Leave Call
-//       </button>
-
-//       <StreamVideo client={client}>
-//         <StreamCall call={call}>
-
-//           {/* ✅ Video area */}
-//           <div style={{ flex: 1, position: "relative" }}>
-//             <SpeakerLayout />
-//           </div>
-
-//           {/* ✅ Controls bar at bottom */}
-//           <div style={{ display: "flex", justifyContent: "center", padding: "12px", background: "#1a1a1a" }}>
-//             <CallControls />
-//           </div>
-
-//         </StreamCall>
-//       </StreamVideo>
-
-//     </div>
-//   );
-// }
-
-// export default VideoCall;
-
-
-
 import {
   StreamVideo,
   StreamCall,
@@ -115,6 +9,7 @@ import { StreamVideoClient } from "@stream-io/video-client";
 import { useEffect, useState, useContext, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
+import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
 const EMOJIS = ["👍", "❤️", "😂", "😮", "👏", "🎉", "🔥", "😢"];
@@ -327,11 +222,9 @@ function InCallChat({ messages, onSend }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// THE FIX: Socket is created HERE inside VideoCallInner.
-// No prop passing. No timing issues. No race conditions.
-// ─────────────────────────────────────────────────────────
-function VideoCallInner({ onLeave, userName, roomId }) {
+// ─── VideoCallInner ───────────────────────────────────────
+// ✅ Accepts onEndCall so it can emit socket event before leaving
+function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
   const [chatOpen,       setChatOpen]       = useState(false);
   const [messages,       setMessages]       = useState([]);
   const [floatingEmojis, setFloatingEmojis] = useState([]);
@@ -339,19 +232,15 @@ function VideoCallInner({ onLeave, userName, roomId }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    // Create socket here — it exists immediately, no prop delay
     const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:5000", { reconnection: true });
     socketRef.current = socket;
 
-    // join-room only after confirmed connected — guaranteed order
     socket.on("connect", () => {
       console.log("✅ Socket connected:", socket.id, "| joining room:", roomId);
       socket.emit("join-room", roomId);
     });
 
-    // Listeners registered immediately — no timing gap possible
     socket.on("call-message", (data) => {
-      console.log("📨 call-message received:", data);
       const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       setMessages(prev => [...prev, {
         text:   data.text,
@@ -359,7 +248,6 @@ function VideoCallInner({ onLeave, userName, roomId }) {
         time:   data.time || time,
         self:   false,
       }]);
-      // Show badge only when chat panel is closed
       setChatOpen(open => {
         if (!open) setUnreadCount(c => c + 1);
         return open;
@@ -367,28 +255,40 @@ function VideoCallInner({ onLeave, userName, roomId }) {
     });
 
     socket.on("call-emoji", (data) => {
-      console.log("😊 call-emoji received:", data);
       setFloatingEmojis(prev => [
         ...prev,
         { emoji: data.emoji, sender: data.sender, id: Date.now() + Math.random() },
       ]);
     });
 
+    // ✅ Other user left — call onLeave (no need to emit again, just navigate)
+    socket.on("call-ended", () => {
+      console.log("📵 Other user ended the call — leaving");
+      onLeave(); // just navigate away, DB already updated by other user
+    });
+
     return () => {
-      console.log("🔌 Socket disconnecting");
       socket.disconnect();
     };
-  }, [roomId]); // roomId never changes during a call
+  }, [roomId]);
+
+  // ✅ Called when THIS user clicks Leave button
+  // Emits call-ended to other user FIRST, then calls onEndCall for DB + navigate
+  const handleLeave = useCallback(() => {
+    const s = socketRef.current;
+    if (s?.connected) {
+      console.log("📤 Emitting call-ended to room:", roomId);
+      s.emit("call-ended", { roomId }); // ✅ notify other user instantly
+    }
+    onEndCall(); // ✅ update DB + navigate
+  }, [roomId, onEndCall]);
 
   const sendMessage = useCallback((text) => {
     const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     setMessages(prev => [...prev, { text, sender: userName, time, self: true }]);
     const s = socketRef.current;
     if (s?.connected) {
-      console.log("📤 Emitting call-message");
       s.emit("call-message", { roomId, text, sender: userName, time });
-    } else {
-      console.warn("⚠️ Socket not connected");
     }
   }, [userName, roomId]);
 
@@ -399,10 +299,7 @@ function VideoCallInner({ onLeave, userName, roomId }) {
     ]);
     const s = socketRef.current;
     if (s?.connected) {
-      console.log("📤 Emitting call-emoji");
       s.emit("call-emoji", { roomId, emoji, sender: userName });
-    } else {
-      console.warn("⚠️ Socket not connected");
     }
   }, [userName, roomId]);
 
@@ -423,8 +320,9 @@ function VideoCallInner({ onLeave, userName, roomId }) {
         {chatOpen && <InCallChat messages={messages} onSend={sendMessage} />}
       </div>
 
+      {/* ✅ onLeave now points to handleLeave which emits socket THEN calls DB */}
       <CustomControls
-        onLeave={onLeave}
+        onLeave={handleLeave}
         chatOpen={chatOpen}
         onToggleChat={() => { setChatOpen(v => !v); setUnreadCount(0); }}
         onSendEmoji={sendEmoji}
@@ -473,7 +371,6 @@ function VideoCallInner({ onLeave, userName, roomId }) {
 }
 
 // ─── Root ─────────────────────────────────────────────────
-// No socket here. VideoCallInner owns the socket entirely.
 function VideoCall() {
   const { roomId } = useParams();
   const navigate   = useNavigate();
@@ -483,7 +380,7 @@ function VideoCall() {
   const [call,   setCall]   = useState(null);
   const callRef      = useRef(null);
   const clientRef    = useRef(null);
-  const hasLeftRef   = useRef(false); // guard against double-leave
+  const hasLeftRef   = useRef(false);
 
   useEffect(() => {
     if (!user) return;
@@ -528,7 +425,6 @@ function VideoCall() {
 
     initVideo();
 
-    // Cleanup: only leave if not already left by leaveCall()
     return () => {
       if (!hasLeftRef.current) {
         hasLeftRef.current = true;
@@ -538,15 +434,47 @@ function VideoCall() {
     };
   }, [roomId, user]);
 
-  const leaveCall = async () => {
+  // ✅ Called by handleLeave in VideoCallInner after socket emit
+  // Updates DB + leaves Stream + navigates
+  const endCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
+
+    try {
+      // Mark session completed in DB — other user's Sessions.jsx polling picks it up
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:5000/api/sessions/complete-by-room/${roomId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (err) {
+      console.error("Failed to complete session:", err);
+    }
+
     try {
       await callRef.current?.leave();
       await clientRef.current?.disconnectUser();
     } catch (e) {
-      // already left — safe to ignore
+      // already left
     }
+
+    navigate("/sessions");
+  };
+
+  // ✅ Called when OTHER user ends call (received via socket)
+  // Just leave Stream + navigate — no need to update DB again
+  const leaveCall = async () => {
+    if (hasLeftRef.current) return;
+    hasLeftRef.current = true;
+
+    try {
+      await callRef.current?.leave();
+      await clientRef.current?.disconnectUser();
+    } catch (e) {
+      // already left
+    }
+
     navigate("/sessions");
   };
 
@@ -562,9 +490,9 @@ function VideoCall() {
   return (
     <StreamVideo client={client}>
       <StreamCall call={call}>
-        {/* No socketRef prop — VideoCallInner creates its own socket */}
         <VideoCallInner
-          onLeave={leaveCall}
+          onLeave={leaveCall}   // ✅ used when OTHER user ends call
+          onEndCall={endCall}   // ✅ used when THIS user clicks Leave button
           userName={user?.name || "You"}
           roomId={roomId}
         />

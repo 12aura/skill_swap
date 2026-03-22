@@ -240,6 +240,16 @@ const PublicProfile = () => {
               <FaRegCommentDots /> Message
             </button>
           )}
+  {/* MESSAGE BUTTON */}
+{loggedInUser?._id !== profileUser._id && (
+  <button
+    onClick={() => navigate(`/chat/${profileUser._id}`)}
+    className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
+    title="Message"
+  >
+    <FaRegCommentDots size={20} />
+  </button>
+)}
         </div>
       </div>
 

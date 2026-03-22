@@ -1,49 +1,53 @@
-// Chat functions
-const Chat = require("../models/chat");
+const { StreamChat } = require("stream-chat");
+const User = require("../models/User"); 
+const apiKey = process.env.STREAM_API_KEY;
+const apiSecret = process.env.STREAM_API_SECRET;
 
-// Create or get a chat between two users
-const createOrGetChat = async (req, res) => {
+const serverClient = StreamChat.getInstance(apiKey, apiSecret);
+
+const getStreamToken = async (req, res) => {
   try {
-    const { senderID, receiverID } = req.body;
+    const userId = req.user._id.toString();
+    const name = req.user.name;
+    const profilePic = req.user.profilePic;
 
-    if (!senderID || !receiverID) {
-      return res.status(400).json({ message: "Both senderID and receiverID required" });
-    }
-
-    // Check if chat already exists
-    let chat = await Chat.findOne({
-      $or: [
-        { senderID, receiverID },
-        { senderID: receiverID, receiverID: senderID },
-      ],
+    // Upsert the logged-in user to Stream
+    await serverClient.upsertUser({
+      id: userId,
+      name: name,
+      image: profilePic,
     });
 
-    if (!chat) {
-      chat = await Chat.create({ senderID, receiverID });
-    }
+    const token = serverClient.createToken(userId);
 
-    res.status(200).json(chat);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.json({
+      token,
+      userId,
+      name,
+      apiKey,
+    });
+
+  } catch (error) {
+    console.error("Error in getStreamToken controller:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-// Get all chats of a user
-const getUserChats = async (req, res) => {
+const upsertStreamUser = async (req, res) => {
   try {
-    const userID = req.user._id;
-    const chats = await Chat.find({
-      $or: [{ senderID: userID }, { receiverID: userID }],
-    }).populate("senderID", "name avatar").populate("receiverID", "name avatar");
-    res.status(200).json(chats);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    const targetUser = await User.findById(req.params.id);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    await serverClient.upsertUser({
+      id: targetUser._id.toString(),
+      name: targetUser.name,
+      image: targetUser.profilePic,
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error upserting stream user:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-module.exports = {
-  createOrGetChat,
-  getUserChats,
-};
+module.exports = { getStreamToken, upsertStreamUser };

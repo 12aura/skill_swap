@@ -236,6 +236,7 @@ exports.getStats = async (req, res) => {
 ------------------------------------ */
 exports.getPublicProfile = async (req, res) => {
   try {
+    // ✅ FIX 3: added avatar to select
     const user = await User.findById(req.params.id)
       .select("name tagline bio demoVideo skillsTeach skillsLearn avatar averageRating totalReviews xp badges")
       .populate("skillsTeach", "name")

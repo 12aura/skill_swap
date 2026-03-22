@@ -182,8 +182,6 @@
 
 // export default PublicProfile;
 
-
-
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -192,6 +190,7 @@ import { AuthContext } from "../context/AuthContext";
 import { FaGraduationCap, FaBook, FaRegCommentDots } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
 import ReviewsSection from "../components/ReviewsSection";
+import { motion, AnimatePresence } from "framer-motion";
 
 const PublicProfile = () => {
   const { id } = useParams();
@@ -201,9 +200,9 @@ const PublicProfile = () => {
 
   const [profileUser, setProfileUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("about"); // "about" | "reviews"
+  const [activeTab, setActiveTab] = useState("about");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  /* ---------------- FETCH PROFILE ---------------- */
   useEffect(() => {
     setLoading(true);
     axios
@@ -213,7 +212,6 @@ const PublicProfile = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  /* ---------------- SEND REQUEST ---------------- */
   const sendRequest = async (skill) => {
     try {
       const token = localStorage.getItem("token");
@@ -230,7 +228,6 @@ const PublicProfile = () => {
     }
   };
 
-  /* ---------------- YOUTUBE EMBED ---------------- */
   const getEmbedUrl = (url) => {
     if (!url) return "";
     const regExp =
@@ -244,85 +241,134 @@ const PublicProfile = () => {
   if (loading) return <p className="p-10">Loading...</p>;
   if (!profileUser) return <p className="p-10">User not found</p>;
 
+  const avatarSrc = profileUser?.avatar
+    ? profileUser.avatar
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        profileUser?.name || "U"
+      )}&background=0d9488&color=fff&size=128`;
+
   const tabs = [
-    { key: "about",   label: "About" },
-    { key: "reviews", label: `Reviews${profileUser.totalReviews > 0 ? ` (${profileUser.totalReviews})` : ""}` },
+    { key: "about", label: "About" },
+    {
+      key: "reviews",
+      label: `Reviews${profileUser.totalReviews > 0 ? ` (${profileUser.totalReviews})` : ""}`,
+    },
   ];
 
   return (
-    <div className={`min-h-screen p-10 ${darkMode ? "bg-slate-900" : "bg-gray-100"}`}>
+    <div
+      className={`min-h-screen p-10 ${
+        darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-gray-900"
+      }`}
+    >
+      {/* LIGHTBOX */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxOpen(false)}
+            className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center cursor-zoom-out"
+          >
+            <motion.img
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              src={avatarSrc}
+              alt="Profile preview"
+              className="max-w-[80vw] max-h-[80vh] rounded-2xl shadow-2xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-6 right-8 text-white text-3xl bg-white/10 hover:bg-white/20 rounded-full w-11 h-11 flex items-center justify-center transition"
+            >
+              ✕
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* HEADER */}
       <div className="max-w-6xl mx-auto text-center mb-8">
-        <div className="flex justify-center items-center gap-3">
+        <div className="flex justify-center items-center gap-4">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-teal-400 shadow">
-            {profileUser.avatar ? (
-              <img
-                src={profileUser.avatar}
-                alt={profileUser.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <img
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profileUser.name)}&background=0d9488&color=fff&size=64`}
-                alt={profileUser.name}
-                className="w-full h-full object-cover"
-              />
-            )}
-          </div>
+          <img
+            src={avatarSrc}
+            alt={profileUser.name}
+            onClick={() => setLightboxOpen(true)}
+            className="w-16 h-16 rounded-full object-cover border-4 border-teal-400 shadow-md cursor-zoom-in hover:scale-105 transition-transform"
+          />
 
-          <div className="text-left">
-            <h1 className={`text-3xl font-bold ${darkMode ? "text-white" : "text-slate-900"}`}>
-              {profileUser.name}
-            </h1>
+          <div className="flex items-center gap-3">
+            <div className="text-left">
+              <h1 className="text-4xl font-bold">{profileUser.name}</h1>
 
-            {/* Star rating summary */}
-            {profileUser.averageRating && (
-              <div className="flex items-center gap-1 mt-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
+              {/* Star rating summary */}
+              {profileUser.averageRating && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`text-sm ${
+                        star <= Math.round(profileUser.averageRating)
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
                   <span
-                    key={star}
-                    className={`text-sm ${
-                      star <= Math.round(profileUser.averageRating)
-                        ? "text-yellow-400"
-                        : "text-gray-300"
+                    className={`text-sm ml-1 ${
+                      darkMode ? "text-slate-400" : "text-gray-500"
                     }`}
                   >
-                    ★
+                    {profileUser.averageRating} · {profileUser.totalReviews}{" "}
+                    review{profileUser.totalReviews !== 1 ? "s" : ""}
                   </span>
-                ))}
-                <span className={`text-sm ml-1 ${darkMode ? "text-slate-400" : "text-gray-500"}`}>
-                  {profileUser.averageRating} · {profileUser.totalReviews} review{profileUser.totalReviews !== 1 ? "s" : ""}
-                </span>
-              </div>
+                </div>
+              )}
+            </div>
+
+            {/* Message button */}
+            {loggedInUser?._id !== profileUser._id && (
+              <button
+                onClick={() => navigate(`/chat/${profileUser._id}`)}
+                className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
+                title="Message"
+              >
+                <FaRegCommentDots size={20} />
+              </button>
             )}
           </div>
-
-          {/* Message button */}
-          {loggedInUser?._id !== profileUser._id && (
-            <button
-              onClick={() => navigate(`/chat/${profileUser._id}`)}
-              className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200 transition"
-              title="Message"
-            >
-              <FaRegCommentDots size={20} />
-            </button>
-          )}
         </div>
 
         {profileUser.tagline && (
-          <p className={`mt-2 text-sm ${darkMode ? "text-slate-400" : "text-gray-600"}`}>
+          <p
+            className={`mt-2 text-sm ${
+              darkMode ? "text-slate-400" : "text-gray-600"
+            }`}
+          >
             {profileUser.tagline}
           </p>
         )}
       </div>
 
       {/* MAIN CARD */}
-      <div className={`max-w-6xl mx-auto rounded-xl shadow-lg overflow-hidden ${darkMode ? "bg-slate-800" : "bg-white"}`}>
-
-        {/* ── Tabs ── */}
-        <div className={`flex border-b ${darkMode ? "border-slate-700" : "border-gray-200"}`}>
+      <div
+        className={`max-w-6xl mx-auto rounded-xl shadow-lg overflow-hidden ${
+          darkMode ? "bg-slate-800" : "bg-white"
+        }`}
+      >
+        {/* Tabs */}
+        <div
+          className={`flex border-b ${
+            darkMode ? "border-slate-700" : "border-gray-200"
+          }`}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -340,7 +386,7 @@ const PublicProfile = () => {
           ))}
         </div>
 
-        {/* ── Tab Content ── */}
+        {/* Tab Content */}
         <div className="p-8">
           {activeTab === "about" ? (
             <div className="flex flex-col md:flex-row gap-10">
@@ -348,7 +394,11 @@ const PublicProfile = () => {
               <div className="flex-1 space-y-6">
                 {/* TEACHES */}
                 <div>
-                  <h2 className={`flex items-center gap-2 font-semibold mb-2 ${darkMode ? "text-slate-300" : "text-gray-700"}`}>
+                  <h2
+                    className={`flex items-center gap-2 font-semibold mb-2 ${
+                      darkMode ? "text-slate-300" : "text-gray-700"
+                    }`}
+                  >
                     <FaGraduationCap /> TEACHES
                   </h2>
                   <div className="flex flex-wrap gap-3">
@@ -375,7 +425,11 @@ const PublicProfile = () => {
 
                 {/* LEARNS */}
                 <div>
-                  <h2 className={`flex items-center gap-2 font-semibold mb-2 ${darkMode ? "text-slate-300" : "text-gray-700"}`}>
+                  <h2
+                    className={`flex items-center gap-2 font-semibold mb-2 ${
+                      darkMode ? "text-slate-300" : "text-gray-700"
+                    }`}
+                  >
                     <FaBook /> LEARNS
                   </h2>
                   <div className="flex flex-wrap gap-2">
@@ -392,7 +446,11 @@ const PublicProfile = () => {
 
                 {/* BIO */}
                 <div>
-                  <h2 className={`font-semibold mb-2 ${darkMode ? "text-slate-300" : "text-gray-700"}`}>
+                  <h2
+                    className={`font-semibold mb-2 ${
+                      darkMode ? "text-slate-300" : "text-gray-700"
+                    }`}
+                  >
                     ABOUT ME
                   </h2>
                   <p className={darkMode ? "text-slate-400" : "text-gray-700"}>
@@ -405,11 +463,18 @@ const PublicProfile = () => {
               <div className="flex-1 space-y-4">
                 {profileUser.demoVideo && (
                   <div>
-                    <h2 className={`font-semibold mb-2 flex items-center gap-2 ${darkMode ? "text-slate-300" : "text-gray-700"}`}>
+                    <h2
+                      className={`font-semibold mb-2 flex items-center gap-2 ${
+                        darkMode ? "text-slate-300" : "text-gray-700"
+                      }`}
+                    >
                       <FaYoutube className="text-red-600 w-5 h-5" />
                       DEMO VIDEO
                     </h2>
-                    <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                    <div
+                      className="relative w-full"
+                      style={{ paddingBottom: "56.25%" }}
+                    >
                       <iframe
                         src={getEmbedUrl(profileUser.demoVideo)}
                         title="demoVideo"
@@ -431,7 +496,7 @@ const PublicProfile = () => {
               </div>
             </div>
           ) : (
-            /* ── Reviews Tab ── */
+            /* Reviews Tab */
             <ReviewsSection userId={profileUser._id} />
           )}
         </div>

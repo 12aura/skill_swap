@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { motion, AnimatePresence } from "framer-motion";
+import ReviewsSection from "../components/ReviewsSection";
 
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -11,6 +12,7 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "reviews"
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -28,16 +30,13 @@ const Profile = () => {
     setUploadError(null);
     setUploading(true);
 
-    // Instant local preview
     const previewUrl = URL.createObjectURL(file);
     setUser((prev) => ({ ...prev, avatar: previewUrl }));
 
     try {
       const formData = new FormData();
       formData.append("avatar", file);
-
       const token = localStorage.getItem("token");
-
       const res = await axios.post(
         "http://localhost:5000/api/user/upload-avatar",
         formData,
@@ -48,7 +47,6 @@ const Profile = () => {
           },
         }
       );
-
       setUser((prev) => ({ ...prev, avatar: res.data.avatar }));
     } catch (err) {
       console.error("Avatar upload failed", err);
@@ -193,6 +191,27 @@ const Profile = () => {
               <h2 className="text-xl font-semibold uppercase">{user.name}</h2>
               <p className="text-sm opacity-90">{user.email}</p>
 
+              {/* Average rating badge */}
+              {user.averageRating && (
+                <div className="mt-3 flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
+                  <span className="text-yellow-300 text-sm">★</span>
+                  <span className="text-white text-sm font-semibold">
+                    {user.averageRating}
+                  </span>
+                  <span className="text-white/70 text-xs">
+                    ({user.totalReviews} review{user.totalReviews !== 1 ? "s" : ""})
+                  </span>
+                </div>
+              )}
+
+              {/* XP badge */}
+              {user.xp > 0 && (
+                <div className="mt-2 flex items-center gap-1.5 bg-white/20 px-3 py-1.5 rounded-full">
+                  <span className="text-yellow-300 text-sm">⚡</span>
+                  <span className="text-white text-sm font-semibold">{user.xp} XP</span>
+                </div>
+              )}
+
               <div className="mt-6 flex flex-col gap-3 w-full items-center">
                 <Link
                   to="/edit-profile"
@@ -223,13 +242,57 @@ const Profile = () => {
               className="md:col-span-2 p-12"
             >
               <h1 className="text-3xl font-bold mb-2">My Profile</h1>
-              <div className="w-12 h-1 bg-teal-500 rounded-full mb-8"></div>
+              <div className="w-12 h-1 bg-teal-500 rounded-full mb-6" />
 
-              <div className="space-y-6">
-                <ProfileItem title="Dashboard" icon="📊" link="/dashboard" darkMode={darkMode} />
-                <ProfileItem title="Skills"    icon="✨" link="/skills"    darkMode={darkMode} />
-                <ProfileItem title="Messages"  icon="💬" link="/messages"  darkMode={darkMode} />
+              {/* ── Tabs ── */}
+              <div className="flex gap-1 mb-8 bg-slate-100 dark:bg-slate-700 rounded-xl p-1 w-fit">
+                {[
+                  { key: "profile", label: "Overview" },
+                  { key: "reviews", label: `Reviews${user.totalReviews > 0 ? ` (${user.totalReviews})` : ""}` },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                      activeTab === tab.key
+                        ? "bg-white shadow text-teal-600"
+                        : darkMode
+                        ? "text-slate-300 hover:text-white"
+                        : "text-slate-500 hover:text-slate-700"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
+
+              {/* ── Tab content ── */}
+              <AnimatePresence mode="wait">
+                {activeTab === "profile" ? (
+                  <motion.div
+                    key="profile"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-6"
+                  >
+                    <ProfileItem title="Dashboard" icon="📊" link="/dashboard" darkMode={darkMode} />
+                    <ProfileItem title="Skills"    icon="✨" link="/skills"    darkMode={darkMode} />
+                    <ProfileItem title="Messages"  icon="💬" link="/messages"  darkMode={darkMode} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="reviews"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ReviewsSection userId={user._id} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         </main>

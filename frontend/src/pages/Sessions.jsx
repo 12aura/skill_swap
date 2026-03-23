@@ -6,7 +6,7 @@ import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { AuthContext } from "../context/AuthContext";
 import ScheduleModal from "../components/ScheduleModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // ✅ Expired = 1 hour AFTER session start time
 const isExpired = (date, time) => {
@@ -43,6 +43,8 @@ const Sessions = () => {
   const { darkMode } = useContext(DarkModeContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+const showOnlyActive = location.hash === "#active";
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSession, setSelectedSession] = useState(null);
@@ -123,7 +125,9 @@ const Sessions = () => {
       !isExpired(session.date, session.time)      // ✅ within 1 hour grace window
     );
   };
-
+const filteredSessions = showOnlyActive
+  ? sessions.filter((s) => getDisplayStatus(s) !== "completed")
+  : sessions;
   return (
     <div
       className={`min-h-screen p-6 ${
@@ -160,7 +164,7 @@ const Sessions = () => {
           )}
 
           <div className="grid gap-6">
-            {sessions.map((session) => {
+            {filteredSessions.map((session) => {
               const partner =
                 session.userA?._id === user?._id
                   ? session.userB

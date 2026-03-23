@@ -87,7 +87,7 @@ const Dashboard = () => {
   const statCards = [
     // { title: "Skill Requests",  value: stats.skillRequests,  desc: "Pending requests",    icon: "📩", link: "/requests"           },
     { title: "Skill Requests",  value: stats.skillRequests,  desc: "Pending requests", icon: "📩", link: "/requests#pending" },
-    { title: "Active Sessions", value: stats.activeSessions, desc: "Ongoing learning",     icon: "⏱️", link: "/sessions"           },
+  { title: "Active Sessions", value: stats.activeSessions, desc: "Ongoing learning", icon: "⏱️", link: "/sessions#active" },
     { title: "Skills Shared",   value: stats.skillsShared,   desc: "Completed sessions",   icon: "✨", link: "/completed-sessions" },
   ];
 
@@ -231,8 +231,8 @@ const Dashboard = () => {
               {/* QUICK ACTIONS */}
               <div className="space-y-4">
                 <DashboardItem title="Badges"   icon="🏆" link="/badges"   darkMode={dm} />
-                {/* <DashboardItem title="Requests" icon="📩" link="/requests" darkMode={dm} /> */}
-                <DashboardItem title="Requests" icon="📩" link="/requests#pending" darkMode={dm} />
+                <DashboardItem title="Requests" icon="📩" link="/requests" darkMode={dm} />
+                {/* <DashboardItem title="Requests" icon="📩" link="/requests#pending" darkMode={dm} /> */}
                 <DashboardItem title="Sessions" icon="⏱️" link="/sessions" darkMode={dm} />
                 <DashboardItem title="Profile"  icon="👤" link="/profile"  darkMode={dm} />
               </div>

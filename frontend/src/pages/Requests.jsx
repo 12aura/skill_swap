@@ -164,19 +164,23 @@ import { AuthContext } from "../context/AuthContext";
 const Requests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState("pending");
+   const [activeFilter, setActiveFilter] = useState("all");
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useContext(AuthContext);
 
+  const { user } = useContext(AuthContext);
+const hash = location.hash.replace("#", "");
+const isPendingOnly = hash === "pending" && !location.pathname.includes("#all");
   // ✅ Read filter from URL hash on mount (e.g. /requests#pending)
-  useEffect(() => {
-    const hash = location.hash.replace("#", "");
-    if (["pending", "accepted", "rejected", "all"].includes(hash)) {
-      setActiveFilter(hash);
-    }
-  }, [location.hash]);
+ useEffect(() => {
+  const hash = location.hash.replace("#", "");
+
+  if (hash === "pending") setActiveFilter("pending");
+  else if (hash === "accepted") setActiveFilter("accepted");
+  else if (hash === "rejected") setActiveFilter("rejected");
+  else setActiveFilter("all");   // ← important line
+}, [location.hash]);
 
   useEffect(() => {
     fetchRequests();
@@ -237,10 +241,14 @@ const Requests = () => {
   };
 
   // ✅ Filtered list based on active tab
+  // const filteredRequests =
+  //   activeFilter === "all"
+  //     ? requests
+  //     : requests.filter((r) => r.status === activeFilter);
   const filteredRequests =
-    activeFilter === "all"
-      ? requests
-      : requests.filter((r) => r.status === activeFilter);
+  activeFilter === "all"
+    ? requests
+    : requests.filter((r) => r.status === activeFilter);
 
   const tabs = [
     { key: "all",      label: "All",      emoji: "📋" },
@@ -277,6 +285,7 @@ const Requests = () => {
       </div>
 
       {/* ── Summary Cards ── */}
+      {!isPendingOnly && (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
         {[
           { key: "pending",  label: "Pending",  emoji: "⏳", color: "#f59e0b", shadow: "#f59e0b33" },
@@ -285,7 +294,10 @@ const Requests = () => {
         ].map((card) => (
           <div
             key={card.key}
-            onClick={() => setActiveFilter(card.key)}
+  onClick={() => {
+  setActiveFilter(card.key);
+  navigate(`/requests#${card.key}`);
+}}
             style={{
               background: "#fff",
               borderRadius: 16,
@@ -304,8 +316,9 @@ const Requests = () => {
           </div>
         ))}
       </div>
-
+)}
       {/* ── Filter Tabs ── */}
+      {!isPendingOnly && (
       <div style={{
         display: "inline-flex", gap: 6, marginBottom: 22,
         background: "#fff", borderRadius: 14, padding: 5,
@@ -314,7 +327,10 @@ const Requests = () => {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveFilter(tab.key)}
+          onClick={() => {
+  setActiveFilter(tab.key);
+  navigate(`/requests#${tab.key}`);
+}}
             style={{
               padding: "8px 16px",
               borderRadius: 10,
@@ -342,7 +358,7 @@ const Requests = () => {
           </button>
         ))}
       </div>
-
+)}
       {/* ── Loading / Empty ── */}
       {loading && (
         <div style={{ textAlign: "center", padding: "48px 0", color: "#94a3b8", fontSize: 15 }}>

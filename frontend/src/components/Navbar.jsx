@@ -29,11 +29,8 @@ const Navbar = () => {
     const fetchNotifications = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/notifications", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (res.ok) {
           const data = await res.json();
           setNotifications(data);
@@ -59,12 +56,8 @@ const Navbar = () => {
     try {
       await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
         method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      // ✅ FIXED: "read" not "isRead"
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
       );
@@ -76,22 +69,17 @@ const Navbar = () => {
   /* -------- DELETE -------- */
   const deleteNotification = async (id, e) => {
     e.stopPropagation();
-
     try {
       await fetch(`http://localhost:5000/api/notifications/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       setNotifications((prev) => prev.filter((n) => n._id !== id));
     } catch (err) {
       console.error("Failed to delete notification:", err);
     }
   };
 
-  // ✅ FIXED: "read" not "isRead"
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
@@ -104,15 +92,13 @@ const Navbar = () => {
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-2">
           <span className="text-3xl font-extrabold text-teal-500">S</span>
-          <span className="text-2xl font-extrabold tracking-wide">
-            SkillSwap
-          </span>
+          <span className="text-2xl font-extrabold tracking-wide">SkillSwap</span>
         </Link>
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-6 text-sm font-semibold relative">
 
-          {/* DARK MODE */}
+          {/* DARK MODE TOGGLE */}
           <button
             onClick={toggleDarkMode}
             className="w-8 h-8 rounded-full overflow-hidden"
@@ -124,6 +110,7 @@ const Navbar = () => {
             />
           </button>
 
+          {/* BROWSE SKILLS */}
           <Link
             to={user ? "/search" : "/login"}
             className={`hover:text-teal-600 transition ${
@@ -133,6 +120,7 @@ const Navbar = () => {
             Browse Skills
           </Link>
 
+          {/* SKILL MATCHES */}
           {user && (
             <Link
               to="/matches"
@@ -144,8 +132,21 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* LEADERBOARD */}
+          {user && (
+            <Link
+              to="/leaderboard"
+              className={`hover:text-teal-600 transition ${
+                darkMode ? "text-white" : "text-gray-700"
+              }`}
+            >
+              🏆 Leaderboard
+            </Link>
+          )}
+
           {user ? (
             <>
+              {/* PROFILE */}
               <Link
                 to="/profile"
                 className={`hover:text-teal-600 transition ${
@@ -155,13 +156,15 @@ const Navbar = () => {
                 Profile
               </Link>
 
+              {/* SETTINGS — icon only */}
               <Link
                 to="/settings"
-                className={`hover:text-teal-600 transition ${
+                title="Settings"
+                className={`text-xl hover:text-teal-600 transition ${
                   darkMode ? "text-white" : "text-gray-700"
                 }`}
               >
-                Settings
+                ⚙️
               </Link>
 
               {/* 🔔 NOTIFICATION BELL */}
@@ -190,18 +193,15 @@ const Navbar = () => {
                         key={n._id}
                         onClick={() => markAsRead(n._id)}
                         className={`p-3 border-b cursor-pointer rounded flex justify-between items-center hover:bg-gray-100 ${
-                          !n.read ? "bg-blue-50" : ""  // ✅ highlight unread
+                          !n.read ? "bg-blue-50" : ""
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{n.message}</p>
-
-                          {/* ✅ FIXED: "read" not "isRead" */}
                           {!n.read && (
                             <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
                           )}
                         </div>
-
                         <button
                           onClick={(e) => deleteNotification(n._id, e)}
                           className="text-red-500 text-xs hover:text-red-700 ml-2"
@@ -222,7 +222,7 @@ const Navbar = () => {
                 </div>
               )}
 
-              {/* AI CHAT BUTTON */}
+              {/* SKILL BUDDY */}
               <button
                 onClick={() => setShowChat(!showChat)}
                 className="bg-teal-500 text-white px-3 py-2 rounded-full hover:bg-teal-600"

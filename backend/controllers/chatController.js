@@ -1,11 +1,17 @@
 const { StreamChat } = require("stream-chat");
 const https = require("https");
-const User = require("../models/User"); 
+const User = require("../models/User");
+
 const apiKey = process.env.STREAM_API_KEY;
 const apiSecret = process.env.STREAM_API_SECRET;
+
+// Only declared ONCE here
 const agent = new https.Agent({ rejectUnauthorized: false });
-const serverClient = StreamChat.getInstance(apiKey, apiSecret);
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+const serverClient = StreamChat.getInstance(apiKey, apiSecret, {
+  httpsAgent: agent,
+});
+
 const getStreamToken = async (req, res) => {
   try {
     const userId = req.user._id.toString();

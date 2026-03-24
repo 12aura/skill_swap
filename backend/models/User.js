@@ -210,13 +210,43 @@ const userSchema = new mongoose.Schema(
       default: "English",
     },
 
-   // -------- GAMIFICATION --------
-    xp: {
+    // -------- PUBLIC PROFILE ADDITIONAL FIELDS --------
+    skillLevel: {
+      type: String,
+      default: "",
+    },
+
+    yearsOfExperience: {
       type: Number,
       default: 0,
     },
 
-    // ✅ ADD THESE TWO BLOCKS HERE ↓
+    linkedin: {
+      type: String,
+      default: "",
+    },
+
+    portfolio: {
+      type: String,
+      default: "",
+    },
+
+    skillsOffered: {
+      type: [String],
+      default: [],
+    },
+
+    skillTags: {
+      type: [String],
+      default: [],
+    },
+ availability: [{ type: String }],
+
+    // -------- GAMIFICATION --------
+    xp: {
+      type: Number,
+      default: 0,
+    },
 
     xpEvents: {
       type: [String],
@@ -225,11 +255,11 @@ const userSchema = new mongoose.Schema(
 
     badges: [
       {
-        id:          { type: String, required: true },
-        title:       { type: String, required: true },
+        id: { type: String, required: true },
+        title: { type: String, required: true },
         description: { type: String, default: "" },
-        icon:        { type: String, default: "🏅" },
-        earnedAt:    { type: Date,   default: Date.now },
+        icon: { type: String, default: "🏅" },
+        earnedAt: { type: Date, default: Date.now },
       },
     ],
 

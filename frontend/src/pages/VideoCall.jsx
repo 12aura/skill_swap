@@ -14,6 +14,7 @@ import { AuthContext } from "../context/AuthContext";
 
 const EMOJIS = ["👍", "❤️", "😂", "😮", "👏", "🎉", "🔥", "😢"];
 
+// ─── Floating Emoji ───────────────────────────────────────
 function FloatingEmoji({ emoji, id, sender, onDone }) {
   const left = useRef(`${30 + Math.random() * 40}%`);
   useEffect(() => {
@@ -29,6 +30,7 @@ function FloatingEmoji({ emoji, id, sender, onDone }) {
   );
 }
 
+// ─── Control Button ───────────────────────────────────────
 function CtrlBtn({ onClick, active, danger, title, children }) {
   return (
     <button onClick={onClick} title={title}
@@ -41,13 +43,66 @@ function CtrlBtn({ onClick, active, danger, title, children }) {
   );
 }
 
+// ─── Live Closed Captions overlay ────────────────────────
+function ClosedCaptionsOverlay() {
+  const { useCallClosedCaptions, useIsCallCaptioningInProgress } = useCallStateHooks();
+  const closedCaptions = useCallClosedCaptions();
+  const isCaptioning = useIsCallCaptioningInProgress();
+
+  if (!isCaptioning || !closedCaptions.length) return null;
+
+  return (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 pointer-events-none z-40">
+      <div className="bg-black/70 backdrop-blur rounded-xl px-4 py-3 space-y-1">
+        {closedCaptions.map(({ user, text, start_time }) => (
+          <p key={`${user.id}-${start_time}`} className="text-white text-sm leading-snug">
+            <span className="font-semibold text-teal-400">{user.name}: </span>
+            <span>{text}</span>
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Transcription status badge ───────────────────────────
+function TranscriptionBadge() {
+  const { useIsCallTranscribingInProgress } = useCallStateHooks();
+  const isTranscribing = useIsCallTranscribingInProgress();
+  if (!isTranscribing) return null;
+  return (
+    <div className="flex items-center gap-2 py-1.5 px-4 w-full justify-center bg-purple-500/10 border-b border-purple-500/20">
+      <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+      <span className="text-purple-400 text-xs font-medium">Transcription is recording</span>
+    </div>
+  );
+}
+
+// ─── Custom Controls ──────────────────────────────────────
 function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCount }) {
   const call = useCall();
-  const { useMicrophoneState, useCameraState, useScreenShareState } = useCallStateHooks();
+  const {
+    useMicrophoneState,
+    useCameraState,
+    useScreenShareState,
+    useCallSettings,
+    useIsCallTranscribingInProgress,
+    useIsCallCaptioningInProgress,
+  } = useCallStateHooks();
+
   const { isMute: micMuted }     = useMicrophoneState();
   const { isMute: camOff }       = useCameraState();
   const { status: screenStatus } = useScreenShareState();
   const isSharing = screenStatus === "enabled";
+
+  const { transcription } = useCallSettings() || {};
+  const isTranscribing    = useIsCallTranscribingInProgress();
+  const isCaptioning      = useIsCallCaptioningInProgress();
+
+  // Hide transcription controls if feature is disabled on dashboard
+const transcriptionAvailable =
+  transcription?.mode !== "disabled";
+
   const [showEmojis, setShowEmojis] = useState(false);
   const [screenError, setScreenError] = useState(null);
 
@@ -59,6 +114,18 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
     catch(e) { if (e.name !== "NotAllowedError") setScreenError("Screen share failed."); }
   };
 
+  const toggleTranscription = async () => {
+    try {
+      isTranscribing ? await call.stopTranscription() : await call.startTranscription();
+    } catch (e) { console.error("Transcription toggle failed:", e); }
+  };
+
+  const toggleCaptions = async () => {
+    try {
+      isCaptioning ? await call.stopClosedCaptions() : await call.startClosedCaptions();
+    } catch (e) { console.error("Captions toggle failed:", e); }
+  };
+
   return (
     <div className="flex flex-col items-center bg-gray-950/95 backdrop-blur-xl border-t border-white/5">
       {isSharing && (
@@ -67,8 +134,11 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
           <span className="text-teal-400 text-xs font-medium">You are sharing your screen</span>
         </div>
       )}
+      <TranscriptionBadge />
       {screenError && <p className="text-xs text-red-400 py-1 animate-pulse">{screenError}</p>}
+
       <div className="flex items-center justify-center gap-3 px-6 py-4">
+        {/* Mic */}
         <CtrlBtn onClick={toggleMic} active={!micMuted} title={micMuted ? "Unmute" : "Mute"}>
           {micMuted ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -82,6 +152,7 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
           )}
         </CtrlBtn>
 
+        {/* Camera */}
         <CtrlBtn onClick={toggleCam} active={!camOff} title={camOff ? "Start Camera" : "Stop Camera"}>
           {camOff ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -95,12 +166,33 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
           )}
         </CtrlBtn>
 
+        {/* Screen Share */}
         <CtrlBtn onClick={toggleScreen} active={isSharing} title={isSharing ? "Stop Sharing" : "Share Screen"}>
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </CtrlBtn>
 
+        {/* Live Captions Toggle */}
+        {transcriptionAvailable && (
+          <CtrlBtn onClick={toggleCaptions} active={isCaptioning} title={isCaptioning ? "Hide Captions" : "Show Captions"}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h6m-6 4h10M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </CtrlBtn>
+        )}
+
+        {/* Transcription Toggle */}
+        {transcriptionAvailable && (
+          <CtrlBtn onClick={toggleTranscription} active={isTranscribing} title={isTranscribing ? "Stop Recording Transcript" : "Record Transcript"}>
+            {/* Mic + dot icon to represent transcription */}
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+            </svg>
+          </CtrlBtn>
+        )}
+
+        {/* Emoji Reactions */}
         <div className="relative">
           <CtrlBtn onClick={() => setShowEmojis(v => !v)} active={showEmojis} title="Reactions">
             <span className="text-xl">😊</span>
@@ -117,6 +209,7 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
           )}
         </div>
 
+        {/* Chat */}
         <div className="relative">
           <CtrlBtn onClick={onToggleChat} active={chatOpen} title="Chat">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,6 +225,7 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
 
         <div className="w-px h-8 bg-white/10 mx-1" />
 
+        {/* Leave */}
         <CtrlBtn onClick={onLeave} danger title="Leave Call">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -142,6 +236,7 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
   );
 }
 
+// ─── In-Call Chat ─────────────────────────────────────────
 function InCallChat({ messages, onSend }) {
   const [text, setText] = useState("");
   const bottomRef = useRef(null);
@@ -206,9 +301,7 @@ function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
     const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:5000", { reconnection: true });
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-      socket.emit("join-room", roomId);
-    });
+    socket.on("connect", () => { socket.emit("join-room", roomId); });
 
     socket.on("call-message", (data) => {
       const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -220,16 +313,11 @@ function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
       setFloatingEmojis(prev => [...prev, { emoji: data.emoji, sender: data.sender, id: Date.now() + Math.random() }]);
     });
 
-    // ✅ Other user left → go to review page
-    socket.on("call-ended", () => {
-      console.log("📵 Other user ended call — going to review page");
-      onLeave();
-    });
+    socket.on("call-ended", () => { onLeave(); });
 
     return () => { socket.disconnect(); };
   }, [roomId]);
 
-  // ✅ THIS user clicks Leave → emit socket + update DB + go to review
   const handleLeave = useCallback(() => {
     const s = socketRef.current;
     if (s?.connected) s.emit("call-ended", { roomId });
@@ -257,6 +345,8 @@ function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 relative overflow-hidden" style={{ imageRendering: "crisp-edges" }}>
           <SpeakerLayout screenshareLayout="spotlight" />
+          {/* ✅ Live closed captions overlay */}
+          <ClosedCaptionsOverlay />
         </div>
         {chatOpen && <InCallChat messages={messages} onSend={sendMessage} />}
       </div>
@@ -300,7 +390,7 @@ function VideoCall() {
   const callRef      = useRef(null);
   const clientRef    = useRef(null);
   const hasLeftRef   = useRef(false);
-  const sessionIdRef = useRef(null); // ✅ persists across async calls
+  const sessionIdRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
@@ -310,22 +400,18 @@ function VideoCall() {
       try {
         const token = localStorage.getItem("token");
 
-        // ✅ Step 1 — find the sessionId matching this roomId
         try {
           const sessRes = await axios.get(
             "http://localhost:5000/api/sessions",
             { headers: { Authorization: `Bearer ${token}` } }
           );
           const allSessions = sessRes.data?.sessions || sessRes.data || [];
-          const matched = allSessions.find(
-            (s) => s.videoCallLink && s.videoCallLink.includes(roomId)
-          );
+          const matched = allSessions.find(s => s.videoCallLink && s.videoCallLink.includes(roomId));
           if (matched) sessionIdRef.current = matched._id;
         } catch (e) {
           console.warn("Could not prefetch sessionId:", e.message);
         }
 
-        // ✅ Step 2 — init Stream video
         const res = await fetch("http://localhost:5000/api/video/token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -340,6 +426,19 @@ function VideoCall() {
         });
 
         const videoCall = videoClient.call("default", roomId);
+
+        // ✅ Override call settings to enable transcription + captions
+        await videoCall.getOrCreate({
+          data: {
+            settings_override: {
+              transcription: {
+                mode: "available",
+                closed_caption_mode: "available",
+              },
+            },
+          },
+        });
+
         await videoCall.join({ create: true });
         await videoCall.camera.enable();
         await videoCall.microphone.enable({
@@ -366,22 +465,18 @@ function VideoCall() {
     };
   }, [roomId, user]);
 
-  // ✅ Leave Stream cleanly
   const leaveStream = async () => {
     try {
       await callRef.current?.leave();
       await clientRef.current?.disconnectUser();
-    } catch (e) { /* already left */ }
+    } catch (e) {}
   };
 
-  // ✅ Go to review page — fall back to /sessions if no sessionId
   const goToReview = (id) => {
     const resolvedId = id || sessionIdRef.current;
     navigate(resolvedId ? `/review/${resolvedId}` : "/sessions");
   };
 
-  // ✅ THIS user clicked Leave
-  // → complete session in DB → leave Stream → redirect to review page
   const endCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
@@ -395,7 +490,6 @@ function VideoCall() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // ✅ Use sessionId from DB response (most reliable)
       if (res.data?.session?._id) resolvedSessionId = res.data.session._id;
     } catch (err) {
       console.error("Failed to complete session:", err);
@@ -405,8 +499,6 @@ function VideoCall() {
     goToReview(resolvedSessionId);
   };
 
-  // ✅ OTHER user ended the call
-  // → DB already updated by them → just leave Stream → redirect to review page
   const leaveCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
@@ -438,3 +530,4 @@ function VideoCall() {
 }
 
 export default VideoCall;
+

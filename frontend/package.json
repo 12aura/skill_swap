@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@stream-io/video-client": "^1.44.3",
-    "@stream-io/video-react-sdk": "^1.33.3",
+    "@stream-io/video-react-sdk": "^1.34.0",
     "@tanstack/react-query": "^5.90.17",
     "axios": "^1.13.5",
     "framer-motion": "^12.26.2",

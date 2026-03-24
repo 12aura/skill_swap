@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import StarRating from "../components/StarRating";
-
 const REVIEW_XP = 10;
 
 const PostCallReview = () => {

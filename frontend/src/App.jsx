@@ -143,7 +143,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import NotificationPopup from "./components/NotificationPopup";
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
   const { loading } = useContext(AuthContext);
@@ -159,6 +159,7 @@ const App = () => {
   return (
     <div className={darkMode ? "bg-slate-900 text-white min-h-screen" : "bg-white text-gray-900 min-h-screen"}>
       <Navbar />
+      <NotificationPopup /> 
 
       <Routes>
         <Route path="/" element={<Landing />} />

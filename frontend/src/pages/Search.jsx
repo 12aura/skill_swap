@@ -5,11 +5,10 @@ import { DarkModeContext } from "../context/DarkModeContext";
 
 const Search = () => {
   const { darkMode } = useContext(DarkModeContext);
-  const [skillsData, setSkillsData]     = useState([]);
-  const [search, setSearch]             = useState("");
-  const [loading, setLoading]           = useState(true);
+  const [skillsData, setSkillsData]       = useState([]);
+  const [search, setSearch]               = useState("");
+  const [loading, setLoading]             = useState(true);
   const [hiddenMentors, setHiddenMentors] = useState(() => {
-    // ✅ Persist hidden mentors in localStorage
     try {
       return JSON.parse(localStorage.getItem("hiddenMentors")) || [];
     } catch {
@@ -20,62 +19,65 @@ const Search = () => {
 
   /* ---------------- FETCH DATA ---------------- */
   useEffect(() => {
-  axios
-    .get("http://localhost:5000/api/user/skills/all") // keep localhost for now
-    .then((res) => {
-      console.log("API response:", res.data); // ✅ add this to see what's coming back
-      setSkillsData(res.data.skills || []); // ✅ fallback to empty array
-    })
-    .catch((err) => console.error("Failed to load skills", err))
-    .finally(() => setLoading(false));
-}, []);
+    axios
+      .get("http://localhost:5000/api/user/skills/all")
+      .then((res) => {
+        setSkillsData(res.data.skills || []);
+      })
+      .catch((err) => console.error("Failed to load skills", err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  /* ---------------- GROUP SKILLS UNDER EACH MENTOR ---------------- */
-
+  /* ---------------- GROUP SKILLS + PROFILE UNDER EACH MENTOR ---------------- */
   const mentors = useMemo(() => {
-  const map = {};
+    const map = {};
 
-  // ✅ Guard — if skillsData is not an array, return empty
-  if (!Array.isArray(skillsData)) return [];
+    if (!Array.isArray(skillsData)) return [];
 
-  skillsData.forEach((skill) => {
-    // ✅ Guard — if skill.mentors is missing
-    if (!Array.isArray(skill.mentors)) return;
+    skillsData.forEach((skill) => {
+      if (!Array.isArray(skill.mentors)) return;
 
-    skill.mentors.forEach((mentor) => {
-      if (!map[mentor.id]) {
-        map[mentor.id] = {
-          id:     mentor.id,
-          name:   mentor.name,
-          avatar: mentor.avatar
-  ? mentor.avatar
-  : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || "U")}&background=0d9488&color=fff&size=128`,
-          skills: new Set(),
-        };
-      }
-      map[mentor.id].skills.add(skill.name);
+      skill.mentors.forEach((mentor) => {
+        if (!map[mentor.id]) {
+          map[mentor.id] = {
+            id:       mentor.id,
+            name:     mentor.name,
+            avatar:   mentor.avatar
+              ? mentor.avatar
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || "U")}&background=0d9488&color=fff&size=128`,
+            // ✅ Extract profile fields from mentor object (adjust keys to match your API)
+            bio:      mentor.bio      || mentor.about       || null,
+            location: mentor.location || mentor.city        || null,
+            rating:   mentor.rating   || mentor.avgRating   || null,
+            sessions: mentor.sessions || mentor.sessionCount|| null,
+            skills:   new Set(),
+          };
+        }
+        map[mentor.id].skills.add(skill.name);
+      });
     });
-  });
 
-  return Object.values(map)
-    .map((m) => ({
-      id:     m.id,
-      name:   m.name,
-      avatar: m.avatar,
-      skills: Array.from(m.skills),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-}, [skillsData]);
+    return Object.values(map)
+      .map((m) => ({
+        id:       m.id,
+        name:     m.name,
+        avatar:   m.avatar,
+        bio:      m.bio,
+        location: m.location,
+        rating:   m.rating,
+        sessions: m.sessions,
+        skills:   Array.from(m.skills),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [skillsData]);
+
   /* ---------------- SEARCH FILTER ---------------- */
   const filteredMentors = useMemo(() => {
     const visible = mentors.filter((m) => !hiddenMentors.includes(m.id));
-
     if (!search.trim()) return visible;
-
     const query = search.toLowerCase();
     return visible.filter(
       (mentor) =>
-        // ✅ search by mentor name OR skill name
         mentor.name.toLowerCase().includes(query) ||
         mentor.skills.some((skill) => skill.toLowerCase().includes(query))
     );
@@ -85,7 +87,6 @@ const Search = () => {
   const handleRemove = (id) => {
     const updated = [...hiddenMentors, id];
     setHiddenMentors(updated);
-    // ✅ persist so it survives refresh
     localStorage.setItem("hiddenMentors", JSON.stringify(updated));
   };
 
@@ -137,13 +138,8 @@ const Search = () => {
         <p className={`text-sm ${darkMode ? "text-slate-400" : "text-gray-500"}`}>
           {filteredMentors.length} mentor{filteredMentors.length !== 1 ? "s" : ""} found
         </p>
-
-        {/* ✅ Show reset button only if some mentors are hidden */}
         {hiddenMentors.length > 0 && (
-          <button
-            onClick={handleResetHidden}
-            className="text-sm text-teal-500 hover:underline"
-          >
+          <button onClick={handleResetHidden} className="text-sm text-teal-500 hover:underline">
             Show {hiddenMentors.length} hidden mentor{hiddenMentors.length !== 1 ? "s" : ""}
           </button>
         )}
@@ -180,34 +176,74 @@ const Search = () => {
                 ×
               </button>
 
-              {/* AVATAR + NAME */}
-<div className="flex items-center gap-3 mb-4">
-  <img
-    src={
-      mentor.avatar
-        ? mentor.avatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(mentor.name || "U")}&background=0d9488&color=fff&size=128`
-    }
-    alt={mentor.name}
-    className="w-12 h-12 rounded-full object-cover border-2 border-teal-400 flex-shrink-0"
-  />
-  <h3 className={`text-xl font-semibold ${darkMode ? "text-white" : "text-gray-900"}`}>
-    {mentor.name}
-  </h3>
-</div>
+              {/* AVATAR + NAME + RATING */}
+              <div className="flex items-center gap-3 mb-4">
+                <img
+                  src={mentor.avatar}
+                  alt={mentor.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-teal-400 flex-shrink-0"
+                />
+                <div>
+                  <h3 className={`text-xl font-semibold leading-tight ${darkMode ? "text-white" : "text-gray-900"}`}>
+                    {mentor.name}
+                  </h3>
+                  {/* ✅ Rating — only shown if API provides it */}
+                  {mentor.rating != null && (
+                    <p className="text-xs text-teal-500 font-medium mt-0.5">
+                      ⭐ {mentor.rating} · Tutor
+                    </p>
+                  )}
+                </div>
+              </div>
 
-              {/* SKILLS */}
-              <p className={`text-sm mb-3 ${darkMode ? "text-slate-300" : "text-gray-500"}`}>
+              {/* ✅ PROFILE SECTION — bio, location, sessions */}
+              {(mentor.bio || mentor.location || mentor.sessions != null) && (
+                <div className={`rounded-xl p-3 mb-4 text-sm space-y-1.5 ${
+                  darkMode ? "bg-slate-700/50" : "bg-teal-50/60"
+                }`}>
+                  {mentor.location && (
+                    <p className={darkMode ? "text-slate-300" : "text-gray-600"}>
+                      <span className={`font-semibold text-xs uppercase tracking-wide mr-2 ${darkMode ? "text-teal-400" : "text-teal-600"}`}>
+                        Location
+                      </span>
+                      📍 {mentor.location}
+                    </p>
+                  )}
+                  {mentor.sessions != null && (
+                    <p className={darkMode ? "text-slate-300" : "text-gray-600"}>
+                      <span className={`font-semibold text-xs uppercase tracking-wide mr-2 ${darkMode ? "text-teal-400" : "text-teal-600"}`}>
+                        Sessions
+                      </span>
+                      🎓 {mentor.sessions} completed
+                    </p>
+                  )}
+                  {mentor.bio && (
+                    <p className={`line-clamp-2 ${darkMode ? "text-slate-300" : "text-gray-600"}`}>
+                      <span className={`font-semibold text-xs uppercase tracking-wide mr-2 ${darkMode ? "text-teal-400" : "text-teal-600"}`}>
+                        About
+                      </span>
+                      {mentor.bio}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* TEACHES LABEL */}
+              <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${
+                darkMode ? "text-slate-400" : "text-gray-400"
+              }`}>
                 Teaches:
               </p>
-              <div className="flex flex-wrap gap-2 mb-6">
+
+              {/* SKILL TAGS */}
+              <div className="flex flex-wrap gap-2 mb-5">
                 {mentor.skills.map((skill) => (
                   <span
                     key={skill}
                     className={`px-3 py-1 text-sm rounded-full ${
                       darkMode
                         ? "bg-teal-900/40 text-teal-300 border border-teal-700/40"
-                        : "bg-teal-50 text-teal-700"
+                        : "bg-teal-50 text-teal-700 border border-teal-100"
                     }`}
                   >
                     {skill}
@@ -218,7 +254,7 @@ const Search = () => {
               {/* VIEW PROFILE BUTTON */}
               <button
                 onClick={() => navigate(`/profile/${mentor.id}`)}
-                className="mt-2 w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition"
+                className="w-full py-2 rounded-xl border text-teal-600 border-teal-400 hover:bg-teal-50 transition font-medium"
               >
                 View Profile
               </button>

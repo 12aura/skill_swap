@@ -20,38 +20,7 @@ const EditProfile = () => {
     console.log("Saved state:", saved);
   }, [saved]);
 
-  // const handleSave = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     const res = await axios.put(
-  //       "http://localhost:5000/api/user/update",
-  //       {
-  //         name,
-  //         skillsTeach: skillsTeach.split(",").map((s) => s.trim()).filter(Boolean),
-  //         skillsLearn: skillsLearn.split(",").map((s) => s.trim()).filter(Boolean),
-  //       },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     setLoading(false);
-  //     setSaved(true); // ✅ SHOW UI FIRST
-
-  //     // ✅ update context AFTER UI feedback
-  //     setTimeout(() => {
-  //       setUser(res.data.user);
-  //       navigate("/home"); // or /dashboard
-  //     }, 1500);
-  //   } catch (err) {
-  //     console.error("Profile update failed", err);
-  //     setLoading(false);
-  //   }
-  // };
+ 
   const handleSave = async (e) => {
   e.preventDefault();
   setLoading(true);

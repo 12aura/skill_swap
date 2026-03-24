@@ -270,7 +270,7 @@
 
 
 
-
+import { Mail, Clock, Sparkles, Trophy, User, LayoutDashboard } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useState, useEffect, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -357,12 +357,11 @@ const Dashboard = () => {
     ? user.avatar
     : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0d9488&color=fff&size=128`;
 
-  const statCards = [
-    // { title: "Skill Requests",  value: stats.skillRequests,  desc: "Pending requests",    icon: "📩", link: "/requests"           },
-    { title: "Skill Requests",  value: stats.skillRequests,  desc: "Pending requests", icon: "📩", link: "/requests#pending" },
-  { title: "Active Sessions", value: stats.activeSessions, desc: "Ongoing learning", icon: "⏱️", link: "/sessions#active" },
-    { title: "Skills Shared",   value: stats.skillsShared,   desc: "Completed sessions",   icon: "✨", link: "/completed-sessions" },
-  ];
+const statCards = [
+  { title: "Skill Requests", value: stats.skillRequests, desc: "Pending requests", icon: <Mail size={20} className="text-teal-500" />, link: "/requests#pending" },
+  { title: "Active Sessions", value: stats.activeSessions, desc: "Ongoing learning", icon: <Clock size={20} className="text-teal-500" />, link: "/sessions#active" },
+  { title: "Skills Shared", value: stats.skillsShared, desc: "Completed sessions", icon: <Sparkles size={20} className="text-teal-500" />, link: "/completed-sessions" },
+];
 
   const dm = darkMode;
 
@@ -476,38 +475,43 @@ const Dashboard = () => {
               <div className="w-12 h-1 bg-teal-500 rounded-full mb-10" />
 
               {/* STATS */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                {statCards.map((stat, i) => (
-                  <motion.div
-                    key={i}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(stat.link)}
-                    className={`rounded-2xl px-6 py-5 shadow cursor-pointer transition-shadow hover:shadow-md ${
-                      dm ? "bg-slate-700 text-white" : "bg-slate-50 text-slate-800"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-slate-500">{stat.title}</p>
-                      <span className="text-lg">{stat.icon}</span>
-                    </div>
-                    {statsLoading ? (
-                      <div className="h-9 w-12 bg-slate-200 rounded-lg animate-pulse mt-1" />
-                    ) : (
-                      <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                    )}
-                    <p className="text-sm text-slate-500 mt-1">{stat.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+  {statCards.map((stat, i) => (
+    <motion.div
+      key={i}
+      whileHover={{ scale: 1.04, y: -4 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={() => navigate(stat.link)}
+      className={`
+        rounded-2xl px-6 py-5 cursor-pointer transition-all backdrop-blur-lg
+        border border-white/10
+        ${dm 
+          ? "bg-white/5 hover:bg-white/10 text-white shadow-lg" 
+          : "bg-white/70 hover:bg-white shadow-md text-slate-800"}
+      `}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm text-slate-400">{stat.title}</p>
+        {stat.icon}
+      </div>
+
+      {statsLoading ? (
+        <div className="h-9 w-12 bg-slate-200 rounded-lg animate-pulse mt-1" />
+      ) : (
+        <p className="text-3xl font-bold mt-1">{stat.value}</p>
+      )}
+
+      <p className="text-sm text-slate-400 mt-1">{stat.desc}</p>
+    </motion.div>
+  ))}
+</div>
 
               {/* QUICK ACTIONS */}
               <div className="space-y-4">
-                <DashboardItem title="Badges"   icon="🏆" link="/badges"   darkMode={dm} />
-                <DashboardItem title="Requests" icon="📩" link="/requests" darkMode={dm} />
-                {/* <DashboardItem title="Requests" icon="📩" link="/requests#pending" darkMode={dm} /> */}
-                <DashboardItem title="Sessions" icon="⏱️" link="/sessions" darkMode={dm} />
-                <DashboardItem title="Profile"  icon="👤" link="/profile"  darkMode={dm} />
+              <DashboardItem title="Badges" icon={<Trophy size={20} />} link="/badges" darkMode={dm} />
+<DashboardItem title="Requests" icon={<Mail size={20} />} link="/requests" darkMode={dm} />
+<DashboardItem title="Sessions" icon={<Clock size={20} />} link="/sessions" darkMode={dm} />
+<DashboardItem title="Profile" icon={<User size={20} />} link="/profile" darkMode={dm} />
               </div>
             </motion.div>
           </motion.div>
@@ -521,18 +525,24 @@ const DashboardItem = ({ title, icon, link, darkMode }) => (
   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
     <Link
       to={link}
-      className={`flex items-center justify-between rounded-2xl px-6 py-5 hover:shadow transition ${
-        darkMode ? "bg-slate-700 text-white" : "bg-slate-50 text-slate-800"
-      }`}
+      className={`
+        flex items-center justify-between rounded-2xl px-6 py-5 transition-all backdrop-blur-lg
+        border border-white/10
+        ${darkMode 
+          ? "bg-white/5 hover:bg-white/10 text-white shadow-lg" 
+          : "bg-white/60 hover:bg-white/80 text-slate-800 shadow-md"}
+      `}
     >
       <div className="flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow ${
-          darkMode ? "bg-slate-600" : "bg-white"
-        }`}>
+        <div className={`
+          w-10 h-10 rounded-xl flex items-center justify-center
+          ${darkMode ? "bg-white/10" : "bg-white shadow"}
+        `}>
           {icon}
         </div>
         <span className="font-medium">{title}</span>
       </div>
+
       <span className="text-slate-400 text-xl">›</span>
     </Link>
   </motion.div>

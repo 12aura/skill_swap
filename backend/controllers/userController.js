@@ -133,32 +133,54 @@ exports.updateProfile = async (req, res) => {
 /* ------------------------------------
    UPDATE PUBLIC PROFILE
 ------------------------------------ */
+/* ------------------------------------
+   UPDATE PUBLIC PROFILE
+------------------------------------ */
 exports.updatePublicProfile = async (req, res) => {
   try {
-    const { tagline, bio, demoVideo } = req.body;
+    const {
+      tagline,
+      bio,
+      demoVideo,
+      skillLevel,
+      yearsOfExperience,
+      linkedin,
+      portfolio,
+      education,
+      skillsOffered,
+      skillTags,
+      availability, // <-- should be array of strings like ["Monday", "Wednesday"]
+    } = req.body;
+
+    // Ensure availability is an array of strings
+    // Normalize availability: ensure array of unique, trimmed strings
+const availabilityToSave = Array.isArray(availability)
+  ? availability.map(d => d.trim())
+  : typeof availability === "string"
+    ? availability.split(",").map(d => d.trim())
+    : [];
+
+const uniqueAvailability = [...new Set(availabilityToSave)]; // remove duplicates
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { tagline, bio, demoVideo },
+      {
+        tagline,
+        bio,
+        demoVideo,
+        skillLevel,
+        yearsOfExperience,
+        linkedin,
+        portfolio,
+        education,
+        skillsOffered,
+        skillTags,
+        availability: uniqueAvailability, // <-- save strings directly
+      },
       { new: true }
     );
 
     if (!user) return res.status(404).json({ msg: "User not found" });
-
-    // ⚡ Check profile complete after public profile update too
-    const isProfileComplete =
-      user.name &&
-      user.bio &&
-      user.avatar &&
-      user.skillsTeach?.length > 0;
-
-    if (isProfileComplete) {
-      const alreadyComplete = await hasEarnedOneTimeXP(req.user.id, "profile_complete");
-      if (!alreadyComplete) {
-        await awardXP(req.user.id, XP.COMPLETE_PROFILE, "Profile completed!");
-        await markOneTimeXP(req.user.id, "profile_complete");
-      }
-    }
 
     res.json({ msg: "Public profile updated successfully", user });
   } catch (err) {
@@ -166,7 +188,6 @@ exports.updatePublicProfile = async (req, res) => {
     res.status(500).json({ msg: "Failed to update public profile" });
   }
 };
-
 /* ------------------------------------
    GET ALL SKILLS
 ------------------------------------ */
@@ -249,13 +270,15 @@ exports.getStats = async (req, res) => {
 ------------------------------------ */
 exports.getPublicProfile = async (req, res) => {
   try {
-    // ✅ FIX 3: added avatar to select
     const user = await User.findById(req.params.id)
-      .select("name tagline bio demoVideo skillsTeach skillsLearn avatar averageRating totalReviews xp badges")
+      .select(
+        "name tagline bio education skillLevel yearsOfExperience linkedin portfolio availability demoVideo skillsTeach skillsLearn avatar averageRating totalReviews xp badges"
+      )
       .populate("skillsTeach", "name")
       .populate("skillsLearn", "name");
 
     if (!user) return res.status(404).json({ msg: "User not found" });
+
     res.json(user);
   } catch (err) {
     console.error("PUBLIC PROFILE ERROR:", err);

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import BasicInfo from "../components/settings/BasicInfo";
 import AccountInfo from "../components/settings/AccountInfo";
-import EditModal from "../components/settings/EditModal";
+import EditModal from "./EditModal";;
 import { DarkModeContext } from "../context/DarkModeContext";
 import { AuthContext } from "../context/AuthContext";
 

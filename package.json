@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@stream-io/video-client": "^1.44.3",
-    "@stream-io/video-react-sdk": "^1.33.3"
+    "@stream-io/video-react-sdk": "^1.33.3",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0"
   }
 }

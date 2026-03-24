@@ -115,6 +115,7 @@ app.use("/api/ai",            aiRoutes);                               // ✅ ad
 app.use("/api/notifications", notificationRoutes);                     // ✅ added
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/availability", require("./routes/availabilityRoutes"));
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {

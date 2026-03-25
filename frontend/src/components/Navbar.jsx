@@ -1,3 +1,8 @@
+
+
+// // export default Navbar;
+// import { IoNotificationsOutline } from "react-icons/io5";
+// import { HiOutlineCog6Tooth } from "react-icons/hi2";
 // import { Link, useNavigate } from "react-router-dom";
 // import { useContext, useState, useEffect } from "react";
 // import { AuthContext } from "../context/AuthContext";
@@ -6,6 +11,9 @@
 // import SunIcon from "../assets/imageofsun.png";
 // import AIChat from "../pages/AIChat";
 // import socket from "../socket";
+
+// /* NEW ICONS */
+// import { FiSettings, FiBell } from "react-icons/fi";
 
 // const Navbar = () => {
 //   const { user, logout } = useContext(AuthContext);
@@ -18,9 +26,7 @@
 
 //   const token = localStorage.getItem("token");
 
-//   /* ------------------------------
-//      LOAD NOTIFICATIONS + SOCKET
-//   ------------------------------ */
+//   /* ---------------- LOAD NOTIFICATIONS ---------------- */
 //   useEffect(() => {
 //     if (!user || !token) return;
 
@@ -51,35 +57,6 @@
 //     };
 //   }, [user, token]);
 
-//   /* -------- MARK AS READ -------- */
-//   const markAsRead = async (id) => {
-//     try {
-//       await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
-//         method: "PUT",
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setNotifications((prev) =>
-//         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
-//       );
-//     } catch (err) {
-//       console.error("Failed to mark notification as read:", err);
-//     }
-//   };
-
-//   /* -------- DELETE -------- */
-//   const deleteNotification = async (id, e) => {
-//     e.stopPropagation();
-//     try {
-//       await fetch(`http://localhost:5000/api/notifications/${id}`, {
-//         method: "DELETE",
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setNotifications((prev) => prev.filter((n) => n._id !== id));
-//     } catch (err) {
-//       console.error("Failed to delete notification:", err);
-//     }
-//   };
-
 //   const unreadCount = notifications.filter((n) => !n.read).length;
 
 //   return (
@@ -92,7 +69,9 @@
 //         {/* LOGO */}
 //         <Link to="/" className="flex items-center gap-2">
 //           <span className="text-3xl font-extrabold text-teal-500">S</span>
-//           <span className="text-2xl font-extrabold tracking-wide">SkillSwap</span>
+//           <span className="text-2xl font-extrabold tracking-wide">
+//             SkillSwap
+//           </span>
 //         </Link>
 
 //         {/* RIGHT SIDE */}
@@ -113,9 +92,7 @@
 //           {/* BROWSE SKILLS */}
 //           <Link
 //             to={user ? "/search" : "/login"}
-//             className={`hover:text-teal-600 transition ${
-//               darkMode ? "text-white" : "text-gray-700"
-//             }`}
+//             className="hover:text-teal-600 transition"
 //           >
 //             Browse Skills
 //           </Link>
@@ -124,128 +101,127 @@
 //           {user && (
 //             <Link
 //               to="/matches"
-//               className={`hover:text-teal-600 transition ${
-//                 darkMode ? "text-white" : "text-gray-700"
-//               }`}
+//               className="hover:text-teal-600 transition"
 //             >
 //               Skill Matches
 //             </Link>
 //           )}
 
-//           {/* LEADERBOARD */}
+//           {/* LEADERBOARD (trophy removed) */}
 //           {user && (
 //             <Link
 //               to="/leaderboard"
-//               className={`hover:text-teal-600 transition ${
-//                 darkMode ? "text-white" : "text-gray-700"
-//               }`}
+//               className="hover:text-teal-600 transition"
 //             >
-//               🏆 Leaderboard
+//               Leaderboard
 //             </Link>
 //           )}
 
-//           {user ? (
+//           {user && (
 //             <>
 //               {/* PROFILE */}
 //               <Link
 //                 to="/profile"
-//                 className={`hover:text-teal-600 transition ${
-//                   darkMode ? "text-white" : "text-gray-700"
-//                 }`}
+//                 className="hover:text-teal-600 transition"
 //               >
 //                 Profile
 //               </Link>
 
-//               {/* SETTINGS — icon only */}
-//               <Link
-//                 to="/settings"
-//                 title="Settings"
-//                 className={`text-xl hover:text-teal-600 transition ${
-//                   darkMode ? "text-white" : "text-gray-700"
-//                 }`}
-//               >
-//                 ⚙️
-//               </Link>
+//              {/* SETTINGS ICON */}
+// <Link
+//   to="/settings"
+//   className={`text-xl transition ${
+//     darkMode
+//       ? "text-slate-300 hover:text-teal-400"
+//       : "text-slate-600 hover:text-teal-500"
+//   }`}
+// >
+//   <HiOutlineCog6Tooth />
+// </Link>
 
-//               {/* 🔔 NOTIFICATION BELL */}
-//               <button
-//                 onClick={() => setShowNotifications(!showNotifications)}
-//                 className="relative text-lg"
-//               >
-//                 🔔
-//                 {unreadCount > 0 && (
-//                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1 rounded-full">
-//                     {unreadCount}
-//                   </span>
-//                 )}
-//               </button>
+// {/* NOTIFICATION BELL */}
+// <div className="relative">
+//   <button
+//     onClick={() => setShowNotifications(!showNotifications)}
+//     className={`text-xl transition ${
+//       darkMode
+//         ? "text-slate-300 hover:text-teal-400"
+//         : "text-slate-600 hover:text-teal-500"
+//     }`}
+//   >
+//     <IoNotificationsOutline />
 
-//               {/* NOTIFICATION DROPDOWN */}
-//               {showNotifications && (
-//                 <div className="absolute right-0 top-12 w-72 bg-white shadow-xl rounded-xl border p-3 z-50 text-gray-800">
-//                   <p className="font-semibold mb-2">Notifications</p>
+//     {unreadCount > 0 && (
+//       <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs px-1 rounded-full">
+//         {unreadCount}
+//       </span>
+//     )}
+//   </button>
 
-//                   {notifications.length === 0 ? (
-//                     <p className="text-sm text-gray-500">No notifications</p>
-//                   ) : (
-//                     notifications.slice(0, 5).map((n) => (
-//                       <div
-//                         key={n._id}
-//                         onClick={() => markAsRead(n._id)}
-//                         className={`p-3 border-b cursor-pointer rounded flex justify-between items-center hover:bg-gray-100 ${
-//                           !n.read ? "bg-blue-50" : ""
-//                         }`}
-//                       >
-//                         <div className="flex items-center gap-2">
-//                           <p className="text-sm font-medium">{n.message}</p>
-//                           {!n.read && (
-//                             <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
-//                           )}
-//                         </div>
-//                         <button
-//                           onClick={(e) => deleteNotification(n._id, e)}
-//                           className="text-red-500 text-xs hover:text-red-700 ml-2"
-//                         >
-//                           ✕
-//                         </button>
-//                       </div>
-//                     ))
-//                   )}
+//   {/* DROPDOWN */}
+//   {showNotifications && (
+//     <div
+//       className={`absolute right-0 mt-3 w-80 rounded-2xl shadow-2xl p-4 z-50 ${
+//         darkMode ? "bg-slate-800 text-white" : "bg-white text-slate-800"
+//       }`}
+//     >
+//       <p className="font-semibold mb-3">Notifications</p>
 
-//                   <Link
-//                     to="/notifications"
-//                     onClick={() => setShowNotifications(false)}
-//                     className="block text-center text-teal-600 text-sm mt-2 hover:underline"
-//                   >
-//                     View All
-//                   </Link>
-//                 </div>
-//               )}
+//       {notifications.length === 0 ? (
+//         <p className="text-sm text-slate-400">No notifications yet</p>
+//       ) : (
+//         notifications.slice(0, 5).map((n) => (
+//           <div
+//             key={n._id}
+//             onClick={() => markAsRead(n._id)}
+//             className={`p-3 rounded-xl mb-2 cursor-pointer transition ${
+//               darkMode
+//                 ? "hover:bg-slate-700"
+//                 : "hover:bg-slate-100"
+//             } ${!n.read ? "bg-teal-500/10" : ""}`}
+//           >
+//             <p className="text-sm">{n.message}</p>
+//           </div>
+//         ))
+//       )}
 
-//               {/* SKILL BUDDY */}
+//       <Link
+//         to="/notifications"
+//         onClick={() => setShowNotifications(false)}
+//         className="block text-center text-teal-500 mt-3 text-sm hover:underline"
+//       >
+//         View All Notifications
+//       </Link>
+//     </div>
+//   )}
+// </div>
+
+//               {/* SKILL BUDDY BUTTON */}
 //               <button
 //                 onClick={() => setShowChat(!showChat)}
-//                 className="bg-teal-500 text-white px-3 py-2 rounded-full hover:bg-teal-600"
+//                 className="bg-teal-500 text-white px-3 py-2 rounded-full hover:bg-teal-600 transition"
 //               >
 //                 Skill Buddy
 //               </button>
 
 //               {/* LOGOUT */}
 //               <button
-//                 onClick={() => {
-//                   logout();
-//                   navigate("/");
-//                 }}
-//                 className={`px-5 py-2 rounded-xl border font-bold transition ${
-//                   darkMode
-//                     ? "border-orange-400 text-orange-300 hover:bg-orange-500/20"
-//                     : "border-orange-400 text-orange-500 hover:bg-orange-50"
-//                 }`}
-//               >
-//                 Logout
-//               </button>
+//   onClick={() => {
+//     logout();
+//     navigate("/");
+//   }}
+//   className={`px-5 py-2 rounded-xl border font-semibold transition ${
+//     darkMode
+//       ? "border-teal-400 text-teal-300 hover:bg-teal-500/10"
+//       : "border-teal-500 text-teal-600 hover:bg-teal-50"
+//   }`}
+// >
+//   Logout
+// </button>
 //             </>
-//           ) : (
+//           )}
+
+//           {!user && (
 //             <Link
 //               to="/login"
 //               className={`px-4 py-2 border rounded-lg transition ${
@@ -271,6 +247,9 @@
 // };
 
 // export default Navbar;
+
+
+
 import { IoNotificationsOutline } from "react-icons/io5";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
@@ -281,6 +260,7 @@ import MoonIcon from "../assets/imageofmoon.png";
 import SunIcon from "../assets/imageofsun.png";
 import AIChat from "../pages/AIChat";
 import socket from "../socket";
+import { useNotifications } from "../context/NotificationContext"; // ✅ NEW
 
 /* NEW ICONS */
 import { FiSettings, FiBell } from "react-icons/fi";
@@ -288,6 +268,7 @@ import { FiSettings, FiBell } from "react-icons/fi";
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
+  const { unreadCount, clearUnread } = useNotifications(); // ✅ NEW
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
@@ -318,16 +299,38 @@ const Navbar = () => {
 
     fetchNotifications();
 
-    socket.on("notification", (data) => {
+    // ✅ Listen on "new_notification" (matches what backend emits)
+    socket.on("new_notification", (data) => {
       setNotifications((prev) => [data, ...prev]);
     });
 
     return () => {
-      socket.off("notification");
+      socket.off("new_notification"); // ✅ clean up correct event name
     };
   }, [user, token]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  /* ---------------- MARK AS READ ---------------- */
+  const markAsRead = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, read: true } : n))
+      );
+    } catch (err) {
+      console.error("Failed to mark as read", err);
+    }
+  };
+
+  /* ---------------- OPEN BELL ---------------- */
+  const handleBellClick = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications) {
+      clearUnread(); // ✅ reset live badge count when dropdown opens
+    }
+  };
 
   return (
     <>
@@ -369,20 +372,14 @@ const Navbar = () => {
 
           {/* SKILL MATCHES */}
           {user && (
-            <Link
-              to="/matches"
-              className="hover:text-teal-600 transition"
-            >
+            <Link to="/matches" className="hover:text-teal-600 transition">
               Skill Matches
             </Link>
           )}
 
-          {/* LEADERBOARD (trophy removed) */}
+          {/* LEADERBOARD */}
           {user && (
-            <Link
-              to="/leaderboard"
-              className="hover:text-teal-600 transition"
-            >
+            <Link to="/leaderboard" className="hover:text-teal-600 transition">
               Leaderboard
             </Link>
           )}
@@ -390,81 +387,83 @@ const Navbar = () => {
           {user && (
             <>
               {/* PROFILE */}
-              <Link
-                to="/profile"
-                className="hover:text-teal-600 transition"
-              >
+              <Link to="/profile" className="hover:text-teal-600 transition">
                 Profile
               </Link>
 
-             {/* SETTINGS ICON */}
-<Link
-  to="/settings"
-  className={`text-xl transition ${
-    darkMode
-      ? "text-slate-300 hover:text-teal-400"
-      : "text-slate-600 hover:text-teal-500"
-  }`}
->
-  <HiOutlineCog6Tooth />
-</Link>
+              {/* SETTINGS ICON */}
+              <Link
+                to="/settings"
+                className={`text-xl transition ${
+                  darkMode
+                    ? "text-slate-300 hover:text-teal-400"
+                    : "text-slate-600 hover:text-teal-500"
+                }`}
+              >
+                <HiOutlineCog6Tooth />
+              </Link>
 
-{/* NOTIFICATION BELL */}
-<div className="relative">
-  <button
-    onClick={() => setShowNotifications(!showNotifications)}
-    className={`text-xl transition ${
-      darkMode
-        ? "text-slate-300 hover:text-teal-400"
-        : "text-slate-600 hover:text-teal-500"
-    }`}
-  >
-    <IoNotificationsOutline />
+              {/* NOTIFICATION BELL */}
+              <div className="relative">
+                <button
+                  onClick={handleBellClick} // ✅ uses new handler
+                  className={`text-xl transition ${
+                    darkMode
+                      ? "text-slate-300 hover:text-teal-400"
+                      : "text-slate-600 hover:text-teal-500"
+                  }`}
+                >
+                  <IoNotificationsOutline />
 
-    {unreadCount > 0 && (
-      <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs px-1 rounded-full">
-        {unreadCount}
-      </span>
-    )}
-  </button>
+                  {/* ✅ unreadCount comes from context (live via socket) */}
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs px-1 rounded-full">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
 
-  {/* DROPDOWN */}
-  {showNotifications && (
-    <div
-      className={`absolute right-0 mt-3 w-80 rounded-2xl shadow-2xl p-4 z-50 ${
-        darkMode ? "bg-slate-800 text-white" : "bg-white text-slate-800"
-      }`}
-    >
-      <p className="font-semibold mb-3">Notifications</p>
+                {/* DROPDOWN */}
+                {showNotifications && (
+                  <div
+                    className={`absolute right-0 mt-3 w-80 rounded-2xl shadow-2xl p-4 z-50 ${
+                      darkMode
+                        ? "bg-slate-800 text-white"
+                        : "bg-white text-slate-800"
+                    }`}
+                  >
+                    <p className="font-semibold mb-3">Notifications</p>
 
-      {notifications.length === 0 ? (
-        <p className="text-sm text-slate-400">No notifications yet</p>
-      ) : (
-        notifications.slice(0, 5).map((n) => (
-          <div
-            key={n._id}
-            onClick={() => markAsRead(n._id)}
-            className={`p-3 rounded-xl mb-2 cursor-pointer transition ${
-              darkMode
-                ? "hover:bg-slate-700"
-                : "hover:bg-slate-100"
-            } ${!n.read ? "bg-teal-500/10" : ""}`}
-          >
-            <p className="text-sm">{n.message}</p>
-          </div>
-        ))
-      )}
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-slate-400">
+                        No notifications yet
+                      </p>
+                    ) : (
+                      notifications.slice(0, 5).map((n) => (
+                        <div
+                          key={n._id}
+                          onClick={() => markAsRead(n._id)}
+                          className={`p-3 rounded-xl mb-2 cursor-pointer transition ${
+                            darkMode
+                              ? "hover:bg-slate-700"
+                              : "hover:bg-slate-100"
+                          } ${!n.read ? "bg-teal-500/10" : ""}`}
+                        >
+                          <p className="text-sm">{n.message}</p>
+                        </div>
+                      ))
+                    )}
 
-      <Link
-        to="/notifications"
-        onClick={() => setShowNotifications(false)}
-        className="block text-center text-teal-500 mt-3 text-sm hover:underline"
-      >
-        View All Notifications
-      </Link>
-    </div>
-  )}
-</div>
+                    <Link
+                      to="/notifications"
+                      onClick={() => setShowNotifications(false)}
+                      className="block text-center text-teal-500 mt-3 text-sm hover:underline"
+                    >
+                      View All Notifications
+                    </Link>
+                  </div>
+                )}
+              </div>
 
               {/* SKILL BUDDY BUTTON */}
               <button
@@ -476,18 +475,18 @@ const Navbar = () => {
 
               {/* LOGOUT */}
               <button
-  onClick={() => {
-    logout();
-    navigate("/");
-  }}
-  className={`px-5 py-2 rounded-xl border font-semibold transition ${
-    darkMode
-      ? "border-teal-400 text-teal-300 hover:bg-teal-500/10"
-      : "border-teal-500 text-teal-600 hover:bg-teal-50"
-  }`}
->
-  Logout
-</button>
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+                className={`px-5 py-2 rounded-xl border font-semibold transition ${
+                  darkMode
+                    ? "border-teal-400 text-teal-300 hover:bg-teal-500/10"
+                    : "border-teal-500 text-teal-600 hover:bg-teal-50"
+                }`}
+              >
+                Logout
+              </button>
             </>
           )}
 

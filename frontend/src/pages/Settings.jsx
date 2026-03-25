@@ -62,7 +62,8 @@ const Settings = () => {
   /* SAVE FIELD */
   const handleSave = async (field, value) => {
     try {
-      const payload = field === "password" ? { password: value } : { [field]: value };
+      const payload =
+        field === "password" ? { password: value } : { [field]: value };
 
       const res = await axios.put(
         "http://localhost:5000/api/user/update",
@@ -90,7 +91,11 @@ const Settings = () => {
   /* LOADING */
   if (pageLoading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#0f172a]" : "bg-gray-50"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          darkMode ? "bg-[#0f172a]" : "bg-gray-50"
+        }`}
+      >
         <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -99,7 +104,11 @@ const Settings = () => {
   /* ERROR */
   if (error) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"}`}>
+      <div
+        className={`min-h-screen flex items-center justify-center ${
+          darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"
+        }`}
+      >
         {error}
       </div>
     );
@@ -112,50 +121,73 @@ const Settings = () => {
 
   return (
     <>
-      <div className={`min-h-screen px-6 py-10 ${darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"}`}>
+      <div
+        className={`min-h-screen px-6 py-10 ${
+          darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"
+        }`}
+      >
         <div className="max-w-6xl mx-auto">
-
           {/* HEADER */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6"
+            className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-6"
           >
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-                <SettingsIcon className="text-teal-500" /> Settings
+              <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 tracking-tight">
+                <SettingsIcon className="text-teal-500" />
+                Settings
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+
+              <p className="text-base text-gray-400 mt-2">
                 Manage your profile and account preferences
               </p>
             </div>
 
             {saved && (
-              <div className="px-5 py-2 rounded-xl bg-teal-500/10 text-teal-500 text-sm font-semibold">
+              <div className="px-6 py-2 rounded-xl bg-teal-500/10 text-teal-500 text-sm font-semibold shadow">
                 Changes saved successfully ✓
               </div>
             )}
           </motion.div>
 
-          <div className="grid md:grid-cols-4 gap-8">
-
+          <div className="grid md:grid-cols-4 gap-10">
             {/* SIDEBAR */}
-            <div className={`rounded-3xl p-6 ${darkMode ? "bg-slate-900" : "bg-white"} shadow-sm`}>
+            <div
+              className={`rounded-3xl p-6 backdrop-blur-lg border ${
+                darkMode
+                  ? "bg-white/5 border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
+                  : "bg-white/80 border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.08)]"
+              }`}
+            >
+              {/* PROFILE CARD */}
+              <div className="text-center mb-10">
+                <div className="relative w-24 h-24 mx-auto mb-4">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 blur-xl opacity-40"></div>
 
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 rounded-full bg-teal-500 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 overflow-hidden shadow-md">
-                  {user?.profilePic ? (
-                    <img src={user.profilePic} alt="profile" className="w-full h-full object-cover" />
-                  ) : (
-                    user?.name?.[0]?.toUpperCase() || "U"
-                  )}
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden shadow-xl border-4 border-white/10">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-teal-500 flex items-center justify-center text-white text-3xl font-bold">
+                        {user?.name?.[0]?.toUpperCase() || "U"}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <p className="font-semibold text-base">{user?.name || "User"}</p>
-                <p className="text-xs text-gray-500 mt-1">{accountData?.email}</p>
+                <p className="font-semibold text-lg">{user?.name || "User"}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {accountData?.email}
+                </p>
               </div>
 
-              <div className="flex flex-col gap-2">
+              {/* TABS */}
+              <div className="flex flex-col gap-3">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
 
@@ -164,11 +196,13 @@ const Settings = () => {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-sm font-medium
-                        ${activeTab === tab.id
-                          ? "bg-teal-500 text-white shadow"
+                      ${
+                        activeTab === tab.id
+                          ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg scale-[1.02]"
                           : darkMode
-                          ? "text-gray-300 hover:bg-slate-800"
-                          : "text-gray-700 hover:bg-gray-100"}`}
+                          ? "text-gray-300 hover:bg-white/5 hover:scale-[1.01]"
+                          : "text-gray-700 hover:bg-gray-100 hover:scale-[1.01]"
+                      }`}
                     >
                       <Icon className="w-4 h-4" />
                       {tab.label}
@@ -183,7 +217,12 @@ const Settings = () => {
               key={activeTab}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`md:col-span-3 rounded-3xl p-8 ${darkMode ? "bg-slate-900" : "bg-white"} shadow-sm border ${darkMode ? "border-slate-800" : "border-gray-100"}`}
+              className={`md:col-span-3 rounded-3xl p-10 backdrop-blur-lg border
+              ${
+                darkMode
+                  ? "bg-white/5 border-white/10 shadow-[0_10px_50px_rgba(0,0,0,0.45)]"
+                  : "bg-white/80 border-gray-200 shadow-[0_10px_50px_rgba(0,0,0,0.08)]"
+              }`}
             >
               {activeTab === "basic" && (
                 <BasicInfo
@@ -213,7 +252,11 @@ const Settings = () => {
       {editField && (
         <EditModal
           field={editField}
-          currentValue={activeTab === "basic" ? basicData[editField] : accountData[editField]}
+          currentValue={
+            activeTab === "basic"
+              ? basicData[editField]
+              : accountData[editField]
+          }
           onSave={handleSave}
           onClose={() => setEditField(null)}
         />

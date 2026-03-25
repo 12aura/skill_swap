@@ -279,7 +279,6 @@ import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
 import MoonIcon from "../assets/imageofmoon.png";
 import SunIcon from "../assets/imageofsun.png";
-import AIChat from "../pages/AIChat";
 import socket from "../socket";
 
 /* NEW ICONS */
@@ -466,13 +465,7 @@ const Navbar = () => {
   )}
 </div>
 
-              {/* SKILL BUDDY BUTTON */}
-              <button
-                onClick={() => setShowChat(!showChat)}
-                className="bg-teal-500 text-white px-3 py-2 rounded-full hover:bg-teal-600 transition"
-              >
-                Skill Buddy
-              </button>
+          
 
               {/* LOGOUT */}
               <button

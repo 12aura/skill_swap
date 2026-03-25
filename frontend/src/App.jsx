@@ -143,6 +143,7 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SkillBuddy from "./pages/SkillBuddy";
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
@@ -165,7 +166,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/notifications" element={<Notifications />} />
-
+<Route path="/skill-buddy" element={<SkillBuddy />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />

@@ -7,7 +7,7 @@ import { FaCrown } from "react-icons/fa";
 import { GiTrophyCup } from "react-icons/gi";
 import { MdWorkspacePremium } from "react-icons/md";
 import axios from "axios";
-
+import SkillBuddyRobot from "./SkillBuddyRobot";
 import {
   FaHandshake,
   FaUsers,
@@ -385,6 +385,8 @@ const Landing = () => {
           © 2026 SkillSwap · Learn by Sharing
         </div>
       </footer>
+       {/* 🤖 AI ROBOT */}
+      <SkillBuddyRobot onOpen={() => navigate("/skill-buddy")} />
     </div>
   );
 };

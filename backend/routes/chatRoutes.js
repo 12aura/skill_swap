@@ -1,8 +1,20 @@
+// const express = require("express");
+// const router = express.Router();
+// const { getStreamToken, upsertStreamUser } = require("../controllers/chatController");
+// const protect = require("../middleware/authMiddleware");
+
+// router.get("/token", protect, getStreamToken);
+// router.post("/upsert-user/:id", protect, upsertStreamUser); 
+// module.exports = router;
+
+
 const express = require("express");
 const router = express.Router();
-const { getStreamToken, upsertStreamUser } = require("../controllers/chatController");
+const { getStreamToken, upsertStreamUser, streamWebhook } = require("../controllers/chatController");
 const protect = require("../middleware/authMiddleware");
 
 router.get("/token", protect, getStreamToken);
-router.post("/upsert-user/:id", protect, upsertStreamUser); 
+router.post("/upsert-user/:id", protect, upsertStreamUser);
+router.post("/webhook", streamWebhook); // ✅ NEW — no auth middleware, Stream calls this directly
+
 module.exports = router;

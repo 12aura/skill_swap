@@ -1,3 +1,8 @@
+
+
+
+
+
 // import React, { useContext } from "react";
 // import { Routes, Route, Navigate } from "react-router-dom";
 // import "@stream-io/video-react-sdk/dist/css/styles.css";
@@ -27,7 +32,8 @@
 // import ChatPage from "./pages/ChatPage";
 // import CompletedSessions from "./pages/Completedsessions";
 // import ScheduleSession from "./pages/ScheduleSession";
-
+// import PostCallReview from "./pages/PostCallReview";
+// import LeaderboardPage from "./pages/LeaderboardPage";
 // import { DarkModeContext } from "./context/DarkModeContext";
 // import { AuthContext } from "./context/AuthContext";
 // import ProtectedRoute from "./components/ProtectedRoute";
@@ -76,7 +82,7 @@
 //         <Route path="/forgot-password" element={<ForgotPassword />} />
 
 //         <Route path="/matches" element={<SkillMatch />} />
-
+//         <Route path="/leaderboard" element={<LeaderboardPage />} />
 //         <Route
 //           path="/sessions/:id/schedule"
 //           element={
@@ -98,6 +104,16 @@
 //           }
 //         />
 
+//         {/* ✅ Post-call review page — shown to both users after video call ends */}
+//         <Route
+//           path="/review/:sessionId"
+//           element={
+//             <ProtectedRoute>
+//               <PostCallReview />
+//             </ProtectedRoute>
+//           }
+//         />
+
 //         <Route path="*" element={<Navigate to="/" />} />
 //       </Routes>
 //     </div>
@@ -108,8 +124,7 @@
 
 
 
-
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 
@@ -140,13 +155,37 @@ import CompletedSessions from "./pages/Completedsessions";
 import ScheduleSession from "./pages/ScheduleSession";
 import PostCallReview from "./pages/PostCallReview";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import BadgeCelebration from "./components/BadgeCelebration"; // ✅ NEW
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import socket from "./socket"; // ✅ your existing socket.js
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
-  const { loading } = useContext(AuthContext);
+  const { loading, user } = useContext(AuthContext);
+
+  // ✅ Join socket room so backend can send badge events to THIS user
+  useEffect(() => {
+    if (!user?._id) return;
+
+    // Tell the server which room this user belongs to
+    socket.emit("join", user._id);
+
+    // Listen for badge-earned events from the backend
+    const handleBadgeEarned = (badge) => {
+      // Fire window event → BadgeCelebration picks it up instantly
+      window.dispatchEvent(
+        new CustomEvent("skillswap:badge-earned", { detail: badge })
+      );
+    };
+
+    socket.on("badge-earned", handleBadgeEarned);
+
+    return () => {
+      socket.off("badge-earned", handleBadgeEarned);
+    };
+  }, [user?._id]);
 
   if (loading) {
     return (
@@ -158,6 +197,10 @@ const App = () => {
 
   return (
     <div className={darkMode ? "bg-slate-900 text-white min-h-screen" : "bg-white text-gray-900 min-h-screen"}>
+
+      {/* ✅ Celebration overlay — sits above everything, invisible until a badge fires */}
+      <BadgeCelebration />
+
       <Navbar />
 
       <Routes>
@@ -189,13 +232,10 @@ const App = () => {
 
         <Route path="/matches" element={<SkillMatch />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+
         <Route
           path="/sessions/:id/schedule"
-          element={
-            <ProtectedRoute>
-              <ScheduleSession />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><ScheduleSession /></ProtectedRoute>}
         />
 
         <Route path="/video-call/:roomId" element={<VideoCall />} />
@@ -203,21 +243,12 @@ const App = () => {
 
         <Route
           path="/chat/:userId"
-          element={
-            <ProtectedRoute>
-              <ChatPage />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><ChatPage /></ProtectedRoute>}
         />
 
-        {/* ✅ Post-call review page — shown to both users after video call ends */}
         <Route
           path="/review/:sessionId"
-          element={
-            <ProtectedRoute>
-              <PostCallReview />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><PostCallReview /></ProtectedRoute>}
         />
 
         <Route path="*" element={<Navigate to="/" />} />
@@ -227,3 +258,5 @@ const App = () => {
 };
 
 export default App;
+
+

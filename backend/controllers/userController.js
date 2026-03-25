@@ -170,9 +170,16 @@ exports.updatePublicProfile = async (req, res) => {
 /* ------------------------------------
    GET ALL SKILLS
 ------------------------------------ */
+/* ------------------------------------
+   GET ALL SKILLS
+------------------------------------ */
 exports.getAllSkills = async (req, res) => {
   try {
-    const users = await User.find().select("name skillsTeach").lean();
+    // ✅ avatar added back to select
+    const users = await User.find()
+      .select("name avatar skillsTeach")
+      .lean();
+
     const skillMap = {};
 
     users.forEach((user) => {
@@ -181,7 +188,13 @@ exports.getAllSkills = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(skillId)) return;
         const id = skillId.toString();
         if (!skillMap[id]) skillMap[id] = { mentors: [] };
-        skillMap[id].mentors.push({ id: user._id, name: user.name });
+
+        // ✅ avatar added back to mentor object
+        skillMap[id].mentors.push({
+          id:     user._id,
+          name:   user.name,
+          avatar: user.avatar || null,
+        });
       });
     });
 
@@ -198,7 +211,6 @@ exports.getAllSkills = async (req, res) => {
     res.status(500).json({ msg: "Failed to load skills" });
   }
 };
-
 /* ------------------------------------
    GET MY PROFILE
 ------------------------------------ */

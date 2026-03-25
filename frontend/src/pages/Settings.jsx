@@ -2,9 +2,11 @@ import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import BasicInfo from "../components/settings/BasicInfo";
 import AccountInfo from "../components/settings/AccountInfo";
-import EditModal from "./EditModal";;
+import EditModal from "./EditModal";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { AuthContext } from "../context/AuthContext";
+import { motion } from "framer-motion";
+import { Settings as SettingsIcon, User, Shield } from "lucide-react";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("basic");
@@ -20,7 +22,7 @@ const Settings = () => {
 
   const token = localStorage.getItem("token");
 
-  // ─── Fetch profile ────────────────────────────────────────
+  /* FETCH PROFILE */
   useEffect(() => {
     if (!token) {
       setError("You are not logged in.");
@@ -34,15 +36,17 @@ const Settings = () => {
       })
       .then((res) => {
         const u = res.data.user;
+
         setBasicData({
-          gender:    u.gender    || "",
-          location:  u.location  || "",
-          birthday:  u.birthday  || "",
-          work:      u.work      || "",
+          gender: u.gender || "",
+          location: u.location || "",
+          birthday: u.birthday || "",
+          work: u.work || "",
           education: u.education || "",
         });
+
         setAccountData({
-          email:    u.email    || "",
+          email: u.email || "",
           password: "********",
           username: u.username || "",
           language: u.language || "English",
@@ -55,15 +59,10 @@ const Settings = () => {
       .finally(() => setPageLoading(false));
   }, [token]);
 
-  // ─── Save field ───────────────────────────────────────────
+  /* SAVE FIELD */
   const handleSave = async (field, value) => {
     try {
-      const isBasic = activeTab === "basic";
-
-      const payload =
-        field === "password"
-          ? { password: value }
-          : { [field]: value };
+      const payload = field === "password" ? { password: value } : { [field]: value };
 
       const res = await axios.put(
         "http://localhost:5000/api/user/update",
@@ -71,7 +70,7 @@ const Settings = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (isBasic) {
+      if (activeTab === "basic") {
         setBasicData((prev) => ({ ...prev, [field]: value }));
       } else {
         setAccountData((prev) => ({ ...prev, [field]: value }));
@@ -88,118 +87,125 @@ const Settings = () => {
     }
   };
 
-  // ─── Loading ──────────────────────────────────────────────
+  /* LOADING */
   if (pageLoading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center
-        ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}>
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent
-          rounded-full animate-spin" />
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#0f172a]" : "bg-gray-50"}`}>
+        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  // ─── Error ────────────────────────────────────────────────
+  /* ERROR */
   if (error) {
     return (
-      <div className={`min-h-screen flex items-center justify-center
-        ${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-800"}`}>
-        <p>{error}</p>
+      <div className={`min-h-screen flex items-center justify-center ${darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"}`}>
+        {error}
       </div>
     );
   }
 
-  const TABS = [
-    { id: "basic",   label: "Basic Info" },
-    { id: "account", label: "Account Information" },
+  const tabs = [
+    { id: "basic", label: "Basic Info", icon: User },
+    { id: "account", label: "Account & Security", icon: Shield },
   ];
 
   return (
-    <div className={`min-h-screen p-10 ${darkMode ? "bg-gray-900" : "bg-gray-100"}`}>
+    <>
+      <div className={`min-h-screen px-6 py-10 ${darkMode ? "bg-[#0f172a] text-white" : "bg-gray-50 text-gray-900"}`}>
+        <div className="max-w-6xl mx-auto">
 
-      {/* PAGE HEADER */}
-      <div className="max-w-6xl mx-auto mb-6 flex items-center justify-between">
-        <div>
-          <h1 className={`text-2xl font-semibold mb-2
-            ${darkMode ? "text-gray-100" : "text-gray-900"}`}>
-            Profile Settings
-          </h1>
-          <p className="text-sm text-gray-500">
-            Manage your account details and preferences.
-          </p>
-        </div>
-        {saved && (
-          <span className="text-sm text-teal-500 font-medium animate-pulse">
-            ✓ Changes saved
-          </span>
-        )}
-      </div>
-
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-8">
-
-        {/* LEFT SIDEBAR */}
-        <div className={`w-full md:w-1/4 p-6 rounded-xl shadow
-          ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-
-          {/* Mini profile */}
-          <div className={`flex items-center gap-3 mb-6 pb-4 border-b
-            ${darkMode ? "border-gray-700" : "border-gray-200"}`}>
-            <div className="w-10 h-10 rounded-full bg-teal-500 flex items-center
-              justify-center text-white font-bold text-sm shrink-0">
-              {user?.name?.[0]?.toUpperCase() || "U"}
-            </div>
-            <div className="min-w-0">
-              <p className={`text-sm font-semibold truncate
-                ${darkMode ? "text-gray-100" : "text-gray-800"}`}>
-                {user?.name || "User"}
-              </p>
-              <p className="text-xs text-teal-500 truncate">
-                {accountData?.email}
+          {/* HEADER */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center md:justify-between mb-10 gap-6"
+          >
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
+                <SettingsIcon className="text-teal-500" /> Settings
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Manage your profile and account preferences
               </p>
             </div>
-          </div>
 
-          {/* Tabs */}
-          <div className="flex flex-col space-y-2">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-4 py-3 rounded-lg transition text-sm font-medium
-                  ${activeTab === tab.id
-                    ? "bg-teal-500 text-white"
-                    : darkMode
-                      ? "text-gray-300 hover:bg-gray-700"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+            {saved && (
+              <div className="px-5 py-2 rounded-xl bg-teal-500/10 text-teal-500 text-sm font-semibold">
+                Changes saved successfully ✓
+              </div>
+            )}
+          </motion.div>
 
-        {/* RIGHT CONTENT */}
-        <div className={`w-full md:w-3/4 p-6 rounded-xl shadow
-          ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-          {activeTab === "basic" && (
-            <BasicInfo
-              data={basicData}
-              onEdit={(field) => {
-                setActiveTab("basic");
-                setEditField(field);
-              }}
-            />
-          )}
-          {activeTab === "account" && (
-            <AccountInfo
-              data={accountData}
-              onEdit={(field) => {
-                setActiveTab("account");
-                setEditField(field);
-              }}
-            />
-          )}
+          <div className="grid md:grid-cols-4 gap-8">
+
+            {/* SIDEBAR */}
+            <div className={`rounded-3xl p-6 ${darkMode ? "bg-slate-900" : "bg-white"} shadow-sm`}>
+
+              <div className="text-center mb-8">
+                <div className="w-20 h-20 rounded-full bg-teal-500 flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 overflow-hidden shadow-md">
+                  {user?.profilePic ? (
+                    <img src={user.profilePic} alt="profile" className="w-full h-full object-cover" />
+                  ) : (
+                    user?.name?.[0]?.toUpperCase() || "U"
+                  )}
+                </div>
+
+                <p className="font-semibold text-base">{user?.name || "User"}</p>
+                <p className="text-xs text-gray-500 mt-1">{accountData?.email}</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {tabs.map((tab) => {
+                  const Icon = tab.icon;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all text-sm font-medium
+                        ${activeTab === tab.id
+                          ? "bg-teal-500 text-white shadow"
+                          : darkMode
+                          ? "text-gray-300 hover:bg-slate-800"
+                          : "text-gray-700 hover:bg-gray-100"}`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* RIGHT CONTENT */}
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`md:col-span-3 rounded-3xl p-8 ${darkMode ? "bg-slate-900" : "bg-white"} shadow-sm border ${darkMode ? "border-slate-800" : "border-gray-100"}`}
+            >
+              {activeTab === "basic" && (
+                <BasicInfo
+                  data={basicData}
+                  onEdit={(field) => {
+                    setActiveTab("basic");
+                    setEditField(field);
+                  }}
+                />
+              )}
+
+              {activeTab === "account" && (
+                <AccountInfo
+                  data={accountData}
+                  onEdit={(field) => {
+                    setActiveTab("account");
+                    setEditField(field);
+                  }}
+                />
+              )}
+            </motion.div>
+          </div>
         </div>
       </div>
 
@@ -207,16 +213,12 @@ const Settings = () => {
       {editField && (
         <EditModal
           field={editField}
-          currentValue={
-            activeTab === "basic"
-              ? basicData[editField]
-              : accountData[editField]
-          }
+          currentValue={activeTab === "basic" ? basicData[editField] : accountData[editField]}
           onSave={handleSave}
           onClose={() => setEditField(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

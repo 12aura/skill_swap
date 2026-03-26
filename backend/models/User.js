@@ -145,8 +145,6 @@
 // module.exports = mongoose.model("User", userSchema);
 
 
-
-
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
@@ -248,6 +246,39 @@ const userSchema = new mongoose.Schema(
       default: "English",
     },
 
+    // -------- PUBLIC PROFILE ADDITIONAL FIELDS --------
+    skillLevel: {
+      type: String,
+      default: "",
+    },
+
+    yearsOfExperience: {
+      type: Number,
+      default: 0,
+    },
+
+    linkedin: {
+      type: String,
+      default: "",
+    },
+
+    portfolio: {
+      type: String,
+      default: "",
+    },
+
+    skillsOffered: {
+      type: [String],
+      default: [],
+    },
+
+    skillTags: {
+      type: [String],
+      default: [],
+    },
+
+    availability: [{ type: String }],
+
     // -------- GAMIFICATION --------
     xp: {
       type: Number,
@@ -261,15 +292,15 @@ const userSchema = new mongoose.Schema(
 
     badges: [
       {
-        id:          { type: String, required: true },
-        title:       { type: String, required: true },
+        id: { type: String, required: true },
+        title: { type: String, required: true },
         description: { type: String, default: "" },
-        icon:        { type: String, default: "🏅" },
-        earnedAt:    { type: Date,   default: Date.now },
+        icon: { type: String, default: "🏅" },
+        earnedAt: { type: Date, default: Date.now },
       },
     ],
 
-    // ✅ NEW — tracks which badge celebrations have already been shown
+    // Tracks shown badge popups
     seenBadgeIds: {
       type: [String],
       default: [],

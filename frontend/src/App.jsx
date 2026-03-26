@@ -259,9 +259,6 @@
 // };
 
 // export default App;
-
-
-
 import React, { useContext, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
@@ -294,10 +291,11 @@ import ScheduleSession from "./pages/ScheduleSession";
 import PostCallReview from "./pages/PostCallReview";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import BadgeCelebration from "./components/BadgeCelebration";
-import NotificationToast from "./components/NotificationToast"; // ✅ NEW
+import NotificationToast from "./components/NotificationToast";
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SkillBuddy from "./pages/SkillBuddy";
 import socket from "./socket";
 
 const App = () => {
@@ -334,7 +332,7 @@ const App = () => {
     <div className={darkMode ? "bg-slate-900 text-white min-h-screen" : "bg-white text-gray-900 min-h-screen"}>
 
       <BadgeCelebration />
-      <NotificationToast /> {/* ✅ NEW — toast popups render here */}
+      <NotificationToast />
 
       <Navbar />
 
@@ -343,7 +341,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/notifications" element={<Notifications />} />
-
+        <Route path="/skill-buddy" element={<SkillBuddy />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />
@@ -370,7 +368,11 @@ const App = () => {
 
         <Route
           path="/sessions/:id/schedule"
-          element={<ProtectedRoute><ScheduleSession /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <ScheduleSession />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="/video-call/:roomId" element={<VideoCall />} />
@@ -378,12 +380,21 @@ const App = () => {
 
         <Route
           path="/chat/:userId"
-          element={<ProtectedRoute><ChatPage /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
         />
 
+        {/* ✅ Post-call review page — shown to both users after video call ends */}
         <Route
           path="/review/:sessionId"
-          element={<ProtectedRoute><PostCallReview /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <PostCallReview />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="*" element={<Navigate to="/" />} />
@@ -393,6 +404,3 @@ const App = () => {
 };
 
 export default App;
-
-
-

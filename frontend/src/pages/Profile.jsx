@@ -1,3 +1,4 @@
+import { LayoutDashboard, Sparkles, MessageCircle, CalendarDays } from "lucide-react";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -5,14 +6,14 @@ import axios from "axios";
 import { DarkModeContext } from "../context/DarkModeContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ReviewsSection from "../components/ReviewsSection";
-
+const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "reviews"
+  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "reviews" | "availability"
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -211,21 +212,25 @@ const Profile = () => {
                   <span className="text-white text-sm font-semibold">{user.xp} XP</span>
                 </div>
               )}
+<div className="mt-6 flex flex-col gap-3 w-full items-center">
 
-              <div className="mt-6 flex flex-col gap-3 w-full items-center">
-                <Link
-                  to="/edit-profile"
-                  className="px-6 py-2 w-48 rounded-full border border-white hover:bg-white hover:text-teal-600 transition text-sm"
-                >
-                  Edit Profile
-                </Link>
-                <Link
-                  to="/edit-public-profile"
-                  className="px-6 py-2 w-48 rounded-full bg-white text-teal-600 hover:bg-teal-50 transition text-sm font-medium"
-                >
-                  Edit Public Profile
-                </Link>
-              </div>
+  {/* Primary Button */}
+  <Link
+    to="/edit-profile"
+    className="px-6 py-2 w-48 rounded-full bg-white text-teal-600 font-medium text-sm shadow-md hover:scale-105 transition"
+  >
+    Edit Profile
+  </Link>
+
+  {/* Secondary Button */}
+  <Link
+    to="/edit-public-profile"
+    className="px-6 py-2 w-48 rounded-full border bg-white text-teal-600 font-medium text-sm shadow-md hover:scale-105 transition"
+  >
+    Edit Public Profile
+  </Link>
+
+</div>
 
               <p className="text-sm opacity-90 mt-12">
                 Welcome to SkillSwap!
@@ -249,6 +254,7 @@ const Profile = () => {
                 {[
                   { key: "profile", label: "Overview" },
                   { key: "reviews", label: `Reviews${user.totalReviews > 0 ? ` (${user.totalReviews})` : ""}` },
+                  { key: "availability", label: "Availability" },
                 ].map((tab) => (
                   <button
                     key={tab.key}
@@ -277,11 +283,11 @@ const Profile = () => {
                     transition={{ duration: 0.2 }}
                     className="space-y-6"
                   >
-                    <ProfileItem title="Dashboard" icon="📊" link="/dashboard" darkMode={darkMode} />
-                    <ProfileItem title="Skills"    icon="✨" link="/skills"    darkMode={darkMode} />
-                    <ProfileItem title="Messages"  icon="💬" link="/messages"  darkMode={darkMode} />
+                   <ProfileItem title="Dashboard" icon={<LayoutDashboard size={20} />} link="/dashboard" darkMode={darkMode} />
+<ProfileItem title="Skills"    icon={<Sparkles size={20} />}        link="/skills"    darkMode={darkMode} />
+<ProfileItem title="Messages"  icon={<MessageCircle size={20} />}   link="/messages"  darkMode={darkMode} />
                   </motion.div>
-                ) : (
+                ) : activeTab === "reviews" ? (
                   <motion.div
                     key="reviews"
                     initial={{ opacity: 0, y: 8 }}
@@ -290,6 +296,45 @@ const Profile = () => {
                     transition={{ duration: 0.2 }}
                   >
                     <ReviewsSection userId={user._id} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="availability"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-4"
+                  >
+<h2 className="text-lg font-semibold">Available Days</h2>
+
+{user.availability && user.availability.length > 0 ? (
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+    {user.availability
+      .slice()
+      .sort((a, b) => weekdays.indexOf(a) - weekdays.indexOf(b))
+      .map((day, idx) => (
+        <div
+          key={idx}
+          className={`
+            flex items-center gap-3 px-5 py-4 rounded-2xl backdrop-blur-md
+            border border-white/10 transition-all
+            ${
+              darkMode
+                ? "bg-white/5 hover:bg-white/10"
+                : "bg-white shadow hover:shadow-md"
+            }
+          `}
+        >
+          <CalendarDays size={18} className="text-teal-500" />
+          <span className="font-medium">{day}</span>
+        </div>
+      ))}
+  </div>
+) : (
+  <p className="text-slate-500">No availability set.</p>
+)}
+                   
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -305,20 +350,26 @@ const ProfileItem = ({ title, icon, link, darkMode }) => (
   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
     <Link
       to={link}
-      className={`flex items-center justify-between rounded-2xl px-6 py-5 transition hover:shadow ${
-        darkMode ? "bg-slate-700 text-white" : "bg-slate-50 text-slate-800"
-      }`}
+      className={`
+        flex items-center justify-between rounded-2xl px-6 py-5 transition-all backdrop-blur-lg
+        border border-white/10
+        ${darkMode 
+          ? "bg-white/5 hover:bg-white/10 text-white shadow-lg" 
+          : "bg-white/60 hover:bg-white/80 text-slate-800 shadow-md"}
+      `}
     >
       <div className="flex items-center gap-4">
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center shadow ${
-            darkMode ? "bg-slate-600" : "bg-white"
-          }`}
+          className={`
+            w-10 h-10 rounded-xl flex items-center justify-center
+            ${darkMode ? "bg-white/10" : "bg-white shadow"}
+          `}
         >
           {icon}
         </div>
         <span className="font-medium">{title}</span>
       </div>
+
       <span className="text-slate-400 text-xl">›</span>
     </Link>
   </motion.div>

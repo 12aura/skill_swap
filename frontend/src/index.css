@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "leaflet/dist/leaflet.css";
 
 .str-chat__channel {
   display: flex;
@@ -32,48 +31,4 @@
 
 .str-chat__message-input {
   border-top: 1px solid #ddd;
-}
-
-/* 🔔 Bell popup */
-.bell-popup {
-  position: absolute;
-  top: 140%;
-  right: 0;
-  min-width: 220px;
-  max-width: 280px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  z-index: 9999;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  animation: bellPopIn 2.5s ease forwards;
-  pointer-events: none;
-}
-
-.bell-popup::before {
-  content: "";
-  position: absolute;
-  top: -6px;
-  right: 12px;
-  border-width: 0 6px 6px 6px;
-  border-style: solid;
-}
-
-.bell-popup-light {
-  background: white;
-  color: #1e293b;
-  border: 1px solid #e2e8f0;
-}
-
-.bell-popup-light::before {
-  border-color: transparent transparent white transparent;
-}
-
-.bell-popup-dark {
-  background: #1e293b;
-  color: white;
-  border: 1px solid #334155;
 }

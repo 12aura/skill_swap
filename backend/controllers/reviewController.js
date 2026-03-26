@@ -183,13 +183,42 @@
 //     return res.status(500).json({ msg: "Failed to fetch your reviews" });
 //   }
 // };
+
+
+
+
 const Review = require("../models/Review");
 const Session = require("../models/Session");
 const User = require("../models/User");
 const sendNotification = require("../utils/sendNotifications"); // ✅ use helper
 const { awardXP, XP, checkAndAwardBadges } = require("../utils/xpUtils");
 
-const REVIEW_XP = XP.LEAVE_REVIEW; // 10
+const REVIEW_XP = XP.LEAVE_REVIEW;
+
+// ─── Helper: emit notification ────────────────────────────
+async function emitNotification(userId, message, type = "session") {
+  try {
+    const notification = await Notification.create({
+      user: userId,
+      message,
+      type,
+      read: false,
+    });
+
+    if (global.io) {
+      global.io.to(String(userId)).emit("new_notification", {
+        _id:       notification._id,
+        message:   notification.message,
+        type:      notification.type,
+        createdAt: notification.createdAt,
+      });
+    }
+
+    return notification;
+  } catch (err) {
+    console.error("emitNotification error:", err);
+  }
+}
 
 // ─────────────────────────────────────────────
 // POST /api/reviews
@@ -241,13 +270,13 @@ exports.submitReview = async (req, res) => {
 
     // Create review
     const review = await Review.create({
-      reviewer: reviewerId,
-      reviewee: revieweeId,
-      session: sessionId,
-      skill: session.skill?._id || null,
+      reviewer:  reviewerId,
+      reviewee:  revieweeId,
+      session:   sessionId,
+      skill:     session.skill?._id || null,
       reviewType,
       rating,
-      comment: comment || "",
+      comment:   comment || "",
       xpAwarded: REVIEW_XP,
     });
 
@@ -258,36 +287,61 @@ exports.submitReview = async (req, res) => {
       await awardXP(revieweeId, XP.RECEIVE_5STAR, "Received a 5-star review");
     }
 
-    // Get reviewer + skill
-    const reviewer = await User.findById(reviewerId).select("name");
+    const reviewer  = await User.findById(reviewerId).select("name");
     const skillName = session.skill?.name || "a skill";
 
-    // 🔥 SEND NOTIFICATION (FINAL CLEAN WAY)
-    await sendNotification({
-      userId: revieweeId,
-      message: `${reviewer.name} left you a ${rating}⭐ review for ${skillName}${rating === 5 ? " (+15 XP bonus!)" : ""}`,
-      type: "session"
-    });
+    // ✅ Notify reviewee about the review
+    await emitNotification(
+      revieweeId,
+      `${reviewer.name} left you a ${rating}⭐ review for ${skillName}${rating === 5 ? " (+15 XP bonus!)" : ""}`,
+      "review"
+    );
 
-    // Update average rating
+    // ✅ Check badges — notify if any earned
+    const reviewerBadges = await checkAndAwardBadges(reviewerId);
+    const revieweeBadges = await checkAndAwardBadges(revieweeId);
+
+    if (reviewerBadges?.length > 0) {
+      for (const badge of reviewerBadges) {
+        await emitNotification(
+          reviewerId,
+          `🏅 You earned the "${badge.name}" badge!`,
+          "badge"
+        );
+        // Also emit badge-earned for the celebration animation
+        if (global.io) {
+          global.io.to(String(reviewerId)).emit("badge-earned", badge);
+        }
+      }
+    }
+
+    if (revieweeBadges?.length > 0) {
+      for (const badge of revieweeBadges) {
+        await emitNotification(
+          revieweeId,
+          `🏅 You earned the "${badge.name}" badge!`,
+          "badge"
+        );
+        if (global.io) {
+          global.io.to(String(revieweeId)).emit("badge-earned", badge);
+        }
+      }
+    }
+
+    // Update reviewee's average rating
     const allReviews = await Review.find({ reviewee: revieweeId });
-    const avgRating =
-      allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+    const avgRating  = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
     await User.findByIdAndUpdate(revieweeId, {
       averageRating: parseFloat(avgRating.toFixed(1)),
       totalReviews: allReviews.length,
     });
 
-    // Badges
-    await checkAndAwardBadges(reviewerId);
-    await checkAndAwardBadges(revieweeId);
-
     return res.status(201).json({
-      msg: "Review submitted successfully",
+      msg:       "Review submitted successfully",
       review,
       xpAwarded: REVIEW_XP,
-      bonusXP: rating === 5 ? XP.RECEIVE_5STAR : 0,
+      bonusXP:   rating === 5 ? XP.RECEIVE_5STAR : 0,
     });
 
   } catch (err) {
@@ -315,15 +369,15 @@ exports.getReviewsForUser = async (req, res) => {
       .lean();
 
     const shaped = reviews.map((r) => ({
-      _id: r._id,
-      reviewerName: r.reviewer?.name || "Anonymous",
+      _id:            r._id,
+      reviewerName:   r.reviewer?.name   || "Anonymous",
       reviewerAvatar: r.reviewer?.avatar || null,
-      skillName: r.skill?.name || "Skill Exchange",
-      skillCategory: r.skill?.category || null,
-      reviewType: r.reviewType,
-      rating: r.rating,
-      comment: r.comment,
-      createdAt: r.createdAt,
+      skillName:      r.skill?.name      || "Skill Exchange",
+      skillCategory:  r.skill?.category  || null,
+      reviewType:     r.reviewType,
+      rating:         r.rating,
+      comment:        r.comment,
+      createdAt:      r.createdAt,
     }));
 
     const avgRating =
@@ -351,7 +405,7 @@ exports.getReviewsForUser = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getSessionReviewStatus = async (req, res) => {
   try {
-    const reviewerId = req.user.id;
+    const reviewerId  = req.user.id;
     const { sessionId } = req.params;
 
     const existing = await Review.findOne({
@@ -392,3 +446,4 @@ exports.getMyReviews = async (req, res) => {
     return res.status(500).json({ msg: "Failed to fetch your reviews" });
   }
 };
+

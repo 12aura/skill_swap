@@ -2,24 +2,25 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Skill = require("../models/Skill");
-// const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
+// ─── REGISTER ─────────────────────────────────────────────────────────────────
 exports.registerUser = async (req, res) => {
   try {
     let { name, email, password, skillsTeach = [], skillsLearn = [] } = req.body;
 
-    // ✅ Convert stringified arrays to real arrays
+    // Convert stringified arrays to real arrays
     const normalizeSkills = (val) => {
       if (Array.isArray(val)) return val;
-
       if (typeof val === "string") {
         try {
           return JSON.parse(val.replace(/'/g, '"'));
         } catch {
-          return [val];
+          // comma-separated string like "React, Python, C++"
+          return val.split(",").map((s) => s.trim()).filter(Boolean);
         }
       }
-
       return [];
     };
 
@@ -34,19 +35,17 @@ exports.registerUser = async (req, res) => {
     // Convert skill names → ObjectIds
     const convertToSkillIds = async (skills) => {
       const ids = [];
-
       for (const skillName of skills) {
+        // ✅ FIX 1: Escape special regex characters so C++, .NET etc. don't crash
+        const escapedName = skillName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         let skill = await Skill.findOne({
-          name: new RegExp(`^${skillName}$`, "i"),
+          name: new RegExp(`^${escapedName}$`, "i"),
         });
-
         if (!skill) {
           skill = await Skill.create({ name: skillName });
         }
-
         ids.push(skill._id);
       }
-
       return ids;
     };
 
@@ -67,8 +66,16 @@ exports.registerUser = async (req, res) => {
       .populate("skillsTeach")
       .populate("skillsLearn");
 
+    // ✅ FIX 2: Return token so frontend can save it and stay logged in
+    const token = jwt.sign(
+      { id: newUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     res.status(201).json({
       msg: "User Registered Successfully",
+      token,
       user: populatedUser,
     });
   } catch (err) {
@@ -77,9 +84,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
-
-
-// LOGIN
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -91,25 +96,18 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) return res.status(400).json({ msg: "Wrong password" });
 
     const token = jwt.sign(
-  { id: user._id },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    res.json({
-      msg: "Login Successful",
-      token,
-      user
-    });
+    res.json({ msg: "Login Successful", token, user });
   } catch (err) {
     res.status(500).json({ msg: "Login Failed" });
   }
 };
-// password otp
-const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 
-
+// ─── FORGOT PASSWORD ──────────────────────────────────────────────────────────
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -117,16 +115,12 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save hashed OTP
     user.otp = crypto.createHash("sha256").update(otp).digest("hex");
     user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
-    
     await user.save();
 
-    // Send email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -142,48 +136,22 @@ exports.forgotPassword = async (req, res) => {
     });
 
     res.json({ msg: "OTP sent successfully" });
-
   } catch (err) {
     console.error("EMAIL ERROR:", err);
     res.status(500).json({ msg: "Failed to send OTP" });
   }
 };
 
-// exports.resetPassword = async (req, res) => {
-//   const { email, otp, newPassword } = req.body;
-//    console.log("resetPassword called with:", { email, otp, newPassword });
-//   const user = await User.findOne({ email });
-//    console.log("Found user:", user);
-//   if(!user) {
-//     return res.status(404).json({ msg: "User not found" });
-//   }
-//   if(otp!=crypto.createHash("sha256").update(otp).digest("hex")|| Date.now() > user.otpExpiry) {
-//     return  res.status(400).json({ msg: "Invalid or expired OTP" });
-//   }
-//   user.password = await bcrypt.hash(newPassword, 10);
-//   user.otp = null;
-//   user.otpExpiry = null;
-
-//   await user.save();
-
-//   res.json({ msg: "Password reset successful" });
-// };
+// ─── RESET PASSWORD ───────────────────────────────────────────────────────────
 exports.resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
+    if (!user) return res.status(404).json({ msg: "User not found" });
 
-    // hash incoming OTP
-    const hashedOtp = crypto
-      .createHash("sha256")
-      .update(otp)
-      .digest("hex");
+    const hashedOtp = crypto.createHash("sha256").update(otp).digest("hex");
 
-    // compare with stored OTP
     if (hashedOtp !== user.otp || Date.now() > user.otpExpiry) {
       return res.status(400).json({ msg: "Invalid or expired OTP" });
     }
@@ -191,11 +159,9 @@ exports.resetPassword = async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     user.otp = null;
     user.otpExpiry = null;
-
     await user.save();
 
     res.json({ msg: "Password reset successful" });
-
   } catch (err) {
     console.error("RESET PASSWORD ERROR:", err);
     res.status(500).json({ msg: "Something went wrong" });

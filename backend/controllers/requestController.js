@@ -90,6 +90,10 @@
 //     res.status(500).json({ msg: "Failed to update request" });
 //   }
 // };
+
+
+
+const Notification = require("../models/Notification");
 const Request = require("../models/Request");
 const sendNotification = require("../utils/sendNotifications");
 
@@ -124,11 +128,19 @@ exports.sendRequest = async (req, res) => {
       status: "pending",
     });
 
-    // 🔥 USE HELPER (instead of Notification.create)
-    await sendNotification({
-      userId: toUser,
+    // Save notification to DB
+    const notification = await Notification.create({
+      user: toUser,
       message: `${req.user.name} sent you a skill request`,
       type: "request"
+    });
+
+    // ✅ Emit realtime toast — event name must match frontend listener
+    global.io.to(String(toUser)).emit("new_notification", {
+      _id:       notification._id,
+      message:   notification.message,
+      type:      notification.type,
+      createdAt: notification.createdAt
     });
 
     res.json({ msg: "Request sent", request });
@@ -157,13 +169,37 @@ exports.updateRequestStatus = async (req, res) => {
       { new: true }
     );
 
-    // If accepted → notify sender
+    // ✅ Notify for ACCEPTED
     if (status === "accepted") {
+      const notification = await Notification.create({
+        user:    request.fromUser,
+        message: `✅ ${req.user.name} accepted your skill request`,
+        type:    "accepted",
+        read:    false,
+      });
 
-      await sendNotification({
-        userId: request.fromUser,
-        message: `${req.user.name} accepted your skill request`,
-        type: "accepted"
+      global.io.to(String(request.fromUser)).emit("new_notification", {
+        _id:       notification._id,
+        message:   notification.message,
+        type:      notification.type,
+        createdAt: notification.createdAt,
+      });
+    }
+
+    // ✅ Notify for REJECTED (was missing before)
+    if (status === "rejected") {
+      const notification = await Notification.create({
+        user:    request.fromUser,
+        message: `❌ ${req.user.name} declined your skill request`,
+        type:    "request",
+        read:    false,
+      });
+
+      global.io.to(String(request.fromUser)).emit("new_notification", {
+        _id:       notification._id,
+        message:   notification.message,
+        type:      notification.type,
+        createdAt: notification.createdAt,
       });
     }
 

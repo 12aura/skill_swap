@@ -14,7 +14,7 @@ const NotificationSchema = new mongoose.Schema({
 
   type: {
     type: String,
-    enum: ["request", "accepted", "session", "match", "message"],
+    enum: ["request", "accepted", "session", "match", "message", "review"],
     default: "request"
   },
 

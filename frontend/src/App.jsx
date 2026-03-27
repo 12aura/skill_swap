@@ -296,6 +296,7 @@ import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SkillBuddy from "./pages/SkillBuddy";
+import SessionSummary from "./pages/SessionSummary";
 import socket from "./socket";
 
 const App = () => {
@@ -374,7 +375,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route path="/summary/:roomId" element={<SessionSummary />} />
         <Route path="/video-call/:roomId" element={<VideoCall />} />
         <Route path="/messages" element={<ChatListPage />} />
 

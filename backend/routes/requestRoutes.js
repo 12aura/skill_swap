@@ -1,4 +1,3 @@
-
 // const express = require("express");
 // const auth = require("../middleware/authMiddleware");
 
@@ -44,8 +43,3 @@ router.get("/incoming", auth, getIncomingRequests);
 router.put("/:id/status", auth, updateRequestStatus);
 
 module.exports = router;
-
-
-
-
-

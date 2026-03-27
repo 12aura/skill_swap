@@ -152,13 +152,12 @@ const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const Notification      = require("./models/Notification"); // ✅ NEW
 
 const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
+    cors: {
+    origin: ["http://localhost:5173"],
     credentials: true,
     methods: ["GET", "POST"],
   },
 });
-
 global.io = io;
 
 // ------------------ SOCKET.IO ------------------
@@ -271,6 +270,6 @@ app.use("/api/leaderboard",   leaderboardRoutes);
 
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });

@@ -1,3 +1,5 @@
+
+
 // import {
 //   StreamVideo,
 //   StreamCall,
@@ -99,9 +101,7 @@
 //   const isTranscribing    = useIsCallTranscribingInProgress();
 //   const isCaptioning      = useIsCallCaptioningInProgress();
 
-//   // Hide transcription controls if feature is disabled on dashboard
-// const transcriptionAvailable =
-//   transcription?.mode !== "disabled";
+//   const transcriptionAvailable = transcription?.mode !== "disabled";
 
 //   const [showEmojis, setShowEmojis] = useState(false);
 //   const [screenError, setScreenError] = useState(null);
@@ -185,7 +185,6 @@
 //         {/* Transcription Toggle */}
 //         {transcriptionAvailable && (
 //           <CtrlBtn onClick={toggleTranscription} active={isTranscribing} title={isTranscribing ? "Stop Recording Transcript" : "Record Transcript"}>
-//             {/* Mic + dot icon to represent transcription */}
 //             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 //               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-3-3v6M12 3a9 9 0 100 18A9 9 0 0012 3z" />
 //             </svg>
@@ -298,7 +297,8 @@
 //   const socketRef = useRef(null);
 
 //   useEffect(() => {
-//     const socket = io(import.meta.env.VITE_SERVER_URL || "http://localhost:5000", { reconnection: true });
+//     // ✅ Using env variable instead of hardcoded URL
+//     const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", { reconnection: true });
 //     socketRef.current = socket;
 
 //     socket.on("connect", () => { socket.emit("join-room", roomId); });
@@ -345,7 +345,6 @@
 //       <div className="flex flex-1 overflow-hidden">
 //         <div className="flex-1 relative overflow-hidden" style={{ imageRendering: "crisp-edges" }}>
 //           <SpeakerLayout screenshareLayout="spotlight" />
-//           {/* ✅ Live closed captions overlay */}
 //           <ClosedCaptionsOverlay />
 //         </div>
 //         {chatOpen && <InCallChat messages={messages} onSend={sendMessage} />}
@@ -381,6 +380,9 @@
 
 // // ─── Root ─────────────────────────────────────────────────
 // function VideoCall() {
+//   // ✅ Single BASE variable — all API calls use this instead of hardcoded URLs
+//   const BASE = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
+
 //   const { roomId } = useParams();
 //   const navigate   = useNavigate();
 //   const { user }   = useContext(AuthContext);
@@ -401,8 +403,9 @@
 //         const token = localStorage.getItem("token");
 
 //         try {
+//           // ✅ Fix 1: was "http://localhost:5000/api/sessions"
 //           const sessRes = await axios.get(
-//             "http://localhost:5000/api/sessions",
+//             `${BASE}/api/sessions`,
 //             { headers: { Authorization: `Bearer ${token}` } }
 //           );
 //           const allSessions = sessRes.data?.sessions || sessRes.data || [];
@@ -412,7 +415,8 @@
 //           console.warn("Could not prefetch sessionId:", e.message);
 //         }
 
-//         const res = await fetch("http://localhost:5000/api/video/token", {
+//         // ✅ Fix 2: was "http://localhost:5000/api/video/token"
+//         const res = await fetch(`${BASE}/api/video/token`, {
 //           method: "POST",
 //           headers: { "Content-Type": "application/json" },
 //           body: JSON.stringify({ userId: user._id }),
@@ -427,7 +431,6 @@
 
 //         const videoCall = videoClient.call("default", roomId);
 
-//         // ✅ Override call settings to enable transcription + captions
 //         await videoCall.getOrCreate({
 //           data: {
 //             settings_override: {
@@ -485,8 +488,9 @@
 
 //     try {
 //       const token = localStorage.getItem("token");
+//       // ✅ Fix 3: was `http://localhost:5000/api/sessions/complete-by-room/${roomId}`
 //       const res = await axios.put(
-//         `http://localhost:5000/api/sessions/complete-by-room/${roomId}`,
+//         `${BASE}/api/sessions/complete-by-room/${roomId}`,
 //         {},
 //         { headers: { Authorization: `Bearer ${token}` } }
 //       );
@@ -673,7 +677,7 @@ function CustomControls({ onLeave, chatOpen, onToggleChat, onSendEmoji, unreadCo
         <CtrlBtn onClick={toggleMic} active={!micMuted} title={micMuted ? "Unmute" : "Mute"}>
           {micMuted ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.923 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
             </svg>
           ) : (
@@ -828,7 +832,6 @@ function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    // ✅ Using env variable instead of hardcoded URL
     const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", { reconnection: true });
     socketRef.current = socket;
 
@@ -911,7 +914,6 @@ function VideoCallInner({ onLeave, onEndCall, userName, roomId }) {
 
 // ─── Root ─────────────────────────────────────────────────
 function VideoCall() {
-  // ✅ Single BASE variable — all API calls use this instead of hardcoded URLs
   const BASE = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
   const { roomId } = useParams();
@@ -946,7 +948,6 @@ function VideoCall() {
           console.warn("Could not prefetch sessionId:", e.message);
         }
 
-        // ✅ Fix 2: was "http://localhost:5000/api/video/token"
         const res = await fetch(`${BASE}/api/video/token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1006,9 +1007,13 @@ function VideoCall() {
     } catch (e) {}
   };
 
-  const goToReview = (id) => {
-    const resolvedId = id || sessionIdRef.current;
-    navigate(resolvedId ? `/review/${resolvedId}` : "/sessions");
+  // ── ✅ Navigate to summary page instead of review ─────────────────
+  // Passes roomId so the summary page can fetch the transcript from Stream.
+  const goToSummary = (resolvedSessionId) => {
+    // Always go to summary — it falls back gracefully if no transcript exists.
+    navigate(`/summary/${roomId}`, {
+      state: { sessionId: resolvedSessionId || sessionIdRef.current },
+    });
   };
 
   const endCall = async () => {
@@ -1031,14 +1036,15 @@ function VideoCall() {
     }
 
     await leaveStream();
-    goToReview(resolvedSessionId);
+    goToSummary(resolvedSessionId);
   };
 
   const leaveCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
     await leaveStream();
-    goToReview(sessionIdRef.current);
+    // Participants who just leave (not end) still see the summary
+    goToSummary(sessionIdRef.current);
   };
 
   if (!client || !call) {

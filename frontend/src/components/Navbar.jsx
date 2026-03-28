@@ -1,6 +1,4 @@
-
-
-// // export default Navbar;
+// export default Navbar;
 // import { IoNotificationsOutline } from "react-icons/io5";
 // import { HiOutlineCog6Tooth } from "react-icons/hi2";
 // import { Link, useNavigate } from "react-router-dom";
@@ -516,9 +514,6 @@
 // };
 
 // export default Navbar;
-
-
-
 
 import { IoNotificationsOutline } from "react-icons/io5";
 import { HiOutlineCog6Tooth } from "react-icons/hi2";

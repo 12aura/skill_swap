@@ -224,16 +224,26 @@ const Settings = () => {
                   : "bg-white/80 border-gray-200 shadow-[0_10px_50px_rgba(0,0,0,0.08)]"
               }`}
             >
+              {/* BASIC INFO (with rectangle box) */}
               {activeTab === "basic" && (
-                <BasicInfo
-                  data={basicData}
-                  onEdit={(field) => {
-                    setActiveTab("basic");
-                    setEditField(field);
-                  }}
-                />
+                <div
+                  className={`rounded-2xl border p-8 ${
+                    darkMode
+                      ? "bg-slate-900/60 border-white/10"
+                      : "bg-white border-gray-200"
+                  }`}
+                >
+                  <BasicInfo
+                    data={basicData}
+                    onEdit={(field) => {
+                      setActiveTab("basic");
+                      setEditField(field);
+                    }}
+                  />
+                </div>
               )}
 
+              {/* ACCOUNT INFO (no extra box above it) */}
               {activeTab === "account" && (
                 <AccountInfo
                   data={accountData}

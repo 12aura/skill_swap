@@ -166,4 +166,26 @@ exports.resetPassword = async (req, res) => {
     console.error("RESET PASSWORD ERROR:", err);
     res.status(500).json({ msg: "Something went wrong" });
   }
+  // ─── CHANGE PASSWORD (when user remembers old password) ───
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id; // comes from auth middleware
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch)
+      return res.status(400).json({ msg: "Old password is incorrect" });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ msg: "Password updated successfully" });
+  } catch (err) {
+    console.error("CHANGE PASSWORD ERROR:", err);
+    res.status(500).json({ msg: "Failed to change password" });
+  }
+};
 };

@@ -1,298 +1,3 @@
-// import { useEffect, useState, useContext } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import axios from "axios";
-// import { DarkModeContext } from "../context/DarkModeContext";
-// import { AuthContext } from "../context/AuthContext";
-// import { FaGraduationCap, FaBook, FaRegCommentDots, FaYoutube } from "react-icons/fa";
-// import ReviewsSection from "../components/ReviewsSection";
-// import { motion, AnimatePresence } from "framer-motion";
-
-// const PublicProfile = () => {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const { darkMode } = useContext(DarkModeContext);
-//   const { user: loggedInUser } = useContext(AuthContext);
-
-//   const [profileUser, setProfileUser] = useState(null);
-//   const [loading, setLoading] = useState(true);
-//   const [activeTab, setActiveTab] = useState("about");
-//   const [lightboxOpen, setLightboxOpen] = useState(false);
-//   const [availability, setAvailability] = useState([]);
-
-//   /* ---------------- FETCH PROFILE ---------------- */
-//   useEffect(() => {
-//     setLoading(true);
-//     axios
-//       .get(`http://localhost:5000/api/user/public/profile/${id}`)
-//       .then((res) => {
-//         const user = res.data.user || res.data;
-//         setProfileUser(user);
-
-//         // Handle availability in both formats
-//         if (Array.isArray(user.availability)) {
-//           setAvailability(user.availability);
-//         } else {
-//           setAvailability([]);
-//         }
-//       })
-//       .catch((err) => console.error(err))
-//       .finally(() => setLoading(false));
-//   }, [id]);
-
-//   /* ---------------- SEND REQUEST ---------------- */
-//   const sendRequest = async (skill) => {
-//     try {
-//       const token = localStorage.getItem("token");
-//       if (!token) return alert("Please login first");
-
-//       await axios.post(
-//         "http://localhost:5000/api/requests/send",
-//         { toUser: profileUser._id, skill },
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-
-//       alert("Request sent successfully!");
-//     } catch (err) {
-//       console.error(err);
-//       alert("Failed to send request");
-//     }
-//   };
-
-//   /* ---------------- YOUTUBE EMBED ---------------- */
-//   const getEmbedUrl = (url) => {
-//     if (!url) return "";
-//     const regExp =
-//       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-//     const match = url.match(regExp);
-//     return match && match[2]
-//       ? `https://www.youtube.com/embed/${match[2]}`
-//       : url;
-//   };
-
-//   if (loading) return <p className="p-10">Loading...</p>;
-//   if (!profileUser) return <p className="p-10">User not found</p>;
-
-//   const avatarSrc = profileUser.avatar
-//     ? profileUser.avatar
-//     : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-//         profileUser.name || "U"
-//       )}&background=0d9488&color=fff&size=128`;
-
-//   const tabs = [
-//     { key: "about", label: "About" },
-//     {
-//       key: "reviews",
-//       label: `Reviews${
-//         profileUser.totalReviews > 0
-//           ? ` (${profileUser.totalReviews})`
-//           : ""
-//       }`,
-//     },
-//   ];
-//   const weekdayOrder = [
-//   "Monday",
-//   "Tuesday",
-//   "Wednesday",
-//   "Thursday",
-//   "Friday",
-//   "Saturday",
-//   "Sunday"
-// ];
-
-//   return (
-//     <div
-//       className={`min-h-screen p-10 ${
-//         darkMode ? "bg-slate-900 text-white" : "bg-gray-100 text-gray-900"
-//       }`}
-//     >
-//       {/* HEADER */}
-//       <div className="max-w-6xl mx-auto text-center mb-8">
-//         <div className="flex justify-center items-center gap-4">
-//           <img
-//             src={avatarSrc}
-//             alt={profileUser.name}
-//             onClick={() => setLightboxOpen(true)}
-//             className="w-16 h-16 rounded-full object-cover border-4 border-teal-400 shadow-md cursor-pointer"
-//           />
-
-//           <div className="text-left">
-//             <h1 className="text-4xl font-bold">{profileUser.name}</h1>
-
-//             {profileUser.tagline && (
-//               <p className={darkMode ? "text-slate-400" : "text-gray-600"}>
-//                 {profileUser.tagline}
-//               </p>
-//             )}
-//           </div>
-
-//           {loggedInUser?._id !== profileUser._id && (
-//             <button
-//               onClick={() => navigate(`/chat/${profileUser._id}`)}
-//               className="p-2 rounded-full bg-teal-100 text-teal-600 hover:bg-teal-200"
-//             >
-//               <FaRegCommentDots size={20} />
-//             </button>
-//           )}
-//         </div>
-//       </div>
-
-//       {/* MAIN CARD */}
-//       <div
-//         className={`max-w-6xl mx-auto rounded-xl shadow-lg ${
-//           darkMode ? "bg-slate-800" : "bg-white"
-//         }`}
-//       >
-//         {/* Tabs */}
-//         <div className="flex border-b">
-//           {tabs.map((tab) => (
-//             <button
-//               key={tab.key}
-//               onClick={() => setActiveTab(tab.key)}
-//               className={`px-8 py-4 text-sm font-medium border-b-2 ${
-//                 activeTab === tab.key
-//                   ? "border-teal-500 text-teal-600"
-//                   : "border-transparent text-gray-500"
-//               }`}
-//             >
-//               {tab.label}
-//             </button>
-//           ))}
-//         </div>
-
-//         {/* Tab Content */}
-//         <div className="p-8">
-//           {activeTab === "about" ? (
-//             <div className="flex flex-col md:flex-row gap-10">
-
-//               {/* LEFT SIDE */}
-//               <div className="flex-1 space-y-6">
-
-//                 {/* TEACHES */}
-//                 <div>
-//                   <h2 className="font-semibold mb-2 flex items-center gap-2">
-//                     <FaGraduationCap /> TEACHES
-//                   </h2>
-//                   <div className="flex flex-wrap gap-2">
-//                     {profileUser.skillsTeach?.map((skill, i) => (
-//                       <div key={i} className="bg-teal-50 px-3 py-1 rounded-full flex gap-2">
-//                         <span>{skill.name || skill}</span>
-//                         {loggedInUser && (
-//                           <button
-//                             onClick={() => sendRequest(skill.name || skill)}
-//                             className="text-xs bg-teal-500 text-white px-2 rounded-full"
-//                           >
-//                             Request
-//                           </button>
-//                         )}
-//                       </div>
-//                     ))}
-//                   </div>
-//                 </div>
-
-//                 {/* ABOUT ME */}
-//                 <div>
-//                   <h2 className="font-semibold mb-2">ABOUT ME</h2>
-//                   <p>{profileUser.bio || "No bio set"}</p>
-
-//                   {profileUser.education && (
-//                     <p className="mt-2">
-//                       <strong>Education:</strong> {profileUser.education}
-//                     </p>
-//                   )}
-
-//                   {profileUser.skillLevel && (
-//                     <p>
-//                       <strong>Skill Level:</strong> {profileUser.skillLevel}
-//                     </p>
-//                   )}
-
-//                   {profileUser.yearsOfExperience > 0 && (
-//                     <p>
-//                       <strong>Experience:</strong> {profileUser.yearsOfExperience} years
-//                     </p>
-//                   )}
-
-//                   {profileUser.linkedin && (
-//                     <p>
-//                       <strong>LinkedIn:</strong>{" "}
-//                       <a href={profileUser.linkedin} target="_blank" rel="noreferrer" className="text-teal-600">
-//                         View Profile
-//                       </a>
-//                     </p>
-//                   )}
-
-//                   {profileUser.portfolio && (
-//                     <p>
-//                       <strong>Portfolio:</strong>{" "}
-//                       <a href={profileUser.portfolio} target="_blank" rel="noreferrer" className="text-teal-600">
-//                         View Portfolio
-//                       </a>
-//                     </p>
-//                   )}
-//                 </div>
-
-//                 {/* AVAILABILITY */}
-//                 <div>
-//                   <h2 className="font-semibold mb-2">WEEKLY AVAILABILITY</h2>
-
-//                   <div className="flex flex-wrap gap-2">
-//                     {availability.length > 0 ? (
-//                    [...availability]
-//   .sort((a, b) => {
-//     const dayA = typeof a === "string" ? a : a.day;
-//     const dayB = typeof b === "string" ? b : b.day;
-
-//     return weekdayOrder.indexOf(dayA) - weekdayOrder.indexOf(dayB);
-//   })
-//   .map((item, idx) => (
-//     <span
-//       key={idx}
-//       className="px-3 py-1 rounded-full bg-teal-100 text-teal-700 font-medium"
-//     >
-//       {typeof item === "string" ? item : item.day}
-//     </span>
-//   ))
-//                     ) : (
-//                       <p className="text-gray-500">No availability set</p>
-//                     )}
-//                   </div>
-//                 </div>
-
-//               </div>
-
-//               {/* RIGHT SIDE (VIDEO) */}
-//               <div className="flex-1">
-//                 {profileUser.demoVideo && (
-//                   <div>
-//                     <h2 className="font-semibold mb-2 flex items-center gap-2">
-//                       <FaYoutube className="text-red-600" /> DEMO VIDEO
-//                     </h2>
-
-//                     <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-//                       <iframe
-//                         src={getEmbedUrl(profileUser.demoVideo)}
-//                         className="absolute top-0 left-0 w-full h-full rounded-lg"
-//                         allowFullScreen
-//                         title="Demo Video"
-//                       />
-//                     </div>
-//                   </div>
-//                 )}
-//               </div>
-
-//             </div>
-//           ) : (
-//             <ReviewsSection userId={profileUser._id} />
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default PublicProfile;
-
-
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -310,49 +15,48 @@ import {
    THEME — fully teal-green anchored
 ═══════════════════════════════════════════ */
 const T = (dark) => ({
-  /* backgrounds */
-  pageBg:     dark ? "#050d0c"                      : "#e8f5f4",
-  heroBg:     dark ? "#061412"                      : "#0d2b27",
-  cardBg:     dark ? "#0a1f1c"                      : "#ffffff",
-  sectionBg:  dark ? "#0d2420"                      : "#f0faf9",
-  /* borders */
-  border:     dark ? "rgba(20,184,166,0.12)"        : "rgba(20,184,166,0.18)",
-  borderMid:  dark ? "rgba(20,184,166,0.22)"        : "rgba(20,184,166,0.28)",
-  /* text */
-  textPrimary:   dark ? "#e8faf8"  : "#0a1f1c",
-  textSecondary: dark ? "#7fb8b2"  : "#2d6b64",
-  textMuted:     dark ? "#3d7a73"  : "#5a9e97",
-  /* teal palette */
-  teal50:  "#f0fdfa",
-  teal100: "#ccfbf1",
+  pageBg:        dark ? "#050d0c"               : "#e8f5f4",
+  heroBg:        dark ? "#061412"               : "#0d2b27",
+  cardBg:        dark ? "#0a1f1c"               : "#ffffff",
+  sectionBg:     dark ? "#0d2420"               : "#f0faf9",
+  border:        dark ? "rgba(20,184,166,0.12)" : "rgba(20,184,166,0.18)",
+  borderMid:     dark ? "rgba(20,184,166,0.22)" : "rgba(20,184,166,0.28)",
+  textPrimary:   dark ? "#e8faf8"               : "#0a1f1c",
+  textSecondary: dark ? "#7fb8b2"               : "#2d6b64",
+  textMuted:     dark ? "#3d7a73"               : "#5a9e97",
   teal300: "#5eead4",
   teal400: "#2dd4bf",
   teal500: "#14b8a6",
   teal600: "#0d9488",
   teal700: "#0f766e",
-  /* green accent */
   green:   "#10b981",
-  /* gradient */
   grad:    "linear-gradient(135deg, #14b8a6 0%, #0d9488 60%, #065f56 100%)",
-  gradSoft:"linear-gradient(135deg, rgba(20,184,166,0.15) 0%, rgba(13,148,136,0.08) 100%)",
 });
 
 const WEEKDAY_ORDER = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
-/* ─── Stat chip in hero ─── */
+/* ─── Stat chip — dark-glass so it pops on the teal hero ─── */
 const HeroStat = ({ icon: Icon, label, value }) => (
   <div style={{
     display:"flex", flexDirection:"column", alignItems:"center", gap:4,
-    background:"rgba(20,184,166,0.12)",
-    border:"1px solid rgba(20,184,166,0.25)",
+    background:"rgba(0,0,0,0.20)",
+    border:"1.5px solid rgba(255,255,255,0.22)",
     borderRadius:16, padding:"14px 24px", minWidth:110,
-    backdropFilter:"blur(10px)",
+    backdropFilter:"blur(12px)",
+    WebkitBackdropFilter:"blur(12px)",
   }}>
-    <Icon size={15} color="#5eead4" strokeWidth={2} />
-    <span style={{ fontFamily:"'Clash Display',sans-serif", fontSize:26, fontWeight:700, color:"#2dd4bf", lineHeight:1 }}>
+    <Icon size={15} color="rgba(255,255,255,0.80)" strokeWidth={2} />
+    <span style={{
+      fontFamily:"'Clash Display',sans-serif",
+      fontSize:26, fontWeight:700, color:"#ffffff", lineHeight:1,
+    }}>
       {value}
     </span>
-    <span style={{ fontSize:11, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.09em", color:"rgba(94,234,212,0.6)" }}>
+    <span style={{
+      fontFamily:"'DM Sans',sans-serif",
+      fontSize:11, fontWeight:700, textTransform:"uppercase",
+      letterSpacing:"0.09em", color:"rgba(255,255,255,0.60)",
+    }}>
       {label}
     </span>
   </div>
@@ -373,6 +77,7 @@ const SkillPill = ({ skill, onRequest, dark }) => {
         border:`1.5px solid ${hover ? "rgba(20,184,166,0.50)" : "rgba(20,184,166,0.22)"}`,
         borderRadius:999, padding:"8px 16px 8px 14px",
         transition:"all 0.2s ease",
+        fontFamily:"'DM Sans',sans-serif",
       }}
     >
       <span style={{ fontSize:14, fontWeight:700, color: dark ? "#2dd4bf" : "#0d9488" }}>
@@ -388,7 +93,8 @@ const SkillPill = ({ skill, onRequest, dark }) => {
             background:"linear-gradient(135deg,#14b8a6,#0d9488)",
             border:"none", borderRadius:999,
             padding:"4px 12px", cursor:"pointer",
-            color:"#fff", fontSize:12, fontWeight:800, letterSpacing:"0.04em",
+            color:"#fff", fontSize:12, fontWeight:800,
+            letterSpacing:"0.04em", fontFamily:"'DM Sans',sans-serif",
           }}
         >
           <Send size={10} strokeWidth={3}/> Request
@@ -402,55 +108,63 @@ const SkillPill = ({ skill, onRequest, dark }) => {
 const DayPill = ({ day, dark }) => (
   <div style={{
     display:"inline-flex", alignItems:"center", gap:6,
-    background: dark ? "rgba(20,184,166,0.10)" : "rgba(20,184,166,0.10)",
+    background:"rgba(20,184,166,0.10)",
     border:"1.5px solid rgba(20,184,166,0.25)",
     borderRadius:999, padding:"7px 16px",
     fontSize:13, fontWeight:700,
     color: dark ? "#5eead4" : "#0f766e",
+    fontFamily:"'DM Sans',sans-serif",
   }}>
     <Calendar size={12} strokeWidth={2.5}/>{day}
   </div>
 );
 
-/* ─── Section heading ─── */
-const SectionHead = ({ icon: Icon, label, dark }) => (
-  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
+/* ─── Big Section Card ─── */
+const SectionCard = ({ icon: Icon, label, dark, children }) => (
+  <motion.div
+    initial={{ opacity:0, y:18 }}
+    animate={{ opacity:1, y:0 }}
+    transition={{ duration:0.4, ease:[0.22,1,0.36,1] }}
+    style={{
+      background: dark ? "rgba(10,31,28,0.85)" : "#ffffff",
+      border:`1.5px solid ${dark ? "rgba(20,184,166,0.18)" : "rgba(20,184,166,0.22)"}`,
+      borderRadius:20,
+      padding:"32px 36px",
+      boxShadow: dark
+        ? "0 4px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(20,184,166,0.06)"
+        : "0 4px 24px rgba(20,184,166,0.08), 0 1px 4px rgba(20,184,166,0.06)",
+      position:"relative",
+      overflow:"hidden",
+    }}
+  >
+    {/* top accent line */}
     <div style={{
-      width:34, height:34, borderRadius:10,
-      background:"linear-gradient(135deg,rgba(20,184,166,0.18),rgba(13,148,136,0.10))",
-      border:"1px solid rgba(20,184,166,0.25)",
-      display:"flex", alignItems:"center", justifyContent:"center",
-    }}>
-      <Icon size={15} color="#14b8a6" strokeWidth={2.5}/>
-    </div>
-    <span style={{
-      fontFamily:"'Clash Display',sans-serif",
-      fontSize:13, fontWeight:700,
-      textTransform:"uppercase", letterSpacing:"0.12em",
-      color: dark ? "#2dd4bf" : "#0d9488",
-    }}>
-      {label}
-    </span>
-  </div>
-);
-
-/* ─── Info row ─── */
-const InfoRow = ({ icon: Icon, label, value, dark }) => {
-  const t = T(dark);
-  return (
-    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+      position:"absolute", top:0, left:0, right:0, height:2,
+      background:"linear-gradient(90deg, #14b8a6, #0d9488, transparent)",
+      borderRadius:"20px 20px 0 0",
+    }}/>
+    {/* card header */}
+    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:24 }}>
       <div style={{
-        width:28, height:28, borderRadius:8, flexShrink:0,
-        background:"rgba(20,184,166,0.08)", border:"1px solid rgba(20,184,166,0.15)",
+        width:40, height:40, borderRadius:12, flexShrink:0,
+        background:"linear-gradient(135deg, rgba(20,184,166,0.20), rgba(13,148,136,0.12))",
+        border:"1.5px solid rgba(20,184,166,0.28)",
         display:"flex", alignItems:"center", justifyContent:"center",
       }}>
-        <Icon size={13} color="#14b8a6" strokeWidth={2}/>
+        <Icon size={17} color="#14b8a6" strokeWidth={2.2}/>
       </div>
-      <span style={{ fontSize:14, color:t.textMuted, fontWeight:600 }}>{label}:</span>
-      <span style={{ fontSize:14, color:t.textPrimary, fontWeight:600 }}>{value}</span>
+      <span style={{
+        fontFamily:"'Clash Display',sans-serif",
+        fontSize:14, fontWeight:700,
+        textTransform:"uppercase", letterSpacing:"0.13em",
+        color: dark ? "#2dd4bf" : "#0d9488",
+      }}>
+        {label}
+      </span>
     </div>
-  );
-};
+    {children}
+  </motion.div>
+);
 
 /* ═══════════════════════════════════════════
    MAIN
@@ -520,8 +234,9 @@ const PublicProfile = () => {
     return WEEKDAY_ORDER.indexOf(da) - WEEKDAY_ORDER.indexOf(db);
   });
 
+  /* "Details" tab (was "About") */
   const tabs = [
-    { key:"about",   label:"About" },
+    { key:"about",   label:"Details" },
     { key:"reviews", label:`Reviews${profileUser.totalReviews>0?` (${profileUser.totalReviews})`:""}` },
   ];
 
@@ -534,70 +249,81 @@ const PublicProfile = () => {
         @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=cabinet-grotesk@400,500,700,800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-        .glass { backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
         ::-webkit-scrollbar { width:5px; }
         ::-webkit-scrollbar-thumb { background:rgba(20,184,166,0.3); border-radius:99px; }
       `}</style>
 
       <div style={{ minHeight:"100vh", background:theme.pageBg, fontFamily:"'DM Sans',sans-serif", color:theme.textPrimary }}>
 
-        {/* ═══ HERO — full bleed ═══ */}
+        {/* ═══ HERO — full teal-green gradient ═══ */}
         <div style={{
-          background: theme.heroBg,
-          backgroundImage:`
-            radial-gradient(ellipse 70% 80% at 15% 50%, rgba(20,184,166,0.13) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 60% at 85% 30%, rgba(13,148,136,0.10) 0%, transparent 55%)
-          `,
+          background:"linear-gradient(135deg, #14b8a6 0%, #0d9488 55%, #065f56 100%)",
           width:"100%", position:"relative", overflow:"hidden",
           paddingBottom:60,
         }}>
-          {/* grid overlay */}
-          <div style={{
-            position:"absolute", inset:0,
-            backgroundImage:`
-              linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px)
-            `,
-            backgroundSize:"50px 50px",
-          }}/>
+          {/* Light decorative circles */}
 
-          {/* teal glow line at bottom */}
+<div style={{
+  position: "absolute",
+  top: "-120px",
+  left: "-120px",
+  width: "380px",
+  height: "380px",
+  borderRadius: "50%",
+  background: "rgba(255,255,255,0.08)",
+  pointerEvents: "none",
+}} />
+
+<div style={{
+  position: "absolute",
+  top: "40px",
+  right: "-100px",
+  width: "300px",
+  height: "300px",
+  borderRadius: "50%",
+  background: "rgba(255,255,255,0.06)",
+  pointerEvents: "none",
+}} />
+
+<div style={{
+  position: "absolute",
+  top: "120px",
+  left: "60px",
+  width: "220px",
+  height: "220px",
+  borderRadius: "50%",
+  background: "rgba(255,255,255,0.05)",
+  pointerEvents: "none",
+}} />
+          {/* depth radials */}
           <div style={{
-            position:"absolute", bottom:0, left:0, right:0, height:1,
-            background:"linear-gradient(90deg, transparent, rgba(20,184,166,0.5) 40%, rgba(20,184,166,0.5) 60%, transparent)",
+            position:"absolute", inset:0, pointerEvents:"none",
+            backgroundImage:`
+              radial-gradient(ellipse 55% 70% at 5% 50%, rgba(255,255,255,0.10) 0%, transparent 55%),
+              radial-gradient(ellipse 40% 50% at 95% 10%, rgba(0,0,0,0.22) 0%, transparent 55%)
+            `,
           }}/>
 
           <div style={{ width:"100%", padding:"52px 48px 0", position:"relative", zIndex:1 }}>
 
-            {/* top bar */}
+            {/* ── top bar: only Message button, blinking badge removed ── */}
             <motion.div initial={{ opacity:0,y:-16 }} animate={{ opacity:1,y:0 }} transition={{ duration:0.5 }}
-              style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:40 }}
+              style={{ display:"flex", justifyContent:"flex-end", alignItems:"center", marginBottom:40 }}
             >
-              <div style={{
-                display:"inline-flex", alignItems:"center", gap:8,
-                background:"rgba(20,184,166,0.12)", border:"1px solid rgba(20,184,166,0.25)",
-                borderRadius:999, padding:"5px 14px 5px 10px",
-              }}>
-                <motion.span
-                  animate={{ opacity:[1,0.3,1], scale:[1,1.4,1] }}
-                  transition={{ duration:2.2, repeat:Infinity }}
-                  style={{ width:7, height:7, borderRadius:"50%", background:"#14b8a6", display:"inline-block" }}/>
-                <span style={{ fontSize:11, fontWeight:700, letterSpacing:"0.10em", textTransform:"uppercase", color:"#5eead4" }}>
-                  Public Profile
-                </span>
-              </div>
-
               {loggedInUser?._id !== profileUser._id && (
                 <motion.button
-                  whileHover={{ scale:1.05, boxShadow:"0 8px 28px rgba(20,184,166,0.40)" }}
+                  whileHover={{ scale:1.05, boxShadow:"0 8px 28px rgba(0,0,0,0.25)" }}
                   whileTap={{ scale:0.95 }}
                   onClick={() => navigate(`/chat/${profileUser._id}`)}
                   style={{
                     display:"flex", alignItems:"center", gap:9,
-                    background:"linear-gradient(135deg,#14b8a6,#0d9488)",
-                    border:"none", borderRadius:14, padding:"12px 24px",
-                    color:"#fff", fontFamily:"'Cabinet Grotesk',sans-serif",
-                    fontWeight:800, fontSize:14, cursor:"pointer",
+                    background:"rgba(0,0,0,0.22)",
+                    backdropFilter:"blur(8px)",
+                    WebkitBackdropFilter:"blur(8px)",
+                    border:"1.5px solid rgba(255,255,255,0.30)",
+                    borderRadius:14, padding:"12px 24px",
+                    color:"#fff", fontFamily:"'DM Sans',sans-serif",
+                    fontWeight:700, fontSize:14, cursor:"pointer",
                     letterSpacing:"0.02em",
                   }}
                 >
@@ -606,16 +332,16 @@ const PublicProfile = () => {
               )}
             </motion.div>
 
-            {/* identity */}
+            {/* ── identity row ── */}
             <motion.div variants={stagger} initial="hidden" animate="show"
               style={{ display:"flex", alignItems:"flex-end", gap:32, flexWrap:"wrap" }}
             >
-              {/* avatar */}
+              {/* avatar — green dot removed */}
               <motion.div variants={fadeUp} style={{ position:"relative", flexShrink:0 }}>
                 <div style={{
                   width:120, height:120, borderRadius:"50%", padding:3,
-                  background:"linear-gradient(135deg,#14b8a6,#0d9488,#065f56)",
-                  boxShadow:"0 0 48px rgba(20,184,166,0.35), 0 0 96px rgba(20,184,166,0.12)",
+                  background:"rgba(255,255,255,0.25)",
+                  boxShadow:"0 0 48px rgba(0,0,0,0.20), 0 0 96px rgba(0,0,0,0.10)",
                 }}>
                   <img
                     src={avatarSrc} alt={profileUser.name}
@@ -623,59 +349,70 @@ const PublicProfile = () => {
                     style={{
                       width:"100%", height:"100%", borderRadius:"50%",
                       objectFit:"cover", cursor:"pointer",
-                      border:`3px solid ${theme.heroBg}`,
+                      border:"3px solid rgba(255,255,255,0.30)",
                     }}
                   />
                 </div>
-                <div style={{
-                  position:"absolute", bottom:6, right:6,
-                  width:16, height:16, borderRadius:"50%",
-                  background:"#10b981", border:`2.5px solid ${theme.heroBg}`,
-                  boxShadow:"0 0 10px rgba(16,185,129,0.7)",
-                }}/>
+                {/* green dot intentionally removed */}
               </motion.div>
 
-              {/* name + meta */}
+              {/* name + tagline — frosted glass box */}
               <motion.div variants={fadeUp} style={{ flex:1, minWidth:240 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", marginBottom:8 }}>
-                  <h1 style={{
-                    fontFamily:"'Clash Display',sans-serif",
-                    fontSize:"clamp(34px,5vw,56px)",
-                    fontWeight:700, lineHeight:1,
-                    color:"#e8faf8", letterSpacing:"-0.025em",
-                  }}>
-                    {profileUser.name}
-                  </h1>
-                  {profileUser.skillLevel && (
-                    <span style={{
-                      background:"rgba(20,184,166,0.18)", border:"1.5px solid rgba(20,184,166,0.40)",
-                      borderRadius:999, padding:"4px 12px",
-                      fontSize:11, fontWeight:800, color:"#2dd4bf",
-                      letterSpacing:"0.10em", textTransform:"uppercase",
+               <div style={{
+  display:"inline-block",
+  background:"transparent",   // ← makes the color uniform
+  borderRadius:20,
+  padding:"20px 0px 22px",    // removed box spacing so it looks clean
+  marginBottom:20,
+}}>
+                  <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", marginBottom:6 }}>
+                    <h1 style={{
+                      fontFamily:"'Clash Display',sans-serif",
+                      fontSize:"clamp(30px,4.5vw,52px)",
+                      fontWeight:700, lineHeight:1,
+                      color:"#ffffff", letterSpacing:"-0.025em",
                     }}>
-                      {profileUser.skillLevel}
-                    </span>
+                      {profileUser.name}
+                    </h1>
+                    {profileUser.skillLevel && (
+                      <span style={{
+                        background:"rgba(255,255,255,0.18)",
+                        border:"1.5px solid rgba(255,255,255,0.35)",
+                        borderRadius:999, padding:"4px 12px",
+                        fontSize:11, fontWeight:800, color:"#ffffff",
+                        letterSpacing:"0.10em", textTransform:"uppercase",
+                        fontFamily:"'DM Sans',sans-serif",
+                      }}>
+                        {profileUser.skillLevel}
+                      </span>
+                    )}
+                  </div>
+                  {profileUser.tagline && (
+                    <p style={{
+                      color:"rgba(255,255,255,0.72)", fontSize:15,
+                      fontWeight:400, lineHeight:1.5,
+                      fontFamily:"'DM Sans',sans-serif",
+                    }}>
+                      {profileUser.tagline}
+                    </p>
                   )}
                 </div>
 
-                {profileUser.tagline && (
-                  <p style={{ color:"rgba(94,234,212,0.65)", fontSize:16, fontWeight:400, marginBottom:20, lineHeight:1.5 }}>
-                    {profileUser.tagline}
-                  </p>
-                )}
-
-                {/* stat chips */}
+                {/* stat chips — dark glass so numbers are visible on teal */}
                 <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
-                  {profileUser.yearsOfExperience>0 && (
-                    <HeroStat icon={Award}         label="Yrs Exp"  value={profileUser.yearsOfExperience}/>
+                  {profileUser.yearsOfExperience > 0 && (
+                    <HeroStat icon={Award}         label="Yrs Exp"    value={profileUser.yearsOfExperience}/>
                   )}
-                  {profileUser.totalReviews>0 && (
-                    <HeroStat icon={Star}          label="Reviews"  value={profileUser.totalReviews}/>
+                  {profileUser.totalReviews > 0 && (
+                    <HeroStat icon={Star}          label="Reviews"    value={profileUser.totalReviews}/>
                   )}
-                  {profileUser.skillsTeach?.length>0 && (
-                    <HeroStat icon={GraduationCap} label="Teaches"  value={profileUser.skillsTeach.length}/>
+                  {profileUser.skillsTeach?.length > 0 && (
+                    <HeroStat icon={GraduationCap} label="Teaches"    value={profileUser.skillsTeach.length}/>
                   )}
-                  {sortedAvail.length>0 && (
+                  {profileUser.skillsLearn?.length > 0 && (
+                    <HeroStat icon={BookOpen}      label="Learns"     value={profileUser.skillsLearn.length}/>
+                  )}
+                  {sortedAvail.length > 0 && (
                     <HeroStat icon={Clock}         label="Days Avail" value={sortedAvail.length}/>
                   )}
                 </div>
@@ -684,14 +421,14 @@ const PublicProfile = () => {
           </div>
         </div>
 
-        {/* ═══ MAIN CARD — full width, overlapping hero ═══ */}
+        {/* ═══ MAIN CONTENT AREA ═══ */}
         <motion.div
           initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }}
           transition={{ delay:0.25, duration:0.55, ease:[0.22,1,0.36,1] }}
           style={{
             width:"100%",
             background: theme.cardBg,
-            borderTop:`2px solid rgba(20,184,166,0.20)`,
+            borderTop:"2px solid rgba(20,184,166,0.20)",
             marginTop:-2,
             boxShadow: darkMode
               ? "0 -8px 60px rgba(0,0,0,0.6)"
@@ -714,8 +451,8 @@ const PublicProfile = () => {
                   style={{
                     padding:"20px 6px", marginRight:36,
                     background:"none", border:"none", cursor:"pointer",
-                    fontFamily:"'Cabinet Grotesk',sans-serif",
-                    fontSize:15, fontWeight: active?800:500,
+                    fontFamily:"'DM Sans',sans-serif",
+                    fontSize:15, fontWeight: active ? 700 : 500,
                     color: active ? "#14b8a6" : theme.textMuted,
                     borderBottom: active ? "2.5px solid #14b8a6" : "2.5px solid transparent",
                     marginBottom:-1.5, transition:"all 0.2s ease",
@@ -738,89 +475,128 @@ const PublicProfile = () => {
             >
               {activeTab === "about" ? (
                 <motion.div variants={stagger} initial="hidden" animate="show"
-                  style={{ display:"flex", gap:56, flexWrap:"wrap" }}
+                  style={{ display:"flex", flexDirection:"column", gap:24 }}
                 >
-                  {/* ── LEFT COLUMN ── */}
-                  <motion.div variants={fadeUp} style={{ flex:"1 1 420px", display:"flex", flexDirection:"column", gap:48 }}>
 
-                    {/* TEACHES */}
-                    {profileUser.skillsTeach?.length>0 && (
-                      <div>
-                        <SectionHead icon={GraduationCap} label="Skills Offered" dark={darkMode}/>
-                        <div style={{ display:"flex", flexWrap:"wrap", gap:10 }}>
-                          {profileUser.skillsTeach.map((skill,i) => (
-                            <SkillPill key={i} skill={skill.name||skill} onRequest={loggedInUser?sendRequest:null} dark={darkMode}/>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* ABOUT ME */}
-                    <div>
-                      <SectionHead icon={User} label="About Me" dark={darkMode}/>
-                      <p style={{
-                        fontSize:16, lineHeight:1.85,
-                        color: darkMode ? "#9dd9d3" : "#1e5550",
-                        fontWeight:400, maxWidth:640,
-                      }}>
-                        {profileUser.bio || "No bio set."}
-                      </p>
-
-                      <div style={{ marginTop:24, display:"flex", flexDirection:"column", gap:14 }}>
-                        {profileUser.education && (
-                          <InfoRow icon={GraduationCap} label="Education" value={profileUser.education} dark={darkMode}/>
-                        )}
-                        {profileUser.yearsOfExperience>0 && (
-                          <InfoRow icon={Award} label="Experience" value={`${profileUser.yearsOfExperience} years`} dark={darkMode}/>
-                        )}
-                        {profileUser.linkedin && (
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                            <div style={{ width:28,height:28,borderRadius:8, background:"rgba(20,184,166,0.08)", border:"1px solid rgba(20,184,166,0.15)", display:"flex",alignItems:"center",justifyContent:"center" }}>
-                              <FaLinkedin size={13} color="#14b8a6"/>
-                            </div>
-                            <span style={{ fontSize:14,color:theme.textMuted,fontWeight:600 }}>LinkedIn:</span>
-                            <a href={profileUser.linkedin} target="_blank" rel="noreferrer"
-                              style={{ fontSize:14, color:"#14b8a6", fontWeight:700, textDecoration:"none", display:"flex", alignItems:"center", gap:4 }}>
-                              View Profile <ExternalLink size={12} strokeWidth={2.5}/>
-                            </a>
-                          </div>
-                        )}
-                        {profileUser.portfolio && (
-                          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                            <div style={{ width:28,height:28,borderRadius:8, background:"rgba(20,184,166,0.08)", border:"1px solid rgba(20,184,166,0.15)", display:"flex",alignItems:"center",justifyContent:"center" }}>
-                              <FaBriefcase size={13} color="#14b8a6"/>
-                            </div>
-                            <span style={{ fontSize:14,color:theme.textMuted,fontWeight:600 }}>Portfolio:</span>
-                            <a href={profileUser.portfolio} target="_blank" rel="noreferrer"
-                              style={{ fontSize:14, color:"#14b8a6", fontWeight:700, textDecoration:"none", display:"flex", alignItems:"center", gap:4 }}>
-                              View Portfolio <ExternalLink size={12} strokeWidth={2.5}/>
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* AVAILABILITY */}
-                    <div>
-                      <SectionHead icon={Calendar} label="Weekly Availability" dark={darkMode}/>
+                  {/* Skills Offered — full width */}
+                  {profileUser.skillsTeach?.length > 0 && (
+                    <SectionCard icon={GraduationCap} label="Skills Offered" dark={darkMode}>
                       <div style={{ display:"flex", flexWrap:"wrap", gap:10 }}>
-                        {sortedAvail.length>0
-                          ? sortedAvail.map((item,i) => (
-                              <DayPill key={i} day={typeof item==="string"?item:item.day} dark={darkMode}/>
-                            ))
-                          : <p style={{ color:theme.textMuted, fontSize:15 }}>No availability set</p>
-                        }
+                        {profileUser.skillsTeach.map((skill,i) => (
+                          <SkillPill key={i} skill={skill.name||skill} onRequest={loggedInUser?sendRequest:null} dark={darkMode}/>
+                        ))}
                       </div>
-                    </div>
-                  </motion.div>
+                    </SectionCard>
+                  )}
 
-                  {/* ── RIGHT COLUMN (video) ── */}
+                  {/* About Me — full width */}
+                  <SectionCard icon={User} label="About Me" dark={darkMode}>
+                    <p style={{
+  fontSize:18,              // same size as education
+  fontWeight:600,           // same thickness
+  lineHeight:1.6,           // same spacing
+  color: darkMode ? "#e8faf8" : "#0a1f1c",
+  fontFamily:"'DM Sans',sans-serif",
+}}>
+  {profileUser.bio || "No bio set."}
+</p>
+                  </SectionCard>
+
+                  {/* Education + Experience — 2 col */}
+                  {(profileUser.education || profileUser.yearsOfExperience > 0) && (
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24 }}>
+                      {profileUser.education && (
+                        <SectionCard icon={GraduationCap} label="Education" dark={darkMode}>
+                          <p style={{
+                            fontSize:18, fontWeight:600, lineHeight:1.6,
+                            color: darkMode ? "#e8faf8" : "#0a1f1c",
+                            fontFamily:"'DM Sans',sans-serif",
+                          }}>
+                            {profileUser.education}
+                          </p>
+                        </SectionCard>
+                      )}
+                      {profileUser.yearsOfExperience > 0 && (
+                        <SectionCard icon={Award} label="Experience" dark={darkMode}>
+                          <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
+                          <span style={{
+  fontSize:18,
+  fontWeight:600,
+  color: darkMode ? "#e8faf8" : "#0a1f1c",
+  fontFamily:"'DM Sans',sans-serif",
+}}>
+  {profileUser.yearsOfExperience}
+</span>
+                            <span style={{
+                              fontSize:18, fontWeight:600,
+                              color: darkMode ? "#e8faf8" : "#0a1f1c",
+                              fontFamily:"'DM Sans',sans-serif",
+                            }}>
+                              years of experience
+                            </span>
+                          </div>
+                        </SectionCard>
+                      )}
+                    </div>
+                  )}
+
+                  {/* LinkedIn + Portfolio — 2 col */}
+                  {(profileUser.linkedin || profileUser.portfolio) && (
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24 }}>
+                      {profileUser.linkedin && (
+                        <SectionCard icon={FaLinkedin} label="LinkedIn" dark={darkMode}>
+                          <a href={profileUser.linkedin} target="_blank" rel="noreferrer"
+                            style={{
+                              display:"inline-flex", alignItems:"center", gap:8,
+                              background:"linear-gradient(135deg,#14b8a6,#0d9488)",
+                              borderRadius:12, padding:"12px 22px",
+                              color:"#fff", fontSize:14, fontWeight:700,
+                              textDecoration:"none", fontFamily:"'DM Sans',sans-serif",
+                              letterSpacing:"0.02em",
+                            }}>
+                            View LinkedIn Profile <ExternalLink size={14} strokeWidth={2.5}/>
+                          </a>
+                        </SectionCard>
+                      )}
+                      {profileUser.portfolio && (
+                        <SectionCard icon={FaBriefcase} label="Portfolio" dark={darkMode}>
+                          <a href={profileUser.portfolio} target="_blank" rel="noreferrer"
+                            style={{
+                              display:"inline-flex", alignItems:"center", gap:8,
+                              background:"linear-gradient(135deg,#14b8a6,#0d9488)",
+                              borderRadius:12, padding:"12px 22px",
+                              color:"#fff", fontSize:14, fontWeight:700,
+                              textDecoration:"none", fontFamily:"'DM Sans',sans-serif",
+                              letterSpacing:"0.02em",
+                            }}>
+                            View Portfolio <ExternalLink size={14} strokeWidth={2.5}/>
+                          </a>
+                        </SectionCard>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Weekly Availability — full width */}
+                  <SectionCard icon={Calendar} label="Weekly Availability" dark={darkMode}>
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:10 }}>
+                      {sortedAvail.length > 0
+                        ? sortedAvail.map((item,i) => (
+                            <DayPill key={i} day={typeof item==="string"?item:item.day} dark={darkMode}/>
+                          ))
+                        : <p style={{
+                            color: darkMode ? "#3d7a73" : "#5a9e97",
+                            fontSize:15, fontFamily:"'DM Sans',sans-serif",
+                          }}>No availability set</p>
+                      }
+                    </div>
+                  </SectionCard>
+
+                  {/* Demo Video — full width */}
                   {profileUser.demoVideo && (
-                    <motion.div variants={fadeUp} style={{ flex:"1 1 360px" }}>
-                      <SectionHead icon={FaYoutube} label="Demo Video" dark={darkMode}/>
+                    <SectionCard icon={FaYoutube} label="Demo Video" dark={darkMode}>
                       <div style={{
-                        borderRadius:20, overflow:"hidden",
-                        border:`1.5px solid ${theme.borderMid}`,
+                        borderRadius:14, overflow:"hidden",
+                        border:`1.5px solid ${darkMode ? "rgba(20,184,166,0.22)" : "rgba(20,184,166,0.28)"}`,
                         boxShadow: darkMode ? "0 12px 48px rgba(0,0,0,0.5)" : "0 8px 32px rgba(20,184,166,0.12)",
                         position:"relative", paddingBottom:"56.25%",
                       }}>
@@ -830,8 +606,9 @@ const PublicProfile = () => {
                           allowFullScreen title="Demo Video"
                         />
                       </div>
-                    </motion.div>
+                    </SectionCard>
                   )}
+
                 </motion.div>
               ) : (
                 <ReviewsSection userId={profileUser._id}/>
@@ -847,13 +624,20 @@ const PublicProfile = () => {
           <motion.div
             initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
             onClick={() => setLightboxOpen(false)}
-            style={{ position:"fixed",inset:0,zIndex:999, background:"rgba(0,0,0,0.88)", display:"flex",alignItems:"center",justifyContent:"center", backdropFilter:"blur(10px)" }}
+            style={{
+              position:"fixed", inset:0, zIndex:999,
+              background:"rgba(0,0,0,0.88)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              backdropFilter:"blur(10px)",
+            }}
           >
             <motion.img
               initial={{ scale:0.85 }} animate={{ scale:1 }} exit={{ scale:0.85 }}
               src={avatarSrc} alt={profileUser.name}
-              style={{ width:300,height:300, borderRadius:"50%", objectFit:"cover",
-                border:"4px solid #14b8a6", boxShadow:"0 0 80px rgba(20,184,166,0.5)" }}
+              style={{
+                width:300, height:300, borderRadius:"50%", objectFit:"cover",
+                border:"4px solid #14b8a6", boxShadow:"0 0 80px rgba(20,184,166,0.5)",
+              }}
             />
           </motion.div>
         )}

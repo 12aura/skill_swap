@@ -1,254 +1,267 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import ReviewModal from "../components/ReviewModal";
 
 const BASE = import.meta.env.VITE_SERVER_URL || "http://localhost:5000";
 
-// ─── Pill badge ───────────────────────────────────────────
-function Pill({ children, color = "teal" }) {
-  const map = {
-    teal:   "bg-teal-500/15   text-teal-300   border-teal-500/25",
-    purple: "bg-purple-500/15 text-purple-300 border-purple-500/25",
-    amber:  "bg-amber-500/15  text-amber-300  border-amber-500/25",
-    rose:   "bg-rose-500/15   text-rose-300   border-rose-500/25",
-    sky:    "bg-sky-500/15    text-sky-300    border-sky-500/25",
-  };
+function useTheme() {
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", saved);
+  }, []);
+}
+
+function Pill({ children }) {
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${map[color] || map.teal}`}>
+    <span className="px-3 py-1 text-xs font-medium rounded-full bg-base-300/40 text-base-content border border-base-300/30 backdrop-blur-md">
       {children}
     </span>
   );
 }
 
-// ─── Section card ─────────────────────────────────────────
-function Card({ icon, title, children }) {
+function Card({ title, children }) {
   return (
-    <div className="bg-white/[0.04] border border-white/[0.07] rounded-2xl p-5 flex flex-col gap-3">
-      <div className="flex items-center gap-2.5">
-        <span className="text-xl">{icon}</span>
-        <h3 className="text-white/70 text-sm font-semibold uppercase tracking-wider">{title}</h3>
-      </div>
-      {children}
+    <div className="rounded-2xl p-6 flex flex-col gap-3 bg-base-100/70 backdrop-blur-xl border border-base-300/40 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+      <h3 className="text-base-content/60 text-xs font-semibold uppercase tracking-widest">{title}</h3>
+      <div className="text-base-content/80 text-sm leading-relaxed">{children}</div>
     </div>
   );
 }
 
-// ─── Skeleton loader ──────────────────────────────────────
 function Skeleton() {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center gap-6 px-4">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-20 h-20">
-          <div className="absolute inset-0 rounded-full border-4 border-teal-500/20" />
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-teal-500 animate-spin" />
-          <div
-            className="absolute inset-2 rounded-full border-4 border-transparent border-b-purple-500 animate-spin"
-            style={{ animationDirection: "reverse", animationDuration: "1.2s" }}
-          />
-          <span className="absolute inset-0 flex items-center justify-center text-2xl">✨</span>
-        </div>
-        <div className="text-center">
-          <p className="text-white font-semibold text-lg">Generating your summary</p>
-          <p className="text-white/40 text-sm mt-1">Claude is analysing your session transcript…</p>
-        </div>
-      </div>
-      <div className="w-full max-w-2xl space-y-3">
-        {[140, 80, 100].map((h, i) => (
-          <div key={i} className="rounded-2xl overflow-hidden" style={{ height: h }}>
-            <div className="w-full h-full bg-white/5 animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-base-200 font-sans">
+      <p className="text-base-content/60 animate-pulse text-lg">Generating your summary...</p>
     </div>
   );
 }
 
-// ─── Mood indicator ───────────────────────────────────────
 function MoodBadge({ mood }) {
-  const config = {
-    positive:    { emoji: "😊", color: "teal",   label: "Positive session" },
-    neutral:     { emoji: "😐", color: "sky",    label: "Neutral session" },
-    challenging: { emoji: "💪", color: "amber",  label: "Challenging session" },
-    mixed:       { emoji: "🌤", color: "purple", label: "Mixed session" },
-  };
-  const c = config[mood?.toLowerCase()] || config.neutral;
-  return <Pill color={c.color}>{c.emoji} {c.label}</Pill>;
+  const config = { positive: "Positive", neutral: "Neutral", challenging: "Challenging", mixed: "Mixed" };
+  return <Pill>{config[mood?.toLowerCase()] || config.neutral}</Pill>;
+}
+
+// ─── Recording Card ───────────────────────────────────────
+function RecordingCard({ sessionId }) {
+  const [recording, setRecording]       = useState(null);
+  const [recordingLoading, setRecordingLoading] = useState(true);
+
+  useEffect(() => {
+    if (!sessionId) { setRecordingLoading(false); return; }
+
+    const fetchRecording = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `${BASE}/api/sessions/${sessionId}/recording`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setRecording(res.data);
+      } catch (e) {
+        // No recording yet or not found — silent fail is fine
+        console.warn("No recording yet:", e.message);
+      } finally {
+        setRecordingLoading(false);
+      }
+    };
+
+    fetchRecording();
+  }, [sessionId]);
+
+  // Don't render the card at all if there's no sessionId
+  if (!sessionId) return null;
+
+  return (
+    <Card title="Session Recording">
+      {recordingLoading ? (
+        <div className="flex items-center gap-2 text-base-content/50">
+          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          <span className="text-sm">Checking for recording...</span>
+        </div>
+
+      ) : recording?.recordingUrl ? (
+        <div className="flex flex-col gap-3">
+          {/* Video player */}
+          <video
+            src={recording.recordingUrl}
+            controls
+            className="w-full rounded-xl border border-base-300/30"
+          />
+
+          {/* Metadata row */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex gap-3 text-xs text-base-content/50">
+              {recording.duration && (
+                <span>Duration: {Math.round(recording.duration / 60)} min</span>
+              )}
+              {recording.createdAt && (
+                <span>Recorded: {new Date(recording.createdAt).toLocaleDateString()}</span>
+              )}
+            </div>
+
+            {/* Download button */}
+            
+              href={recording.recordingUrl}
+              download
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
+                         bg-teal-500/15 text-teal-600 border border-teal-500/25
+                         hover:bg-teal-500/25 transition"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download
+            </a>
+          </div>
+        </div>
+
+      ) : (
+        // Recording was enabled but not ready yet
+        <div className="flex items-start gap-3 text-sm text-base-content/60">
+          <span className="text-lg shrink-0">🎬</span>
+          <div>
+            <p className="font-medium text-base-content/70">Recording is processing</p>
+            <p className="text-xs mt-0.5">
+              This usually takes 1–3 minutes after the session ends. 
+              Refresh the page to check again.
+            </p>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
 }
 
 // ─── Main component ───────────────────────────────────────
 export default function SessionSummary() {
+  useTheme();
+
   const { roomId, sessionId } = useParams();
   const navigate  = useNavigate();
-  const location  = useLocation(); // ✅ inside the component — no hook violation
+  const location  = useLocation();
 
   const [summary,      setSummary]      = useState(null);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState(null);
   const [noTranscript, setNoTranscript] = useState(false);
+  const [reviewing,    setReviewing]    = useState(null);
+  const [hasReviewed,  setHasReviewed]  = useState(false);
 
-  // ── Best available session ID for the Review button ──────────────
-  // Priority: location.state (passed by VideoCall.goToSummary)
-  //         → sessionId URL param
-  //         → roomId URL param (last resort)
   const resolvedSessionId =
-    location.state?.sessionId ||
-    sessionId                  ||
-    roomId;
+    location.state?.sessionId || sessionId || roomId;
 
+  // ─── Fetch AI summary ─────────────────────────────────────
   useEffect(() => {
     const id = roomId || sessionId;
     if (!id) { setError("Missing room ID."); setLoading(false); return; }
 
     const token   = localStorage.getItem("token");
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-    let attempts = 0;
-    const MAX    = 3;
+    let attempts  = 0;
+    const MAX     = 3;
 
     const fetchSummary = async () => {
       attempts++;
       try {
         const res  = await axios.get(`${BASE}/api/video/summary/${id}`, { headers });
         const data = res.data;
-
-        if (data.summary) {
-          setSummary(data.summary);
-          setLoading(false);
-        } else if (data.message) {
-          setNoTranscript(true);
-          setLoading(false);
-        } else if (attempts < MAX) {
-          setTimeout(fetchSummary, 8000);
-        } else {
-          setError("Summary could not be generated. The transcript may still be processing.");
-          setLoading(false);
-        }
-      } catch (err) {
-        if (attempts < MAX) {
-          setTimeout(fetchSummary, 8000);
-        } else {
-          setError(err.response?.data?.error || "Failed to load summary.");
-          setLoading(false);
-        }
+        if (data.summary)      { setSummary(data.summary); setLoading(false); }
+        else if (data.message) { setNoTranscript(true);    setLoading(false); }
+        else if (attempts < MAX) setTimeout(fetchSummary, 8000);
+        else { setError("Summary could not be generated."); setLoading(false); }
+      } catch {
+        if (attempts < MAX) setTimeout(fetchSummary, 8000);
+        else { setError("Failed to load summary."); setLoading(false); }
       }
     };
 
     fetchSummary();
   }, [roomId, sessionId]);
 
-  if (loading) return <Skeleton />;
+  // ─── Check if already reviewed ────────────────────────────
+  useEffect(() => {
+    if (!resolvedSessionId) return;
+    const token = localStorage.getItem("token");
+    axios
+      .get(`${BASE}/api/reviews/session/${resolvedSessionId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => { if (res.data.hasReviewed) setHasReviewed(true); })
+      .catch(() => {});
+  }, [resolvedSessionId]);
 
-  // ── Review navigation with safe fallback ─────────────────────────
   const handleReviewClick = () => {
-    if (resolvedSessionId) {
-      navigate(`/review/${resolvedSessionId}`);
-    } else {
-      navigate("/sessions");
-    }
+    setReviewing({
+      _id:          resolvedSessionId,
+      role:         location.state?.role        || "learner",
+      partnerName:  location.state?.partnerName || "Your partner",
+      partnerAvatar: location.state?.partnerAvatar || null,
+      skillName:    location.state?.skillName   || summary?.title || "Skill Exchange",
+    });
   };
 
+  const handleCopy = () => {
+    if (!summary) return;
+    navigator.clipboard.writeText(JSON.stringify(summary, null, 2));
+  };
+
+  if (loading) return <Skeleton />;
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Subtle background gradient */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-teal-950/40 via-gray-950 to-gray-950 pointer-events-none" />
+    <div className="min-h-screen text-base-content font-sans bg-gradient-to-br from-base-200 via-base-300 to-base-200">
+      <div className="max-w-3xl mx-auto px-4 py-12 flex flex-col gap-8">
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-12 flex flex-col gap-8">
-
-        {/* ── Header ── */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center text-xl">
-              ✨
-            </div>
-            <div>
-              <p className="text-white/40 text-xs uppercase tracking-widest font-medium">Session complete</p>
-              <h1 className="text-white font-bold text-xl leading-tight">
-                {summary?.title || "Session Summary"}
-              </h1>
-            </div>
-          </div>
-
-          {/* Metadata row */}
-          <div className="flex flex-wrap gap-2 items-center mt-1">
-            {summary?.mood && <MoodBadge mood={summary.mood} />}
-            {summary?.durationEstimate && (
-              <Pill color="sky">🕐 {summary.durationEstimate}</Pill>
-            )}
-            {summary && <Pill color="purple">AI-generated</Pill>}
-          </div>
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            {summary?.title || "Session Summary"}
+          </h1>
         </div>
 
-        {/* ── Error state ── */}
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/25 rounded-2xl p-5 text-red-300 text-sm flex gap-3 items-start">
-            <span className="text-lg shrink-0">⚠️</span>
-            <div>
-              <p className="font-semibold mb-1">Could not generate summary</p>
-              <p className="text-red-300/70">{error}</p>
-            </div>
-          </div>
-        )}
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2">
+          {summary?.mood             && <MoodBadge mood={summary.mood} />}
+          {summary?.durationEstimate && <Pill>{summary.durationEstimate}</Pill>}
+          {summary                   && <Pill>AI Generated</Pill>}
+        </div>
 
-        {/* ── No transcript state ── */}
-        {noTranscript && !error && (
-          <div className="bg-amber-500/10 border border-amber-500/25 rounded-2xl p-5 text-amber-300 text-sm flex gap-3 items-start">
-            <span className="text-lg shrink-0">📝</span>
-            <div>
-              <p className="font-semibold mb-1">No transcript recorded</p>
-              <p className="text-amber-300/70">
-                A summary couldn't be generated because transcription wasn't enabled during
-                the session. Enable "Record Transcript" in your next call to get AI-powered summaries.
-              </p>
-            </div>
-          </div>
-        )}
+        {/* Alerts */}
+        {error        && <div className="alert alert-error text-sm">{error}</div>}
+        {noTranscript && <div className="alert alert-warning text-sm">No transcript recorded for this session.</div>}
 
-        {/* ── Summary cards ── */}
+        {/* ✅ Recording card — sits above AI summary cards */}
+        <RecordingCard sessionId={resolvedSessionId} />
+
+        {/* AI Summary cards */}
         {summary && (
-          <div className="flex flex-col gap-4">
-
-            {/* Overview */}
+          <div className="flex flex-col gap-6">
             {summary.overview && (
-              <Card icon="📋" title="Overview">
-                <p className="text-white/75 text-sm leading-relaxed">{summary.overview}</p>
-              </Card>
+              <Card title="Overview"><p>{summary.overview}</p></Card>
             )}
 
-            {/* Key Topics */}
             {summary.keyTopics?.length > 0 && (
-              <Card icon="🏷️" title="Key Topics">
+              <Card title="Key Topics">
                 <div className="flex flex-wrap gap-2">
-                  {summary.keyTopics.map((t, i) => (
-                    <Pill key={i} color={["teal", "purple", "sky", "amber"][i % 4]}>{t}</Pill>
-                  ))}
+                  {summary.keyTopics.map((t, i) => <Pill key={i}>{t}</Pill>)}
                 </div>
               </Card>
             )}
 
-            {/* Two-column: Action Items + Highlights */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-5">
               {summary.actionItems?.length > 0 && (
-                <Card icon="✅" title="Action Items">
+                <Card title="Action Items">
                   <ul className="space-y-2">
-                    {summary.actionItems.map((a, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-white/70">
-                        <span className="text-teal-400 shrink-0 mt-0.5">→</span>
-                        <span>{a}</span>
-                      </li>
-                    ))}
+                    {summary.actionItems.map((a, i) => <li key={i}>• {a}</li>)}
                   </ul>
                 </Card>
               )}
-
               {summary.highlights?.length > 0 && (
-                <Card icon="⭐" title="Highlights">
+                <Card title="Highlights">
                   <ul className="space-y-2">
-                    {summary.highlights.map((h, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-white/70">
-                        <span className="text-amber-400 shrink-0 mt-0.5">✦</span>
-                        <span>{h}</span>
-                      </li>
-                    ))}
+                    {summary.highlights.map((h, i) => <li key={i}>• {h}</li>)}
                   </ul>
                 </Card>
               )}
@@ -256,71 +269,51 @@ export default function SessionSummary() {
           </div>
         )}
 
-        {/* ── Actions ── */}
-        <div className="flex gap-3 flex-wrap pt-2">
-
-          {/* Leave a Review — only shown when a valid session ID is available */}
+        {/* Action buttons */}
+        <div className="flex gap-3 flex-wrap pt-4">
           {resolvedSessionId && (
-            <button
-              onClick={handleReviewClick}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 hover:text-purple-200 font-semibold text-sm transition hover:scale-105 active:scale-95">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg>
-              Leave a Review
-            </button>
+            hasReviewed ? (
+              <div className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-teal-500">
+                ✓ Review submitted
+              </div>
+            ) : (
+              <button
+                onClick={handleReviewClick}
+                className="px-5 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+              >
+                Leave Review
+              </button>
+            )
           )}
 
-          {/* Back to Sessions */}
           <button
             onClick={() => navigate("/sessions")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal-500 hover:bg-teal-400 text-white font-semibold text-sm transition hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/25">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v0" />
-            </svg>
+            className="px-5 py-2 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300"
+          >
             Back to Sessions
           </button>
 
-          {/* Copy Summary */}
           {summary && (
             <button
-              onClick={() => {
-                const text = formatSummaryAsText(summary);
-                navigator.clipboard.writeText(text).catch(() => {});
-                const el = document.querySelector("[data-copy-btn]");
-                if (el) {
-                  el.textContent = "Copied!";
-                  setTimeout(() => (el.textContent = "Copy Summary"), 2000);
-                }
-              }}
-              data-copy-btn
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/8 hover:bg-white/12 border border-white/10 text-white/70 hover:text-white font-semibold text-sm transition hover:scale-105 active:scale-95">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy Summary
+              onClick={handleCopy}
+              className="p-3 rounded-xl text-white bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center"
+              title="Copy Summary"
+            >
+              ⧉
             </button>
           )}
         </div>
 
-        {/* Footer note */}
-        <p className="text-white/20 text-xs text-center pb-4">
-          Summary generated by Claude AI · Based on session transcript
-        </p>
-
+        <p className="text-xs text-center text-base-content/50">Summary generated by AI</p>
       </div>
+
+      {reviewing && (
+        <ReviewModal
+          session={reviewing}
+          onClose={() => setReviewing(null)}
+          onSubmitted={() => { setHasReviewed(true); setReviewing(null); }}
+        />
+      )}
     </div>
   );
-}
-
-// ─── Plain-text formatter for clipboard ──────────────────
-function formatSummaryAsText(s) {
-  const lines = [`📋 ${s.title || "Session Summary"}`, ""];
-  if (s.overview)            lines.push(`Overview\n${s.overview}`, "");
-  if (s.keyTopics?.length)   lines.push(`Key Topics\n${s.keyTopics.map(t => `• ${t}`).join("\n")}`, "");
-  if (s.actionItems?.length) lines.push(`Action Items\n${s.actionItems.map(a => `→ ${a}`).join("\n")}`, "");
-  if (s.highlights?.length)  lines.push(`Highlights\n${s.highlights.map(h => `✦ ${h}`).join("\n")}`, "");
-  if (s.mood)                lines.push(`Mood: ${s.mood}`);
-  if (s.durationEstimate)    lines.push(`Duration: ${s.durationEstimate}`);
-  return lines.join("\n");
 }

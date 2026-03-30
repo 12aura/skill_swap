@@ -147,6 +147,7 @@
 // export default App;
 
 
+
 import React, { useContext, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
@@ -179,16 +180,25 @@ import ScheduleSession from "./pages/ScheduleSession";
 import PostCallReview from "./pages/PostCallReview";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import BadgeCelebration from "./components/BadgeCelebration";
-import NotificationToast from "./components/NotificationToast"; // ✅ NEW
+import NotificationToast from "./components/NotificationToast";
 import { DarkModeContext } from "./context/DarkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SkillBuddy from "./pages/SkillBuddy";
+import SessionSummary from "./pages/Sessionsummary";
 import socket from "./socket";
 
 const App = () => {
   const { darkMode } = useContext(DarkModeContext);
   const { loading, user } = useContext(AuthContext);
+
+  // ✅ Apply DaisyUI theme to <html> tag whenever darkMode changes
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-theme",
+      darkMode ? "dark" : "light"
+    );
+  }, [darkMode]);
 
   useEffect(() => {
     if (!user?._id) return;
@@ -208,26 +218,20 @@ const App = () => {
     };
   }, [user?._id]);
 
-  useEffect(() => {
-  document.documentElement.setAttribute(
-    "data-theme",
-    darkMode ? "dark" : "light"
-  );
-}, [darkMode]);
-
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-base-100 text-base-content">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className={darkMode ? "bg-slate-900 text-white min-h-screen" : "bg-white text-gray-900 min-h-screen"}>
+    // ✅ Use DaisyUI semantic classes instead of hardcoded colors
+    <div className="bg-base-100 text-base-content min-h-screen">
 
       <BadgeCelebration />
-      <NotificationToast /> {/* ✅ NEW — toast popups render here */}
+      <NotificationToast />
 
       <Navbar />
 
@@ -236,7 +240,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/notifications" element={<Notifications />} />
-<Route path="/skill-buddy" element={<SkillBuddy />} />
+        <Route path="/skill-buddy" element={<SkillBuddy />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<PublicProfile />} />
@@ -263,20 +267,32 @@ const App = () => {
 
         <Route
           path="/sessions/:id/schedule"
-          element={<ProtectedRoute><ScheduleSession /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <ScheduleSession />
+            </ProtectedRoute>
+          }
         />
-
+        <Route path="/summary/:roomId" element={<SessionSummary />} />
         <Route path="/video-call/:roomId" element={<VideoCall />} />
         <Route path="/messages" element={<ChatListPage />} />
 
         <Route
           path="/chat/:userId"
-          element={<ProtectedRoute><ChatPage /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <ChatPage />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/review/:sessionId"
-          element={<ProtectedRoute><PostCallReview /></ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              <PostCallReview />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="*" element={<Navigate to="/" />} />

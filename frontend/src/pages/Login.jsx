@@ -1,3 +1,4 @@
+
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,17 +7,14 @@ import { DarkModeContext } from "../context/DarkModeContext";
 
 const Login = () => {
   const handleGoogleLogin = () => {
-  window.location.href = "http://localhost:5000/api/auth/google";
-};
+    window.location.href = "http://localhost:5000/api/auth/google";
+  };
+
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-  const { darkMode } = useContext(DarkModeContext); // <-- added dark mode
+  const { darkMode } = useContext(DarkModeContext);
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,10 +24,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        form
-      );
+      const res = await axios.post("http://localhost:5000/api/auth/login", form);
 
       login(res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
@@ -46,11 +41,12 @@ const Login = () => {
       className={`min-h-screen flex items-center justify-center px-6 transition-colors ${
         darkMode
           ? "bg-slate-900 text-white"
-          : "bg-gradient-to-br from-teal-300 via-cyan-300 to-sky-400 text-gray-800"
+          : "bg-teal-500 text-white"
       }`}
     >
+      {/* CARD */}
       <div
-        className={`w-full max-w-md rounded-3xl shadow-xl p-8 transition-colors ${
+        className={`w-full max-w-md rounded-3xl shadow-2xl p-8 transition-colors ${
           darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-800"
         }`}
       >
@@ -63,10 +59,11 @@ const Login = () => {
           Login to continue SkillSwap
         </p>
 
+        {/* FORM */}
         <form onSubmit={handleLogin} className="mt-8 space-y-5">
           {error && (
             <div
-              className={`alert text-sm ${
+              className={`text-sm text-center ${
                 darkMode ? "text-red-400" : "text-red-600"
               }`}
             >
@@ -74,92 +71,102 @@ const Login = () => {
             </div>
           )}
 
-          {/* Email */}
+          {/* EMAIL */}
           <div>
-            <label className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+            <label
+              className={`text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
               Email
             </label>
             <input
               type="email"
-              className={`input input-bordered w-full mt-1 transition-colors ${
-                darkMode
-                  ? "bg-slate-700 text-white border-slate-600"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
               placeholder="you@example.com"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
+              className={`w-full mt-1 px-4 py-3 rounded-xl transition-colors outline-none border ${
+                darkMode
+                  ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                  : "bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+              }`}
             />
           </div>
 
-          {/* Password */}
+          {/* PASSWORD */}
           <div>
-            <label className={`text-sm ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+            <label
+              className={`text-sm font-medium ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
+            >
               Password
             </label>
             <input
               type="password"
-              className={`input input-bordered w-full mt-1 transition-colors ${
-                darkMode
-                  ? "bg-slate-700 text-white border-slate-600"
-                  : "bg-white text-gray-800 border-gray-300"
-              }`}
               placeholder="••••••••"
               value={form.password}
-              onChange={(e) =>
-                setForm({ ...form, password: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
+              className={`w-full mt-1 px-4 py-3 rounded-xl transition-colors outline-none border ${
+                darkMode
+                  ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                  : "bg-white border-gray-300 text-gray-800 placeholder-gray-400"
+              }`}
             />
             <div className="text-left mt-2 mb-4">
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-teal-500 hover:underline"
-                >
-                  Forgot password?
-                </Link>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-teal-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
             </div>
           </div>
 
+          {/* LOGIN BUTTON */}
           <button
-            className={`btn w-full mt-4 ${
+            className={`w-full py-3 rounded-xl font-semibold transition ${
               darkMode
-                ? "btn-neutral bg-teal-600 hover:bg-teal-500 text-white"
-                : "btn-neutral"
+                ? "bg-teal-600 hover:bg-teal-500 text-white"
+                : "bg-teal-600 hover:bg-teal-500 text-white"
             }`}
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-          {/* manshi */}
-          <div className="flex items-center my-4">
-  <div className="flex-grow border-t border-gray-300"></div>
-  <span className="px-3 text-sm text-gray-400">OR</span>
-  <div className="flex-grow border-t border-gray-300"></div>
-</div>
 
-{/* Google Login Button */}
-<button
-  type="button"
-  onClick={handleGoogleLogin}
-  className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2 bg-white hover:bg-gray-100 transition"
->
-  <img
-    src="https://developers.google.com/identity/images/g-logo.png"
-    alt="Google"
-    className="w-5 h-5"
-  />
-  <span className="text-gray-700 font-medium">Continue with Google</span>
-</button>
+          {/* OR DIVIDER */}
+          <div className="flex items-center my-4">
+            <div className="flex-grow border-t border-gray-300"></div>
+            <span className="px-3 text-sm text-gray-400">OR</span>
+            <div className="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          {/* GOOGLE LOGIN */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-xl py-3 bg-white hover:bg-gray-100 transition"
+          >
+            <img
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google"
+              className="w-5 h-5"
+            />
+            <span className="text-gray-700 font-medium">Continue with Google</span>
+          </button>
         </form>
 
-        <p className={`text-center text-sm mt-6 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+        {/* SIGN UP LINK */}
+        <p
+          className={`text-center text-sm mt-6 ${
+            darkMode ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
           Don’t have an account?
-          <Link
-            to="/register"
-            className="text-teal-600 font-medium ml-1"
-          >
+          <Link to="/register" className="text-teal-500 font-medium ml-1 hover:underline">
             Sign Up
           </Link>
         </p>

@@ -134,10 +134,10 @@ const Settings = () => {
             className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-6"
           >
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 tracking-tight">
-                <SettingsIcon className="text-teal-500" />
-                Settings
-              </h1>
+             <h1 className="text-4xl md:text-5xl font-bold flex items-center gap-3 tracking-tight text-[#23b8ab]">
+  <SettingsIcon className="text-[#56c9b9]" />
+  Settings
+</h1>
 
               <p className="text-base text-gray-400 mt-2">
                 Manage your profile and account preferences

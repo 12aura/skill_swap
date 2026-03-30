@@ -126,7 +126,6 @@ const Requests = () => {
         </p>
       </motion.div>
 
-      {/* SUMMARY CARDS (hide when opened from pending) */}
       {!isFromPending && (
         <div className="grid grid-cols-3 gap-6 mb-10">
           {[
@@ -211,7 +210,7 @@ const Requests = () => {
 
             <p style={{ color: darkMode ? "#94a3b8" : "#64748b", fontSize: 14 }}>
               {activeFilter === "pending"
-                ?" "
+                ? " "
                 : "Once someone sends you a skill request, it will appear here."}
             </p>
           </motion.div>
@@ -238,100 +237,100 @@ const Requests = () => {
                     boxShadow: "0 10px 40px rgba(0,0,0,0.05)",
                   }}
                 >
-             <div className="flex justify-between items-start">
-  <div>
-    <div
-      style={{
-        fontSize: 20,
-        fontWeight: 700,
-        color: darkMode ? "#e5e7eb" : "#0f172a",
-      }}
-    >
-      {req.skill}
-    </div>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 700,
+                          color: darkMode ? "#e5e7eb" : "#0f172a",
+                        }}
+                      >
+                        {req.skill}
+                      </div>
 
-    <div
-      style={{
-        color: darkMode ? "#94a3b8" : "#64748b",
-        marginTop: 6,
-        fontSize: 14,
-      }}
-    >
-      With {req.fromUser?.name}
-    </div>
-  </div>
+                      <div
+                        style={{
+                          color: darkMode ? "#94a3b8" : "#64748b",
+                          marginTop: 6,
+                          fontSize: 14,
+                        }}
+                      >
+                        With {req.fromUser?.name}
+                      </div>
+                    </div>
 
-  <div
-    style={{
-      background: sc.bg,
-      color: sc.color,
-      padding: "6px 14px",
-      borderRadius: 50,
-      fontWeight: 700,
-      fontSize: 12,
-    }}
-  >
-    {req.status}
-  </div>
-</div>
+                    <div
+                      style={{
+                        background: sc.bg,
+                        color: sc.color,
+                        padding: "6px 14px",
+                        borderRadius: 50,
+                        fontWeight: 700,
+                        fontSize: 12,
+                      }}
+                    >
+                      {req.status}
+                    </div>
+                  </div>
 
-{/* ACTION BUTTONS */}
-{req.status === "pending" && isReceiver && (
-  <div className="flex gap-3 mt-6">
-    <button
-      onClick={() => updateStatus(req._id, "accepted")}
-      style={{
-        background: "#10b981",
-        color: "#fff",
-        padding: "10px 18px",
-        borderRadius: 12,
-        fontWeight: 600,
-        fontSize: 14,
-        border: "none",
-        cursor: "pointer",
-      }}
-    >
-      Accept
-    </button>
+                  {/* PENDING BUTTONS */}
+                  {req.status === "pending" && isReceiver && (
+                    <div className="flex justify-end gap-3 mt-6">
+                      <button
+                        onClick={() => updateStatus(req._id, "accepted")}
+                        style={{
+                          background: "#ecfdf5",
+                          color: "#10b981",
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          fontWeight: 600,
+                          fontSize: 14,
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Accept
+                      </button>
 
-    <button
-      onClick={() => updateStatus(req._id, "rejected")}
-      style={{
-        background: "#ef4444",
-        color: "#fff",
-        padding: "10px 18px",
-        borderRadius: 12,
-        fontWeight: 600,
-        fontSize: 14,
-        border: "none",
-        cursor: "pointer",
-      }}
-    >
-      Reject
-    </button>
-  </div>
-)}
+                      <button
+                        onClick={() => updateStatus(req._id, "rejected")}
+                        style={{
+                          background: "#fef2f2",
+                          color: "#ef4444",
+                          padding: "10px 18px",
+                          borderRadius: 12,
+                          fontWeight: 600,
+                          fontSize: 14,
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
 
-{/* CREATE SESSION BUTTON (only when accepted) */}
-{req.status === "accepted" && (
-  <div className="mt-6">
-    <button
-      onClick={() => createSession(req._id)}
-      style={{
-        background: "#14b8a6",
-        color: "#fff",
-        padding: "10px 20px",
-        borderRadius: 12,
-        fontWeight: 600,
-        fontSize: 14,
-        border: "none",
-        cursor: "pointer",
-      }}
-    >
-      Create Session
-    </button>
-  </div>
-)}
+                  {/* CREATE SESSION (TEAL GREEN) */}
+                  {req.status === "accepted" && (
+                    <div className="flex justify-end mt-6">
+                      <button
+                        onClick={() => createSession(req._id)}
+                        style={{
+                          background: "#14b8a6",
+                          color: "#fff",
+                          padding: "10px 20px",
+                          borderRadius: 12,
+                          fontWeight: 600,
+                          fontSize: 14,
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Create Session
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               );
             })}

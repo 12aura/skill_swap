@@ -7,6 +7,8 @@ import { DarkModeContext } from "../context/DarkModeContext";
 import MoonIcon from "../assets/imageofmoon.png";
 import SunIcon from "../assets/imageofsun.png";
 import socket from "../socket";
+import logolight from "../assets/logolight.png";
+import logodark from "../assets/logodark.png";
 import { useNotifications } from "../context/NotificationContext";
 import { FiSettings, FiBell } from "react-icons/fi";
 
@@ -86,12 +88,20 @@ const Navbar = () => {
         }`}
       >
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-3xl font-extrabold text-teal-500">S</span>
-          <span className="text-2xl font-extrabold tracking-wide">
-            SkillSwap
-          </span>
-        </Link>
+<Link to="/" className="flex items-center gap-3">
+  <img
+    src={darkMode ? logodark : logolight}
+    alt="SkillSwap Logo"
+    className="w-10 h-10 object-contain"
+  />
+
+<span className="text-2xl font-extrabold tracking-wide">
+  <span className="text-teal-500">Skill</span>
+  <span className={darkMode ? "text-white" : "text-black"}>
+    Swap
+  </span>
+</span>
+</Link>
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-6 text-sm font-semibold relative">

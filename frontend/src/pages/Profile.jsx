@@ -377,9 +377,6 @@
 
 // export default Profile;
 
-
-
-
 import { LayoutDashboard, Sparkles, MessageCircle, CalendarDays, Star, Zap, ChevronRight, Camera, Edit, Users, Mail } from "lucide-react";
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";

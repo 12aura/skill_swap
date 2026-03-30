@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+
+.str-chat__message-input {
+  display: none !important;
+}
+.cp-input {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  align-items: center;
+}
+
+.cp-input input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+.cp-input button {
+  background: #0ea5e9;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+}
+
+.emoji-box {
+  position: absolute;
+  bottom: 60px;
+}
+
 .str-chat__channel {
   display: flex;
   align-items: center;

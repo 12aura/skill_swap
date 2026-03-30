@@ -29,6 +29,11 @@ const sessionSchema = new mongoose.Schema(
       enum: ["pending", "upcoming", "scheduled", "completed", "cancelled"],
       default: "pending",
     },
+    // Session.js
+    callId: { type: String, default: null, index: true },
+    recordingUrl:       { type: String, default: null },
+    recordingDuration:  { type: Number, default: null },
+    recordingCreatedAt: { type: Date,   default: null },
   },
   { timestamps: true }
 );

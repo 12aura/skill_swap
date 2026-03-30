@@ -146,7 +146,7 @@ const server = http.createServer(app);
 const reviewRoutes      = require("./routes/review");
 const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const Notification      = require("./models/Notification"); // ✅ NEW
-
+const webhookRoutes = require("./routes/webhooks");
 const io = new Server(server, {
     cors: {
     origin: ["http://localhost:5173"],
@@ -263,7 +263,7 @@ app.use("/api/ai",            aiRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reviews",       reviewRoutes);
 app.use("/api/leaderboard",   leaderboardRoutes);
-
+app.use("/api/webhooks", webhookRoutes);
 // ------------------ SERVER ------------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, "0.0.0.0", () => {

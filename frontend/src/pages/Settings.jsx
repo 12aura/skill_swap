@@ -267,7 +267,6 @@
 
 // export default Settings;
 
-
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import BasicInfo from "../components/settings/BasicInfo";
@@ -330,33 +329,30 @@ const Settings = () => {
   }, [token]);
 
   /* SAVE FIELD */
-  const handleSave = async (field, value) => {
-    try {
-      const payload =
-        field === "password" ? { password: value } : { [field]: value };
-
-      const res = await axios.put(
-        "http://localhost:5000/api/user/update",
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (activeTab === "basic") {
-        setBasicData((prev) => ({ ...prev, [field]: value }));
-      } else {
-        setAccountData((prev) => ({ ...prev, [field]: value }));
+const handleSave = async (field, value) => {
+  try {
+    const token = localStorage.getItem("token");   // 🔥 get token
+console.log("OLD:", value.oldPassword);
+console.log("NEW:", value.newPassword);
+    await axios.put(
+      "http://localhost:5000/api/auth/change-password",
+      {
+        oldPassword: value.oldPassword,
+        newPassword: value.newPassword,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,   // 🔥 send token here
+        },
       }
+    );
 
-      if (res.data.user) setUser(res.data.user);
-
-      setEditField(null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error("Save failed:", err);
-      alert("Failed to save changes. Please try again.");
-    }
-  };
+    alert("Password updated successfully");
+  } catch (err) {
+    console.log("Save failed:", err);
+    alert("Failed to save changes");
+  }
+};
 
   /* LOADING */
   if (pageLoading) {

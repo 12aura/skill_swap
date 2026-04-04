@@ -441,13 +441,11 @@ function VideoCall() {
 
         const videoCall = videoClient.call("default", roomId);
 
-        // ✅ KEY FIX: recording mode set to "auto-on" so Stream records automatically
-        // and fires the call.recording_ready webhook when the call ends
         await videoCall.getOrCreate({
           data: {
             settings_override: {
               recording: {
-                mode: "auto-on",      // ✅ starts recording as soon as call begins
+                mode: "auto-on",
                 quality: "1080p",
               },
               transcription: {
@@ -502,33 +500,67 @@ function VideoCall() {
     });
   };
 
+  // ✅ FIXED: endCall now calls complete-by-room to mark session as "completed"
+  // This is what makes the "Join Video Call" button disappear in Sessions.jsx
   const endCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
 
     let resolvedSessionId = sessionIdRef.current;
+    const token = localStorage.getItem("token");
 
-   try {
-  const token = localStorage.getItem("token");
-  if (sessionIdRef.current) {
-    await axios.patch(
-      `${BASE}/api/sessions/${sessionIdRef.current}/call-id`,
-      { callId: roomId },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-  }
-} catch (e) {
-  console.warn("Could not save callId:", e.message);
-}
+    // ✅ Step 1: Save callId to session (for recording lookup later)
+    try {
+      if (sessionIdRef.current) {
+        await axios.patch(
+          `${BASE}/api/sessions/${sessionIdRef.current}/call-id`,
+          { callId: roomId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (e) {
+      console.warn("Could not save callId:", e.message);
+    }
+
+    // ✅ Step 2: Mark session as "completed" — THIS is what hides the Join Video Call button
+    try {
+      const res = await axios.put(
+        `${BASE}/api/sessions/complete-by-room/${roomId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data?.session?._id) resolvedSessionId = res.data.session._id;
+    } catch (e) {
+      console.warn("Could not complete session:", e.message);
+    }
+
     await leaveStream();
     goToSummary(resolvedSessionId);
   };
 
+  // ✅ leaveCall also marks session as completed so the button hides for
+  // participants who leave early (not just the one who clicks "End Call")
   const leaveCall = async () => {
     if (hasLeftRef.current) return;
     hasLeftRef.current = true;
+
+    let resolvedSessionId = sessionIdRef.current;
+    const token = localStorage.getItem("token");
+
+    // ✅ Also complete session on leave so the button disappears for this user too
+    try {
+      const res = await axios.put(
+        `${BASE}/api/sessions/complete-by-room/${roomId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data?.session?._id) resolvedSessionId = res.data.session._id;
+    } catch (e) {
+      console.warn("Could not complete session on leave:", e.message);
+    }
+
     await leaveStream();
-    goToSummary(sessionIdRef.current);
+    goToSummary(resolvedSessionId);
   };
 
   if (!client || !call) {

@@ -277,7 +277,7 @@ const BADGE_DEFINITIONS = [
     title:       "Explorer",
     description: "Reached 50 XP on SkillSwap",
     icon:        "🧭",
-    xpBonus:     0,
+    xpBonus:     50,
     check:       async (userId) => {
       const user = await User.findById(userId).select("xp");
       return (user?.xp || 0) >= 50;
@@ -312,9 +312,9 @@ const BADGE_DEFINITIONS = [
   {
     id:          "mentor",
     title:       "Mentor",
-    description: "Reached 300 XP — a true skill mentor",
+    description: "Reached 500 XP — a true skill mentor",
     icon:        "🏅",
-    xpBonus:     0,
+    xpBonus:     500,
     check:       async (userId) => {
       const user = await User.findById(userId).select("xp");
       return (user?.xp || 0) >= 300;
@@ -323,9 +323,9 @@ const BADGE_DEFINITIONS = [
   {
     id:          "expert",
     title:       "Expert",
-    description: "Reached 500 XP — SkillSwap Expert!",
+    description: "Reached 1000 XP — SkillSwap Expert!",
     icon:        "💎",
-    xpBonus:     0,
+    xpBonus:     1000,
     check:       async (userId) => {
       const user = await User.findById(userId).select("xp");
       return (user?.xp || 0) >= 500;
@@ -334,7 +334,7 @@ const BADGE_DEFINITIONS = [
   {
     id:          "community_helper",
     title:       "Community Helper",
-    description: "Received 10 or more reviews from the community",
+    description: "Received 15 or more reviews from the community",
     icon:        "🤝",
     xpBonus:     30,
     check:       async (userId) => {

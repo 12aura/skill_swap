@@ -249,14 +249,13 @@
 // export default EditProfile;
 
 
-
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import { DarkModeContext } from "../context/DarkModeContext";
-import { motion } from "framer-motion";
-import { User, Sparkles, BookOpen, Save, X, Camera } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { User, Sparkles, BookOpen, Save, X, Camera, Zap } from "lucide-react";
 
 const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -270,9 +269,19 @@ const EditProfile = () => {
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  // XP Popup state
+  const [xpPopup, setXpPopup] = useState({ visible: false, amount: 0 });
+
   useEffect(() => {
     setName(user?.name || "");
   }, [user]);
+
+  const showXpPopup = (xpAmount) => {
+    setXpPopup({ visible: true, amount: xpAmount });
+    setTimeout(() => {
+      setXpPopup({ visible: false, amount: 0 });
+    }, 3000);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -311,8 +320,20 @@ const EditProfile = () => {
         }
       );
 
-      setSaved(true);
+      // Show XP popup only for skills you can teach (not learn)
+      const totalNewSkills = newTeach.length;
+      if (totalNewSkills > 0) {
+        const xpEarned = totalNewSkills * 10;
+        showXpPopup(xpEarned);
+        // Also dispatch event for any external listeners
+        window.dispatchEvent(
+          new CustomEvent("skillswap:xp-earned", {
+            detail: xpEarned,
+          })
+        );
+      }
 
+      setSaved(true);
       setTimeout(() => {
         setUser(res.data.user);
         navigate("/Profile");
@@ -337,6 +358,46 @@ const EditProfile = () => {
           : "bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900"
       }`}
     >
+      {/* ✅ XP POPUP — Fixed top-right, fully self-contained */}
+      <AnimatePresence>
+        {xpPopup.visible && (
+          <motion.div
+            key="xp-popup"
+            initial={{ opacity: 0, y: -60, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -40, scale: 0.8 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{ zIndex: 9999 }}
+            className="fixed top-6 right-6 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-2xl bg-teal-500 text-white"
+          >
+            {/* Pulsing ring around icon */}
+            <div className="relative flex items-center justify-center">
+              <span className="absolute inline-flex h-8 w-8 rounded-full bg-teal-300 opacity-40 animate-ping" />
+              <Zap size={20} className="relative text-yellow-300 fill-yellow-300" />
+            </div>
+
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs font-medium opacity-80 uppercase tracking-wide">
+                XP Earned
+              </span>
+              <span className="text-2xl font-bold tracking-tight">
+                +{xpPopup.amount} XP
+              </span>
+            </div>
+
+            {/* Progress bar draining over 3s */}
+            <div className="absolute bottom-0 left-0 h-1 rounded-b-2xl bg-teal-300 w-full overflow-hidden">
+              <motion.div
+                className="h-full bg-yellow-300"
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: 3, ease: "linear" }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
 
         {/* LEFT PROFILE CARD */}
@@ -413,7 +474,10 @@ const EditProfile = () => {
                 <input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^[a-zA-Z\s]*$/.test(val)) setName(val);
+                  }}
                   placeholder="Enter your full name"
                   className="w-full bg-transparent outline-none text-[15px]"
                 />
@@ -489,7 +553,7 @@ const EditProfile = () => {
 
       {/* SUCCESS MODAL */}
       {saved && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40" style={{ zIndex: 9998 }}>
           <div
             className={`p-6 rounded-2xl shadow-xl text-center ${
               darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-800"

@@ -6,7 +6,7 @@ const BASIC_FIELDS = [
   { key: "location", label: "Location" },
   { key: "birthday", label: "Birthday" },
   { key: "work", label: "Work" },
-  { key: "education", label: "Education" },
+  // { key: "education", label: "Education" },
 ];
 
 const BasicInfo = ({ data, onEdit }) => {

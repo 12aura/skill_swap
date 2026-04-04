@@ -331,29 +331,75 @@ const Settings = () => {
   /* SAVE FIELD */
 const handleSave = async (field, value) => {
   try {
-    const token = localStorage.getItem("token");   // 🔥 get token
-console.log("OLD:", value.oldPassword);
-console.log("NEW:", value.newPassword);
-    await axios.put(
-      "http://localhost:5000/api/auth/change-password",
-      {
+    const token = localStorage.getItem("token");
+
+    let url = "";
+    let payload = {};
+
+    // 🔐 Password change
+    if (field === "password") {
+      url = "http://localhost:5000/api/auth/change-password";
+      payload = {
         oldPassword: value.oldPassword,
         newPassword: value.newPassword,
+      };
+    } 
+    
+    // 👤 All other updates
+    else {
+      url = "http://localhost:5000/api/user/update";
+      payload = { [field]: value };
+    }
+
+    // ✅ SAVE DATA
+    await axios.put(url, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
+    });
+
+    // 🔥 REFETCH UPDATED USER (THIS WAS MISSING)
+    const userRes = await axios.get(
+      "http://localhost:5000/api/user/me",
       {
         headers: {
-          Authorization: `Bearer ${token}`,   // 🔥 send token here
+          Authorization: `Bearer ${token}`,
         },
       }
     );
 
-    alert("Password updated successfully");
+    const u = userRes.data.user;
+
+    // ✅ UPDATE UI STATE
+    setBasicData({
+      gender: u.gender || "",
+      location: u.location || "",
+      birthday: u.birthday || "",
+      work: u.work || "",
+      education: u.education || "",
+    });
+
+    setAccountData({
+      email: u.email || "",
+      password: "********",
+      username: u.username || "",
+      language: u.language || "English",
+    });
+
+    // ✅ UPDATE GLOBAL USER
+    setUser(u);
+
+    // ✅ UI FEEDBACK
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+
+    setEditField(null); // close modal
+
   } catch (err) {
-    console.log("Save failed:", err);
-    alert("Failed to save changes");
+    console.log("FULL ERROR:", err.response?.data);
+    alert(err.response?.data?.msg || "Failed to save changes");
   }
 };
-
   /* LOADING */
   if (pageLoading) {
     return (

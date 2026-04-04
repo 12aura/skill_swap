@@ -45,12 +45,11 @@ const Settings = () => {
           education: u.education || "",
         });
 
-        setAccountData({
-          email: u.email || "",
-          password: "********",
-          username: u.username || "",
-          language: u.language || "English",
-        });
+       setAccountData({
+  email: u.email || "",
+  password: "********",
+  language: u.language || "English",
+});
       })
       .catch((err) => {
         console.error("Failed to load profile:", err);
@@ -60,34 +59,76 @@ const Settings = () => {
   }, [token]);
 
   /* SAVE FIELD */
-  const handleSave = async (field, value) => {
-    try {
-      const payload =
-        field === "password" ? { password: value } : { [field]: value };
+const handleSave = async (field, value) => {
+  try {
+    const token = localStorage.getItem("token");
 
-      const res = await axios.put(
-        "http://localhost:5000/api/user/update",
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    let url = "";
+    let payload = {};
 
-      if (activeTab === "basic") {
-        setBasicData((prev) => ({ ...prev, [field]: value }));
-      } else {
-        setAccountData((prev) => ({ ...prev, [field]: value }));
-      }
-
-      if (res.data.user) setUser(res.data.user);
-
-      setEditField(null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error("Save failed:", err);
-      alert("Failed to save changes. Please try again.");
+    // 🔐 Password change
+    if (field === "password") {
+      url = "http://localhost:5000/api/auth/change-password";
+      payload = {
+        oldPassword: value.oldPassword,
+        newPassword: value.newPassword,
+      };
+    } 
+    
+    // 👤 All other updates
+    else {
+      url = "http://localhost:5000/api/user/update";
+      payload = { [field]: value };
     }
-  };
 
+    // ✅ SAVE DATA
+    await axios.put(url, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // 🔥 REFETCH UPDATED USER (THIS WAS MISSING)
+    const userRes = await axios.get(
+      "http://localhost:5000/api/user/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const u = userRes.data.user;
+
+    // ✅ UPDATE UI STATE
+    setBasicData({
+      gender: u.gender || "",
+      location: u.location || "",
+      birthday: u.birthday || "",
+      work: u.work || "",
+      education: u.education || "",
+    });
+
+  setAccountData({
+  email: u.email || "",
+  password: "********",
+  language: u.language || "English",
+});
+
+    // ✅ UPDATE GLOBAL USER
+    setUser(u);
+
+    // ✅ UI FEEDBACK
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+
+    setEditField(null); // close modal
+
+  } catch (err) {
+    console.log("FULL ERROR:", err.response?.data);
+    alert(err.response?.data?.msg || "Failed to save changes");
+  }
+};
   /* LOADING */
   if (pageLoading) {
     return (

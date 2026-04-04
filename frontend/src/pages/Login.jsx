@@ -30,8 +30,10 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.msg || "Login failed");
-    } finally {
+  console.log("FULL ERROR:", err.response);
+  console.log("DATA:", err.response?.data);
+  setError(err.response?.data?.msg || "Login failed");
+} finally {
       setLoading(false);
     }
   };

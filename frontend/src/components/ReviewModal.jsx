@@ -1,5 +1,3 @@
-// src/components/ReviewModal.jsx
-
 import { useState } from "react";
 import StarRating from "./StarRating";
 
@@ -60,106 +58,116 @@ const ReviewModal = ({ session, onClose, onSubmitted }) => {
       setLoading(false);
     }
   };
-return (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
-    
-    <div className="w-full max-w-md rounded-2xl p-6 shadow-xl bg-base-100 border border-base-300">
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-semibold text-lg text-base-content">
-          Leave a Review
-        </h2>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
 
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-[#1F8F7A] text-xl"
-        >
-          ✕
-        </button>
-      </div>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-800">
+            Leave a Review
+          </h2>
 
-      {success ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <div className="text-5xl">🎉</div>
-          <p className="font-semibold text-lg text-[#1F8F7A]">
-            Review submitted!
-          </p>
-
-          <div className="px-4 py-2 rounded-xl border border-base-300 bg-base-200">
-            <span className="font-medium text-[#1F8F7A]">
-              +{REVIEW_XP} XP earned
-            </span>
-          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-[#1F8F7A] text-xl"
+          >
+            ✕
+          </button>
         </div>
-      ) : (
-        <>
-          {/* Session Info */}
-          <div className="flex items-center gap-3 rounded-xl p-3 mb-5 border border-base-300 bg-base-200">
-            <div className="w-10 h-10 rounded-full bg-[#1F8F7A] flex items-center justify-center text-white font-bold text-sm">
-              {session.partnerName?.[0]?.toUpperCase() || "?"}
-            </div>
 
-            <div>
-              <p className="text-sm font-medium text-base-content">
-                {session.partnerName}
-              </p>
-              <p className="text-xs opacity-70">
-                {session.skillName} · Reviewing as {reviewingLabel}
-              </p>
+        {success ? (
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <div className="text-5xl">🎉</div>
+            <p className="font-semibold text-lg text-[#1F8F7A]">
+              Review submitted!
+            </p>
+
+            <div className="px-4 py-2 rounded-lg bg-[#E8F5F2]">
+              <span className="font-medium text-[#1F8F7A]">
+                +{REVIEW_XP} XP earned
+              </span>
             </div>
           </div>
+        ) : (
+          <>
+            {/* Session Info */}
+            <div className="flex items-center gap-3 bg-[#E8F5F2] rounded-xl p-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-[#1F8F7A] flex items-center justify-center text-white font-bold">
+                {session.partnerName?.[0]?.toUpperCase() || "?"}
+              </div>
 
-          {/* XP Info */}
-          <div className="text-xs mb-5 px-3 py-2 rounded-lg border border-base-300 bg-base-200">
-            You'll earn <strong className="text-[#1F8F7A]">+{REVIEW_XP} XP</strong> for leaving a review
-          </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">
+                  {session.partnerName}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {session.skillName} · Reviewing as {reviewingLabel}
+                </p>
+              </div>
+            </div>
 
-          {/* Rating */}
-          <div className="mb-5">
-            <label className="block text-sm mb-2 opacity-70">
-              Rating *
-            </label>
+            {/* XP Info */}
+            <div className="text-sm bg-[#E8F5F2] rounded-lg px-3 py-2 mb-4">
+              You'll earn{" "}
+              <span className="text-[#1F8F7A] font-semibold">
+                +{REVIEW_XP} XP
+              </span>{" "}
+              for leaving a review
+            </div>
 
-            <StarRating value={rating} onChange={setRating} size="lg" />
-          </div>
+            {/* Rating */}
+            <div className="mb-4">
+              <label className="block text-sm text-gray-600 mb-2">
+                Rating *
+              </label>
 
-          {/* Comment */}
-          <div className="mb-5">
-            <label className="block text-sm mb-2 opacity-70">
-              Review (optional)
-            </label>
+              <StarRating value={rating} onChange={setRating} />
+            </div>
 
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={3}
-              className="textarea textarea-bordered w-full focus:outline-none focus:border-[#1F8F7A]"
-            />
-          </div>
+            {/* Comment */}
+            <div className="mb-5">
+              <label className="block text-sm text-gray-600 mb-2">
+                Review (optional)
+              </label>
 
-          {/* Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={onClose}
-              className="btn flex-1 border-[#1F8F7A] text-[#1F8F7A] hover:bg-[#1F8F7A] hover:text-white"
-            >
-              Cancel
-            </button>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={4}
+                placeholder="Write your review..."
+                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#1F8F7A]"
+              />
+            </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="btn flex-1 bg-[#1F8F7A] border-[#1F8F7A] text-white hover:bg-[#187a68]"
-            >
-              {loading ? "Submitting..." : "Submit Review"}
-            </button>
-          </div>
-        </>
-      )}
+            {/* Error */}
+            {error && (
+              <p className="text-red-500 text-sm mb-3">{error}</p>
+            )}
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 border border-[#1F8F7A] text-[#1F8F7A] py-2 rounded-lg hover:bg-[#1F8F7A] hover:text-white transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 bg-[#1F8F7A] text-white py-2 rounded-lg hover:bg-[#187a68] transition"
+              >
+                {loading ? "Submitting..." : "Submit Review"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default ReviewModal;

@@ -9,10 +9,29 @@ import {
 
 const EditModal = ({ field, currentValue, onSave, onClose }) => {
   const [value, setValue] = useState(currentValue || "");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [position, setPosition] = useState([28.6139, 77.2090]); // default Delhi
+
   const fieldName = field?.toLowerCase();
 
   const handleSubmit = () => {
+    // If user is editing password
+    if (fieldName === "password") {
+      if (!oldPassword || !newPassword) {
+        alert("Please enter both current and new password");
+        return;
+      }
+
+      onSave(field, {
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      });
+
+      return;
+    }
+
+    // Normal fields
     onSave(field, value);
   };
 
@@ -175,6 +194,26 @@ const EditModal = ({ field, currentValue, onSave, onClose }) => {
             onChange={(e) => setValue(e.target.value)}
             className="w-full p-2 border rounded mb-4"
           />
+
+        ) : fieldName === "password" ? (
+
+          <>
+            <input
+              type="password"
+              placeholder="Enter current password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full p-2 border rounded mb-3"
+            />
+
+            <input
+              type="password"
+              placeholder="Enter new password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full p-2 border rounded mb-4"
+            />
+          </>
 
         ) : (
 

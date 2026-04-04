@@ -205,7 +205,7 @@ const PublicProfile = () => {
             />
           </div>
 
-          {/* Skill Tags */}
+          {/* Skill Tags
           <div>
             <label className="block font-medium mb-2">Skill Categories</label>
             <input
@@ -216,7 +216,7 @@ const PublicProfile = () => {
                 darkMode ? "bg-slate-700 border-slate-600" : "bg-slate-50 border-slate-200"
               }`}
             />
-          </div>
+          </div> */}
 
           {/* Tagline */}
           <div className="md:col-span-2">

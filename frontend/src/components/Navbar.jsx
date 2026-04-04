@@ -1,3 +1,4 @@
+
 // import { IoNotificationsOutline } from "react-icons/io5";
 // import { HiOutlineCog6Tooth } from "react-icons/hi2";
 // import { Link, useNavigate } from "react-router-dom";
@@ -6,44 +7,33 @@
 // import { DarkModeContext } from "../context/DarkModeContext";
 // import MoonIcon from "../assets/imageofmoon.png";
 // import SunIcon from "../assets/imageofsun.png";
-
 // import socket from "../socket";
+// import { useNotifications } from "../context/NotificationContext";
+// import { FiSettings, FiBell } from "react-icons/fi";
+
+// const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; // ✅
 
 // const Navbar = () => {
 //   const { user, logout } = useContext(AuthContext);
 //   const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
+//   const { unreadCount, clearUnread } = useNotifications();
 //   const navigate = useNavigate();
 
 //   const [notifications, setNotifications] = useState([]);
 //   const [showChat, setShowChat] = useState(false);
 //   const [showNotifications, setShowNotifications] = useState(false);
-//   const [popup, setPopup] = useState(null);
 
 //   const token = localStorage.getItem("token");
 
-//   /* ---------------- SOCKET + FETCH ---------------- */
+//   /* ---------------- LOAD NOTIFICATIONS ---------------- */
 //   useEffect(() => {
 //     if (!user || !token) return;
 
-//     console.log("👤 user object:", user);
-//     console.log("🔑 user._id:", user._id);
+//     socket.emit("join", user._id);
 
-//     // ✅ Join room — works whether socket is already connected or not
-//     const joinRoom = () => {
-//       console.log("📡 Emitting join for:", user._id);
-//       socket.emit("join", user._id);
-//     };
-
-//     // ✅ Always try to join immediately
-//     joinRoom();
-
-//     // ✅ Also re-join if socket reconnects (e.g. server restart)
-//     socket.on("connect", joinRoom);
-
-//     // ✅ Fetch existing notifications from DB
 //     const fetchNotifications = async () => {
 //       try {
-//         const res = await fetch("http://localhost:5000/api/notifications", {
+//         const res = await fetch(`${API_URL}/api/notifications`, {  // ✅
 //           headers: { Authorization: `Bearer ${token}` },
 //         });
 //         if (res.ok) {
@@ -57,33 +47,19 @@
 
 //     fetchNotifications();
 
-//     // ✅ Listen for real-time notifications
-//     const handleNewNotification = (data) => {
-//       console.log("🎯 Notification received:", data);
+//     socket.on("new_notification", (data) => {
 //       setNotifications((prev) => [data, ...prev]);
-//       setPopup(data);
-//       setTimeout(() => setPopup(null), 2500);
-//     };
-
-//     socket.on("newNotification", handleNewNotification);
-
-//     // ✅ Debug — log ALL socket events
-//     const debugAll = (eventName, ...args) => {
-//       console.log("📡 SOCKET EVENT:", eventName, args);
-//     };
-//     socket.onAny(debugAll);
+//     });
 
 //     return () => {
-//       socket.off("connect", joinRoom);
-//       socket.off("newNotification", handleNewNotification);
-//       socket.offAny(debugAll);
+//       socket.off("new_notification");
 //     };
 //   }, [user, token]);
 
 //   /* ---------------- MARK AS READ ---------------- */
 //   const markAsRead = async (id) => {
 //     try {
-//       await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+//       await fetch(`${API_URL}/api/notifications/${id}/read`, {     // ✅
 //         method: "PUT",
 //         headers: { Authorization: `Bearer ${token}` },
 //       });
@@ -91,11 +67,17 @@
 //         prev.map((n) => (n._id === id ? { ...n, read: true } : n))
 //       );
 //     } catch (err) {
-//       console.error("Failed to mark as read:", err);
+//       console.error("Failed to mark as read", err);
 //     }
 //   };
 
-//   const unreadCount = notifications.filter((n) => !n.read).length;
+//   /* ---------------- OPEN BELL ---------------- */
+//   const handleBellClick = () => {
+//     setShowNotifications(!showNotifications);
+//     if (!showNotifications) {
+//       clearUnread();
+//     }
+//   };
 
 //   return (
 //     <>
@@ -107,7 +89,9 @@
 //         {/* LOGO */}
 //         <Link to="/" className="flex items-center gap-2">
 //           <span className="text-3xl font-extrabold text-teal-500">S</span>
-//           <span className="text-2xl font-extrabold tracking-wide">SkillSwap</span>
+//           <span className="text-2xl font-extrabold tracking-wide">
+//             SkillSwap
+//           </span>
 //         </Link>
 
 //         {/* RIGHT SIDE */}
@@ -148,13 +132,11 @@
 //                 Profile
 //               </Link>
 
-//               {/* SETTINGS */}
+//               {/* SETTINGS ICON */}
 //               <Link
 //                 to="/settings"
 //                 className={`text-xl transition ${
-//                   darkMode
-//                     ? "text-slate-300 hover:text-teal-400"
-//                     : "text-slate-600 hover:text-teal-500"
+//                   darkMode ? "text-slate-300 hover:text-teal-400" : "text-slate-600 hover:text-teal-500"
 //                 }`}
 //               >
 //                 <HiOutlineCog6Tooth />
@@ -163,40 +145,25 @@
 //               {/* NOTIFICATION BELL */}
 //               <div className="relative">
 //                 <button
-//                   onClick={() => setShowNotifications(!showNotifications)}
-//                   className={`relative text-xl transition ${
-//                     darkMode
-//                       ? "text-slate-300 hover:text-teal-400"
-//                       : "text-slate-600 hover:text-teal-500"
+//                   onClick={handleBellClick}
+//                   className={`text-xl transition ${
+//                     darkMode ? "text-slate-300 hover:text-teal-400" : "text-slate-600 hover:text-teal-500"
 //                   }`}
 //                 >
 //                   <IoNotificationsOutline />
+
 //                   {unreadCount > 0 && (
 //                     <span className="absolute -top-2 -right-2 bg-teal-500 text-white text-xs px-1 rounded-full">
-//                       {unreadCount}
+//                       {unreadCount > 9 ? "9+" : unreadCount}
 //                     </span>
 //                   )}
 //                 </button>
-
-//                 {/* ✅ POPUP — drops from bell */}
-//                 {popup && (
-//                   <div
-//                     className={`bell-popup ${
-//                       darkMode ? "bell-popup-dark" : "bell-popup-light"
-//                     }`}
-//                   >
-//                     <span>🔔</span>
-//                     <p>{popup.message}</p>
-//                   </div>
-//                 )}
 
 //                 {/* DROPDOWN */}
 //                 {showNotifications && (
 //                   <div
 //                     className={`absolute right-0 mt-3 w-80 rounded-2xl shadow-2xl p-4 z-50 ${
-//                       darkMode
-//                         ? "bg-slate-800 text-white"
-//                         : "bg-white text-slate-800"
+//                       darkMode ? "bg-slate-800 text-white" : "bg-white text-slate-800"
 //                     }`}
 //                   >
 //                     <p className="font-semibold mb-3">Notifications</p>
@@ -228,20 +195,11 @@
 //                 )}
 //               </div>
 
-//               {/* SKILL BUDDY */}
-//               <button
-//                 onClick={() => setShowChat(!showChat)}
-//                 className="bg-teal-500 text-white px-3 py-2 rounded-full hover:bg-teal-600 transition"
-//               >
-//                 Skill Buddy
-//               </button>
+          
 
 //               {/* LOGOUT */}
 //               <button
-//                 onClick={() => {
-//                   logout();
-//                   navigate("/");
-//                 }}
+//                 onClick={() => { logout(); navigate("/"); }}
 //                 className={`px-5 py-2 rounded-xl border font-semibold transition ${
 //                   darkMode
 //                     ? "border-teal-400 text-teal-300 hover:bg-teal-500/10"
@@ -266,7 +224,14 @@
 //             </Link>
 //           )}
 //         </div>
-//       </nav>  
+//       </nav>
+
+//       {/* AI CHAT WINDOW */}
+//       {showChat && (
+//         <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[500px] rounded-2xl shadow-2xl overflow-hidden">
+//           <AIChat />
+//         </div>
+//       )}
 //     </>
 //   );
 // };
@@ -281,6 +246,8 @@ import { DarkModeContext } from "../context/DarkModeContext";
 import MoonIcon from "../assets/imageofmoon.png";
 import SunIcon from "../assets/imageofsun.png";
 import socket from "../socket";
+import logolight from "../assets/logolight.png";
+import logodark from "../assets/logodark.png";
 import { useNotifications } from "../context/NotificationContext";
 import { FiSettings, FiBell } from "react-icons/fi";
 
@@ -360,12 +327,20 @@ const Navbar = () => {
         }`}
       >
         {/* LOGO */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-3xl font-extrabold text-teal-500">S</span>
-          <span className="text-2xl font-extrabold tracking-wide">
-            SkillSwap
-          </span>
-        </Link>
+<Link to="/" className="flex items-center gap-3">
+  <img
+    src={darkMode ? logodark : logolight}
+    alt="SkillSwap Logo"
+    className="w-10 h-10 object-contain"
+  />
+
+<span className="text-2xl font-extrabold tracking-wide">
+  <span className="text-teal-500">Skill</span>
+  <span className={darkMode ? "text-white" : "text-black"}>
+    Swap
+  </span>
+</span>
+</Link>
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-6 text-sm font-semibold relative">

@@ -36,7 +36,7 @@ exports.registerUser = async (req, res) => {
     const convertToSkillIds = async (skills) => {
       const ids = [];
       for (const skillName of skills) {
-        // ✅ FIX 1: Escape special regex characters so C++, .NET etc. don't crash
+        // Escape special regex characters so C++, .NET etc. don't crash
         const escapedName = skillName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         let skill = await Skill.findOne({
           name: new RegExp(`^${escapedName}$`, "i"),
@@ -66,7 +66,6 @@ exports.registerUser = async (req, res) => {
       .populate("skillsTeach")
       .populate("skillsLearn");
 
-    // ✅ FIX 2: Return token so frontend can save it and stay logged in
     const token = jwt.sign(
       { id: newUser._id },
       process.env.JWT_SECRET,
@@ -166,20 +165,32 @@ exports.resetPassword = async (req, res) => {
     console.error("RESET PASSWORD ERROR:", err);
     res.status(500).json({ msg: "Something went wrong" });
   }
-  // ─── CHANGE PASSWORD (when user remembers old password) ───
+};
+
 exports.changePassword = async (req, res) => {
   try {
-    const userId = req.user.id; // comes from auth middleware
+    const userId = req.user.id;
     const { oldPassword, newPassword } = req.body;
+
+    // check if fields are coming
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ msg: "Both passwords are required" });
+    }
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ msg: "User not found" });
 
+    // compare old password
     const isMatch = await bcrypt.compare(oldPassword, user.password);
-    if (!isMatch)
-      return res.status(400).json({ msg: "Old password is incorrect" });
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Old password is incorrect" });
+    }
+
+    // hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
     await user.save();
 
     res.json({ msg: "Password updated successfully" });
@@ -187,5 +198,5 @@ exports.changePassword = async (req, res) => {
     console.error("CHANGE PASSWORD ERROR:", err);
     res.status(500).json({ msg: "Failed to change password" });
   }
-};
+
 };

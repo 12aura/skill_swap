@@ -89,10 +89,6 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
-    username: {
-      type: String,
-      default: "",
-    },
 
     language: {
       type: String,

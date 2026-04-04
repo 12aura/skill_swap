@@ -3,14 +3,14 @@ const router = express.Router();
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middleware/authMiddleware");
-
 const {
   registerUser,
   loginUser,
   forgotPassword,
   resetPassword,
+  changePassword,
 } = require("../controllers/authController");
-
+router.put("/change-password", authMiddleware, changePassword);
 //  REGISTER
 router.post("/register", registerUser);
 
@@ -29,6 +29,7 @@ router.get("/me", authMiddleware, async (req, res) => {
     userId: req.user,
   });
 });
+router.put("/change-password", authMiddleware, changePassword);
 
 // manshi
 router.get("/google",

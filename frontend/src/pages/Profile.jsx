@@ -57,6 +57,10 @@ const Profile = () => {
   const accent  = "#0d9488";
   const accentL = dm ? "rgba(13,148,136,0.15)" : "rgba(13,148,136,0.09)";
 
+  const sidebarBg = dm
+    ? "linear-gradient(180deg, #0d9488 0%, #0a8077 38%, #087068 70%, #065f57 100%)"
+    : "linear-gradient(180deg, #0a9688 0%, #0d9488 40%, #0f766e 75%, #115e59 100%)";
+
   const fadeUp = (delay = 0) => ({
     initial: { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0 },
@@ -92,130 +96,128 @@ const Profile = () => {
           color: ${text1};
         }
 
-        /* ══ SIDEBAR — exactly 37vw ══ */
+        /* ══ SIDEBAR — 52vw ══ */
         .profile-sidebar {
-          width: 37vw;
-          min-width: 37vw;
-          max-width: 37vw;
+          width: 52vw;
+          min-width: 360px;
+          max-width: 560px;
           position: sticky;
           top: 0;
           height: 100vh;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
-          background: ${dm
-            ? "linear-gradient(180deg,#0d2e2b 0%,#0f3330 50%,#0a2420 100%)"
-            : "linear-gradient(180deg,#0a9688 0%,#0d9488 40%,#0f766e 75%,#115e59 100%)"};
-          border-right: 1.5px solid ${dm ? "#1a4a45" : "#0f766e"};
+          background: ${sidebarBg};
+          border-right: 1.5px solid rgba(255,255,255,0.12);
           scrollbar-width: none;
         }
         .profile-sidebar::-webkit-scrollbar { display: none; }
 
         /* blobs */
         .sb-blob { position: absolute; border-radius: 50%; pointer-events: none; }
-        .sb-blob-1 { top: -80px; right: -80px; width: 280px; height: 280px; background: rgba(255,255,255,0.07); }
-        .sb-blob-2 { bottom: 20px; left: -100px; width: 300px; height: 300px; background: rgba(255,255,255,0.04); }
-        .sb-blob-3 { top: 44%; left: 50%; transform: translate(-50%,-50%); width: 340px; height: 340px; background: rgba(255,255,255,0.025); }
+        .sb-blob-1 { top: -70px; right: -70px; width: 220px; height: 220px; background: rgba(255,255,255,0.08); }
+        .sb-blob-2 { bottom: 10px; left: -90px; width: 240px; height: 240px; background: rgba(255,255,255,0.05); }
+        .sb-blob-3 { top: 44%; left: 50%; transform: translate(-50%,-50%); width: 280px; height: 280px; background: rgba(255,255,255,0.03); }
 
         .sidebar-inner {
           position: relative; z-index: 1;
           display: flex; flex-direction: column; align-items: center;
-          padding: 56px 44px 44px;
+          padding: 44px 28px 36px;
           height: 100%;
         }
 
         /* avatar */
-        .avatar-wrap { position: relative; margin-bottom: 28px; }
+        .avatar-wrap { position: relative; margin-bottom: 22px; }
         .avatar-ring {
-          width: 136px; height: 136px; border-radius: 50%; overflow: hidden;
-          border: 5px solid rgba(255,255,255,0.42);
-          box-shadow: 0 0 0 8px rgba(255,255,255,0.12), 0 14px 44px rgba(0,0,0,0.3);
+          width: 110px; height: 110px; border-radius: 50%; overflow: hidden;
+          border: 4px solid rgba(255,255,255,0.40);
+          box-shadow: 0 0 0 7px rgba(255,255,255,0.10), 0 12px 36px rgba(0,0,0,0.28);
           cursor: pointer; transition: transform 0.2s;
         }
         .avatar-ring:hover { transform: scale(1.05); }
         .avatar-ring img { width: 100%; height: 100%; object-fit: cover; }
         .camera-btn {
-          position: absolute; bottom: 4px; right: 4px;
-          width: 38px; height: 38px; border-radius: 50%;
+          position: absolute; bottom: 2px; right: 2px;
+          width: 32px; height: 32px; border-radius: 50%;
           background: #fff; border: 2.5px solid ${accent};
           display: flex; align-items: center; justify-content: center;
           cursor: pointer; color: ${accent};
-          box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
           transition: transform 0.15s;
         }
         .camera-btn:hover { transform: scale(1.12); }
 
         /* text */
         .sb-name {
-          font-size: 34px; font-weight: 900; color: #fff;
-          letter-spacing: -0.9px; text-align: center;
-          margin-bottom: 8px; line-height: 1.1;
+          font-size: 26px; font-weight: 900; color: #fff;
+          letter-spacing: -0.6px; text-align: center;
+          margin-bottom: 6px; line-height: 1.15;
         }
         .sb-email {
-          font-size: 17px; color: rgba(255,255,255,0.72);
+          font-size: 13.5px; color: rgba(255,255,255,0.72);
           font-weight: 500; text-align: center;
-          margin-bottom: 28px; word-break: break-all; line-height: 1.45;
+          margin-bottom: 22px; word-break: break-all; line-height: 1.5;
         }
 
         /* chips */
-        .chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+        .chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 18px; }
         .chip {
-          display: flex; align-items: center; gap: 8px;
-          background: rgba(255,255,255,0.17);
-          border: 1.5px solid rgba(255,255,255,0.3);
-          border-radius: 26px; padding: 10px 22px;
-          font-size: 18px; font-weight: 800; color: #fff;
+          display: flex; align-items: center; gap: 6px;
+          background: rgba(255,255,255,0.16);
+          border: 1.5px solid rgba(255,255,255,0.28);
+          border-radius: 22px; padding: 8px 16px;
+          font-size: 14px; font-weight: 800; color: #fff;
           backdrop-filter: blur(4px);
         }
 
         /* stars */
-        .stars { display: flex; align-items: center; gap: 6px; margin-bottom: 32px; }
-        .stars-val { font-size: 22px; font-weight: 900; color: #fff; margin-left: 6px; }
-        .stars-cnt { font-size: 17px; color: rgba(255,255,255,0.65); font-weight: 600; }
+        .stars { display: flex; align-items: center; gap: 5px; margin-bottom: 24px; }
+        .stars-val { font-size: 18px; font-weight: 900; color: #fff; margin-left: 4px; }
+        .stars-cnt { font-size: 14px; color: rgba(255,255,255,0.65); font-weight: 600; }
 
-        .sb-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.17); margin-bottom: 28px; }
+        .sb-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.17); margin-bottom: 22px; }
 
         /* sidebar buttons */
         .sb-btn {
           width: 100%;
-          display: flex; align-items: center; gap: 14px;
-          background: rgba(255,255,255,0.14);
-          border: 1.5px solid rgba(255,255,255,0.26);
-          border-radius: 16px; padding: 20px 24px;
-          color: #fff; font-size: 20px; font-weight: 800;
-          text-decoration: none; cursor: pointer; margin-bottom: 14px;
+          display: flex; align-items: center; gap: 12px;
+          background: rgba(255,255,255,0.13);
+          border: 1.5px solid rgba(255,255,255,0.24);
+          border-radius: 14px; padding: 16px 18px;
+          color: #fff; font-size: 16px; font-weight: 700;
+          text-decoration: none; cursor: pointer; margin-bottom: 10px;
           transition: background 0.15s, border-color 0.15s, transform 0.15s;
           font-family: 'DM Sans', system-ui, sans-serif;
         }
         .sb-btn:hover {
-          background: rgba(255,255,255,0.26);
-          border-color: rgba(255,255,255,0.46);
+          background: rgba(255,255,255,0.24);
+          border-color: rgba(255,255,255,0.44);
           transform: translateX(3px);
         }
         .sb-btn-icon {
-          width: 44px; height: 44px; border-radius: 12px;
-          background: rgba(255,255,255,0.2);
+          width: 36px; height: 36px; border-radius: 10px;
+          background: rgba(255,255,255,0.18);
           display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
 
         /* footer */
-        .sb-footer { margin-top: auto; width: 100%; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.15); }
+        .sb-footer { margin-top: auto; width: 100%; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.15); }
         .sb-footer-lbl {
-          font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.55);
-          text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 10px;
+          font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5);
+          text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 8px;
         }
-        .sb-footer-email { font-size: 16px; color: rgba(255,255,255,0.85); font-weight: 600; word-break: break-all; line-height: 1.5; }
+        .sb-footer-email { font-size: 13px; color: rgba(255,255,255,0.82); font-weight: 600; word-break: break-all; line-height: 1.5; }
 
         .sb-error {
-          font-size: 14px; font-weight: 600; color: #fca5a5;
+          font-size: 13px; font-weight: 600; color: #fca5a5;
           background: rgba(239,68,68,0.18); border-radius: 10px;
-          padding: 10px 16px; width: 100%; margin-bottom: 16px; text-align: center;
+          padding: 9px 14px; width: 100%; margin-bottom: 14px; text-align: center;
         }
 
         /* ══ MAIN ══ */
         .profile-main {
           flex: 1; min-width: 0;
-          padding: 52px 52px 90px;
+          padding: 52px 72px 90px;
           display: flex; flex-direction: column; gap: 28px;
         }
 
@@ -253,7 +255,7 @@ const Profile = () => {
           padding: 0 12px; gap: 4px;
         }
         .tab-btn {
-          padding: 22px 34px; font-size: 18px; font-weight: 800;
+          padding: 18px 28px; font-size: 15px; font-weight: 800;
           cursor: pointer; background: none; border: none;
           border-bottom: 3px solid transparent;
           transition: color 0.15s, border-color 0.15s;
@@ -266,20 +268,20 @@ const Profile = () => {
         /* nav items */
         .nav-item {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 30px 38px; border-bottom: 1.5px solid ${border};
+          padding: 24px 38px; border-bottom: 1.5px solid ${border};
           cursor: pointer; transition: background 0.15s; text-decoration: none;
         }
         .nav-item:last-child { border-bottom: none; }
         .nav-item:hover { background: ${dm ? "#1a2332" : "#f8fffe"}; }
-        .nav-item-left { display: flex; align-items: center; gap: 22px; }
+        .nav-item-left { display: flex; align-items: center; gap: 18px; }
         .nav-icon {
-          width: 64px; height: 64px; border-radius: 18px;
+          width: 52px; height: 52px; border-radius: 15px;
           background: ${accentL};
           display: flex; align-items: center; justify-content: center;
           color: ${accent}; flex-shrink: 0;
         }
-        .nav-lbl { font-size: 24px; font-weight: 900; color: ${text1}; letter-spacing: -0.3px; margin-bottom: 5px; }
-        .nav-desc { font-size: 17px; color: ${text2}; font-weight: 500; line-height: 1.4; }
+        .nav-lbl { font-size: 18px; font-weight: 900; color: ${text1}; letter-spacing: -0.3px; margin-bottom: 4px; }
+        .nav-desc { font-size: 14px; color: ${text2}; font-weight: 500; line-height: 1.4; }
 
         /* availability */
         .avail-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; padding: 28px 38px; }
@@ -288,7 +290,7 @@ const Profile = () => {
           background: ${accentL}; border: 1.5px solid ${accent}40;
           border-radius: 14px; padding: 18px 22px;
         }
-        .avail-day-lbl { font-size: 18px; font-weight: 700; color: ${text1}; }
+        .avail-day-lbl { font-size: 16px; font-weight: 700; color: ${text1}; }
 
         .reviews-wrap { padding: 32px 38px; }
         .section-lbl { font-size: 13px; font-weight: 800; color: ${text2}; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 20px; }
@@ -296,15 +298,15 @@ const Profile = () => {
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 900px) {
-          .profile-sidebar { width: 42vw; min-width: 42vw; max-width: 42vw; }
-          .profile-main { padding: 36px 32px 70px; }
+          .profile-sidebar { width: 48vw; min-width: 300px; }
+          .profile-main { padding: 36px 48px 70px; }
           .page-title { font-size: 38px; }
           .stat-val { font-size: 44px; }
         }
         @media (max-width: 768px) {
           .profile-layout { flex-direction: column; }
           .profile-sidebar { width: 100%; min-width: unset; max-width: unset; height: auto; position: relative; }
-          .profile-main { padding: 28px 20px 60px; }
+          .profile-main { padding: 28px 24px 60px; }
           .stats-row { grid-template-columns: 1fr 1fr; }
           .avail-grid { grid-template-columns: repeat(2,1fr); }
           .page-title { font-size: 30px; }
@@ -344,8 +346,8 @@ const Profile = () => {
               </div>
               <label htmlFor="avatar-upload" className="camera-btn" onClick={e => e.stopPropagation()}>
                 {uploading
-                  ? <div style={{ width: 15, height: 15, border: `2.5px solid ${accent}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
-                  : <Camera size={17} />}
+                  ? <div style={{ width: 13, height: 13, border: `2.5px solid ${accent}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                  : <Camera size={15} />}
               </label>
               <input id="avatar-upload" type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageUpload} disabled={uploading} />
             </div>
@@ -355,17 +357,17 @@ const Profile = () => {
 
             <div className="chips">
               {user.xp > 0 && (
-                <div className="chip"><Zap size={18} color="#fde68a" /><span>{user.xp} XP</span></div>
+                <div className="chip"><Zap size={15} color="#fde68a" /><span>{user.xp} XP</span></div>
               )}
               {user.totalReviews > 0 && (
-                <div className="chip"><Star size={18} color="#fde68a" fill="#fde68a" /><span>{user.averageRating} · {user.totalReviews} reviews</span></div>
+                <div className="chip"><Star size={15} color="#fde68a" fill="#fde68a" /><span>{user.averageRating} · {user.totalReviews} reviews</span></div>
               )}
             </div>
 
             {user.averageRating && (
               <div className="stars">
                 {[1,2,3,4,5].map(n => (
-                  <Star key={n} size={24} fill={n <= Math.round(user.averageRating) ? "#fbbf24" : "none"} color="#fbbf24" />
+                  <Star key={n} size={20} fill={n <= Math.round(user.averageRating) ? "#fbbf24" : "none"} color="#fbbf24" />
                 ))}
                 <span className="stars-val">{user.averageRating}</span>
                 <span className="stars-cnt">({user.totalReviews})</span>
@@ -377,20 +379,20 @@ const Profile = () => {
             {uploadError && <p className="sb-error">{uploadError}</p>}
 
             <Link to="/edit-profile" className="sb-btn">
-              <div className="sb-btn-icon"><Edit size={20} /></div>
+              <div className="sb-btn-icon"><Edit size={17} /></div>
               Edit Profile
-              <ChevronRight size={20} style={{ marginLeft: "auto", opacity: 0.6 }} />
+              <ChevronRight size={17} style={{ marginLeft: "auto", opacity: 0.6 }} />
             </Link>
             <Link to="/edit-public-profile" className="sb-btn">
-              <div className="sb-btn-icon"><Users size={20} /></div>
+              <div className="sb-btn-icon"><Users size={17} /></div>
               Edit Public Profile
-              <ChevronRight size={20} style={{ marginLeft: "auto", opacity: 0.6 }} />
+              <ChevronRight size={17} style={{ marginLeft: "auto", opacity: 0.6 }} />
             </Link>
 
             <div className="sb-footer">
               <p className="sb-footer-lbl">Account</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Mail size={16} color="rgba(255,255,255,0.55)" />
+              <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                <Mail size={14} color="rgba(255,255,255,0.55)" />
                 <p className="sb-footer-email">{user.email}</p>
               </div>
             </div>
@@ -406,19 +408,7 @@ const Profile = () => {
             <p className="page-sub">Manage your skills, reviews and availability</p>
           </motion.div>
 
-          <motion.div {...fadeUp(0.06)} className="stats-row">
-            {[
-              { label: "Total XP",  value: user.xp || 0,            sub: "experience points" },
-              { label: "Reviews",   value: user.totalReviews || 0,   sub: `avg ${user.averageRating || "—"} rating` },
-              { label: "Skills",    value: user.skills?.length || 0, sub: "listed skills" },
-            ].map((s, i) => (
-              <div key={i} className="stat-card">
-                <p className="stat-lbl">{s.label}</p>
-                <p className="stat-val">{s.value}</p>
-                <p className="stat-sub">{s.sub}</p>
-              </div>
-            ))}
-          </motion.div>
+          
 
           <motion.div {...fadeUp(0.1)} className="tabs-box">
             <div className="tabs-bar">
@@ -443,7 +433,7 @@ const Profile = () => {
                           <p className="nav-desc">{item.desc}</p>
                         </div>
                       </div>
-                      <ChevronRight size={26} color={text2} />
+                      <ChevronRight size={22} color={text2} />
                     </Link>
                   ))}
                 </motion.div>

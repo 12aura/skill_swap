@@ -6,9 +6,6 @@ import { DarkModeContext } from "../context/DarkModeContext";
 import { motion } from "framer-motion";
 import { User, Sparkles, BookOpen, Save, X, Camera } from "lucide-react";
 
-// This is a pure JSX component (NOT TypeScript)
-// You can save this file as: EditProfile.jsx
-
 const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
   const { darkMode } = useContext(DarkModeContext);
@@ -102,11 +99,25 @@ const EditProfile = () => {
 
             {/* PROFILE IMAGE */}
             <div className="relative w-32 h-32 mb-4">
-              <img
-                src={user?.profilePic || user?.avatar || "https://i.pravatar.cc/200"}
-                alt="profile"
-                className="w-full h-full object-cover rounded-full border-4 border-teal-500 shadow-lg"
-              />
+              {user?.profilePic || user?.avatar ? (
+                <img
+                  src={user?.profilePic || user?.avatar}
+                  alt="profile"
+                  className="w-full h-full object-cover rounded-full border-4 border-teal-500 shadow-lg"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center rounded-full border-4 border-teal-500 shadow-lg bg-teal-500 text-white text-3xl font-bold">
+                  {name
+                    ? name
+                        .trim()
+                        .split(" ")
+                        .map((word) => word[0])
+                        .join("")
+                        .slice(0, 2)
+                        .toUpperCase()
+                    : "U"}
+                </div>
+              )}
 
               <div className="absolute bottom-2 right-2 bg-teal-500 p-2 rounded-full shadow-md">
                 <Camera size={16} className="text-white" />
@@ -139,7 +150,7 @@ const EditProfile = () => {
 
           <form onSubmit={handleSave} className="grid md:grid-cols-2 gap-8">
 
-            {/* NAME BOX */}
+            {/* NAME */}
             <div className="md:col-span-2">
               <label className="text-sm font-medium mb-2 block">Full Name</label>
 
@@ -193,7 +204,7 @@ const EditProfile = () => {
               </div>
             </div>
 
-            {/* Buttons */}
+            {/* BUTTONS */}
             <div className="md:col-span-2 flex justify-end gap-4 pt-6">
               <button
                 type="button"
@@ -224,15 +235,18 @@ const EditProfile = () => {
         </motion.div>
       </div>
 
-      {/* Saved Modal */}
+      {/* SUCCESS MODAL */}
       {saved && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div
-            className={`p-6 rounded-2xl shadow-xl text-center transition-colors ${
+            className={`p-6 rounded-2xl shadow-xl text-center ${
               darkMode ? "bg-slate-800 text-white" : "bg-white text-gray-800"
             }`}
           >
-            <p className="text-lg font-semibold mb-4 text-green-500">Profile Saved Successfully!</p>
+            <p className="text-lg font-semibold mb-4 text-green-500">
+              Profile Saved Successfully!
+            </p>
+
             <button
               onClick={handleOk}
               className="px-6 py-2 rounded-xl bg-teal-500 hover:bg-teal-600 text-white transition"

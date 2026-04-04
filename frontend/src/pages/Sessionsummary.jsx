@@ -46,6 +46,7 @@ function MoodBadge({ mood }) {
 function RecordingCard({ sessionId }) {
   const [recording, setRecording]               = useState(null);
   const [recordingLoading, setRecordingLoading] = useState(true);
+  const [copied, setCopied]                     = useState(false);
 
   useEffect(() => {
     if (!sessionId) { setRecordingLoading(false); return; }
@@ -86,6 +87,12 @@ function RecordingCard({ sessionId }) {
     fetchRecording();
   }, [sessionId]);
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(recording.recordingUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   if (!sessionId) return null;
 
   return (
@@ -116,21 +123,29 @@ function RecordingCard({ sessionId }) {
               )}
             </div>
 
-            {/* Download button — fixed: was missing opening <a tag */}
-            <a
-              href={recording.recordingUrl}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Copy Link button */}
+            <button
+              onClick={handleCopyLink}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold
                          bg-teal-500/15 text-teal-600 border border-teal-500/25
                          hover:bg-teal-500/25 transition"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download
-            </a>
+              {copied ? (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copy Link
+                </>
+              )}
+            </button>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { DarkModeContext } from "../../context/DarkModeContext";
 const ACCOUNT_FIELDS = [
   { key: "email", label: "Email" },
   { key: "password", label: "Password" },
-  { key: "username", label: "Username" },
+  // { key: "username", label: "Username" },
   { key: "language", label: "Language" },
 ];
 

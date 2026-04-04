@@ -526,7 +526,9 @@
 // import { DarkModeContext } from "../context/DarkModeContext";
 // import MoonIcon from "../assets/imageofmoon.png";
 // import SunIcon from "../assets/imageofsun.png";
-// import socket from "../socket";
+// // import socket from "../socket";
+// import logolight from "../assets/logolight.png";
+// import logodark from "../assets/logodark.png";
 // import { useNotifications } from "../context/NotificationContext";
 // import { FiSettings, FiBell } from "react-icons/fi";
 

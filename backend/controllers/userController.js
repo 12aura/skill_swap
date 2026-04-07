@@ -435,8 +435,67 @@ exports.updateProfile = async (req, res) => {
 /* ------------------------------------
    UPDATE PUBLIC PROFILE
 ------------------------------------ */
+// /* ------------------------------------
+//    UPDATE PUBLIC PROFILE
+// ------------------------------------ */
+// exports.updatePublicProfile = async (req, res) => {
+//   try {
+//     const {
+//       tagline,
+//       bio,
+//       demoVideo,
+//       skillLevel,
+//       yearsOfExperience,
+//       linkedin,
+//       portfolio,
+//       education,
+//       skillsOffered,
+//       skillTags,
+//       availability, // <-- should be array of strings like ["Monday", "Wednesday"]
+//     } = req.body;
+
+//     // Ensure availability is an array of strings
+//     // Normalize availability: ensure array of unique, trimmed strings
+// const availabilityToSave = Array.isArray(availability)
+//   ? availability.map(d => d.trim())
+//   : typeof availability === "string"
+//     ? availability.split(",").map(d => d.trim())
+//     : [];
+
+// const uniqueAvailability = [...new Set(availabilityToSave)]; // remove duplicates
+
+//     const user = await User.findByIdAndUpdate(
+//       req.user.id,
+//       {
+//         tagline,
+//         bio,
+//         demoVideo,
+//         skillLevel,
+//         yearsOfExperience,
+//         linkedin,
+//         portfolio,
+//         education,
+//         skillsOffered,
+//         skillTags,
+//         availability: uniqueAvailability, // <-- save strings directly
+//       },
+//       { new: true }
+//     );
+
+//     if (!user) return res.status(404).json({ msg: "User not found" });
+
+//     res.json({ msg: "Public profile updated successfully", user });
+//   } catch (err) {
+//     console.error("UPDATE PUBLIC PROFILE ERROR:", err);
+//     res.status(500).json({ msg: "Failed to update public profile" });
+//   }
+// };
+
+
+
+
 /* ------------------------------------
-   UPDATE PUBLIC PROFILE
+    UPDATE PUBLIC PROFILE (With 5 XP Bonus)
 ------------------------------------ */
 exports.updatePublicProfile = async (req, res) => {
   try {
@@ -451,19 +510,19 @@ exports.updatePublicProfile = async (req, res) => {
       education,
       skillsOffered,
       skillTags,
-      availability, // <-- should be array of strings like ["Monday", "Wednesday"]
+      availability,
     } = req.body;
 
-    // Ensure availability is an array of strings
-    // Normalize availability: ensure array of unique, trimmed strings
-const availabilityToSave = Array.isArray(availability)
-  ? availability.map(d => d.trim())
-  : typeof availability === "string"
-    ? availability.split(",").map(d => d.trim())
-    : [];
+    // Normalize availability
+    const availabilityToSave = Array.isArray(availability)
+      ? availability.map((d) => d.trim())
+      : typeof availability === "string"
+      ? availability.split(",").map((d) => d.trim())
+      : [];
 
-const uniqueAvailability = [...new Set(availabilityToSave)]; // remove duplicates
+    const uniqueAvailability = [...new Set(availabilityToSave)];
 
+    // 1. Update the user record
     const user = await User.findByIdAndUpdate(
       req.user.id,
       {
@@ -477,14 +536,41 @@ const uniqueAvailability = [...new Set(availabilityToSave)]; // remove duplicate
         education,
         skillsOffered,
         skillTags,
-        availability: uniqueAvailability, // <-- save strings directly
+        availability: uniqueAvailability,
       },
       { new: true }
     );
 
     if (!user) return res.status(404).json({ msg: "User not found" });
 
-    res.json({ msg: "Public profile updated successfully", user });
+    // 2. ⚡ Check for 5 XP Bonus (One-time only)
+    let earnedBonus = false;
+    
+    // Define what "Complete" means for your public profile
+    const isPublicProfileComplete = 
+      user.bio && 
+      user.tagline && 
+      user.skillLevel && 
+      user.skillsOffered?.length > 0;
+
+    if (isPublicProfileComplete) {
+      const alreadyAwarded = await hasEarnedOneTimeXP(req.user.id, "public_profile_bonus");
+      
+      if (!alreadyAwarded) {
+        // Award exactly 5 XP
+        await awardXP(req.user.id, 5, "Completed Public Profile");
+        // Mark it so they can't get it again
+        await markOneTimeXP(req.user.id, "public_profile_bonus");
+        earnedBonus = true;
+      }
+    }
+
+    // 3. Return response with the earnedBonus flag for the frontend popup
+    res.json({ 
+      msg: "Public profile updated successfully", 
+      user,
+      earnedBonus // Frontend will use this to show the popup
+    });
   } catch (err) {
     console.error("UPDATE PUBLIC PROFILE ERROR:", err);
     res.status(500).json({ msg: "Failed to update public profile" });

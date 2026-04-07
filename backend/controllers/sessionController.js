@@ -331,39 +331,92 @@ exports.getMySessions = async (req, res) => {
   }
 };
 
-// ✅ Schedule a session
+// // ✅ Schedule a session
+// exports.scheduleSession = async (req, res) => {
+//   try {
+//     const { date, time, notes } = req.body;
+//     const roomId = uuidv4();
+//     const videoCallLink = `http://localhost:5173/video-call/${roomId}`;
+
+//     const session = await Session.findByIdAndUpdate(
+//       req.params.id,
+//       { date, time, notes, status: "upcoming", videoCallLink },
+//       { returnDocument: "after" }
+//     );
+
+//     if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+
+//     // ✅ Notify both users about scheduled session
+//     const otherUserId =
+//       session.userA.toString() === req.user.id
+//         ? session.userB
+//         : session.userA;
+
+//     await emitNotification(
+//       otherUserId,
+//       `Your session has been scheduled for ${date} at ${time}`,
+//       "session"
+//     );
+//     await emitNotification(
+//       req.user.id,
+//       `You scheduled a session for ${date} at ${time}`,
+//       "session"
+//     );
+
+//     res.status(200).json({ success: true, message: "Session scheduled", session });
+//   } catch (error) {
+//     console.error("Schedule session error:", error);
+//     res.status(500).json({ success: false, message: "Failed to schedule session" });
+//   }
+// };
 exports.scheduleSession = async (req, res) => {
   try {
-    const { date, time, notes } = req.body;
+    const { date, time, notes, mode, meetingLink } = req.body;
+    const userId = req.user.id;
+    const { v4: uuidv4 } = require('uuid');
+    
     const roomId = uuidv4();
-    const videoCallLink = `http://localhost:5173/video-call/${roomId}`;
+    // Use the meeting link provided by user, or fallback to your internal video call link
+    const finalLink = mode === "Custom" ? meetingLink : `http://localhost:5173/video-call/${roomId}`;
 
     const session = await Session.findByIdAndUpdate(
       req.params.id,
-      { date, time, notes, status: "upcoming", videoCallLink },
-      { returnDocument: "after" }
+      { 
+        date, 
+        time, 
+        notes, 
+        status: "upcoming", 
+        videoCallLink: finalLink,
+        mode 
+      },
+      { new: true }
     );
 
-    if (!session) return res.status(404).json({ success: false, message: "Session not found" });
+    if (!session) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
 
-    // ✅ Notify both users about scheduled session
-    const otherUserId =
-      session.userA.toString() === req.user.id
-        ? session.userB
-        : session.userA;
+    // ✅ XP Logic
+    const alreadyScheduled = await hasEarnedOneTimeXP(userId, "first_schedule");
+    let xpAwarded = false;
 
-    await emitNotification(
-      otherUserId,
-      `Your session has been scheduled for ${date} at ${time}`,
-      "session"
-    );
-    await emitNotification(
-      req.user.id,
-      `You scheduled a session for ${date} at ${time}`,
-      "session"
-    );
+    if (!alreadyScheduled) {
+      await awardXP(userId, 8, "First session scheduled!"); // Hardcoded 8 to match your popup
+      await markOneTimeXP(userId, "first_schedule");
+      xpAwarded = true; 
+    }
 
-    res.status(200).json({ success: true, message: "Session scheduled", session });
+    // Notifications
+    const otherUserId = session.userA.toString() === userId ? session.userB : session.userA;
+    await emitNotification(otherUserId, `Your session has been scheduled for ${date} at ${time}`, "session");
+    await emitNotification(userId, `You scheduled a session for ${date} at ${time}`, "session");
+
+    res.status(200).json({ 
+      success: true, 
+      message: "Session scheduled", 
+      session, 
+      xpAwarded // This tells React to show the popup
+    });
   } catch (error) {
     console.error("Schedule session error:", error);
     res.status(500).json({ success: false, message: "Failed to schedule session" });

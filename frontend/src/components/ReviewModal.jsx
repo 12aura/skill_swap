@@ -1,7 +1,7 @@
 import { useState } from "react";
 import StarRating from "./StarRating";
 
-const REVIEW_XP = 10;
+const REVIEW_XP = 3;
 
 const ReviewModal = ({ session, onClose, onSubmitted }) => {
   const [rating, setRating] = useState(0);

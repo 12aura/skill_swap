@@ -286,7 +286,7 @@ exports.submitReview = async (req, res) => {
     // ✅ Notify reviewee about the review
     await emitNotification(
       revieweeId,
-      `${reviewer.name} left you a ${rating}⭐ review for ${skillName}${rating === 5 ? " (+15 XP bonus!)" : ""}`,
+      `${reviewer.name} left you a ${rating}⭐ review for ${skillName}${rating === 5 ? " (+5 XP bonus!)" : ""}`,
       "review"
     );
 
